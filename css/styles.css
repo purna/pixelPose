@@ -1,0 +1,520 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap');
+
+:root {
+    --bg: #0a0a0f;
+    --panel: #111118;
+    --panel2: #16161f;
+    --border: #2a2a3a;
+    --accent: #00ffcc;
+    --accent2: #ff3d7f;
+    --accent3: #7b61ff;
+    --text: #e0e0f0;
+    --text-dim: #666688;
+    --node-color: #00ffcc;
+    --node-hover: #ffffff;
+    --line-color: #334455;
+    --line-active: #00bbaa;
+    --frame-active: #7b61ff;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Space Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    user-select: none;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+}
+
+header h1 span {
+    color: var(--text-dim);
+    font-weight: 400;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+    align-items: center;
+}
+
+.btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn.primary {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    font-weight: 700;
+}
+
+.btn.primary:hover {
+    background: #00ddaa;
+}
+
+.btn.danger {
+    border-color: var(--accent2);
+    color: var(--accent2);
+}
+
+.btn.danger:hover {
+    background: var(--accent2);
+    color: #fff;
+}
+
+.btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0, 255, 204, 0.08);
+}
+
+.main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* Left panel */
+.sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-section {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.sidebar-section h3 {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+}
+
+.tool-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text-dim);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.68rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 0.2rem;
+    text-align: left;
+}
+
+.tool-btn:hover {
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.tool-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(0, 255, 204, 0.06);
+}
+
+.tool-btn .icon {
+    font-size: 1rem;
+    min-width: 20px;
+}
+
+.label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.slider-row label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    min-width: 40px;
+}
+
+.slider-row input[type=range] {
+    flex: 1;
+    height: 3px;
+    accent-color: var(--accent);
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.slider-val {
+    font-size: 0.6rem;
+    color: var(--accent);
+    min-width: 28px;
+    text-align: right;
+}
+
+/* Canvas area */
+.canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+#mainCanvas {
+    display: block;
+    cursor: crosshair;
+}
+
+.canvas-hint {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    background: rgba(10, 10, 15, 0.8);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* Right panel — animation */
+.anim-panel {
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.anim-header {
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.anim-header h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.anim-controls {
+    display: flex;
+    gap: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.playback-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.fps-control {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+}
+
+.fps-control input {
+    width: 38px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 3px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.3rem;
+    text-align: center;
+}
+
+.timeline {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.frame-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+    background: var(--panel2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-size: 0.65rem;
+    position: relative;
+}
+
+.frame-item:hover {
+    border-color: var(--accent3);
+}
+
+.frame-item.current {
+    border-color: var(--frame-active);
+    background: rgba(123, 97, 255, 0.12);
+}
+
+.frame-num {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    min-width: 20px;
+    font-family: 'Space Mono', monospace;
+}
+
+.frame-thumb {
+    width: 50px;
+    height: 36px;
+    border-radius: 3px;
+    background: #0a0a14;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.frame-label {
+    flex: 1;
+    color: var(--text);
+    font-size: 0.62rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.frame-del {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.1rem 0.2rem;
+    border-radius: 3px;
+    transition: all 0.1s;
+}
+
+.frame-del:hover {
+    color: var(--accent2);
+}
+
+/* Saved animations list */
+.saved-anims {
+    border-top: 1px solid var(--border);
+    padding: 0.6rem;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.saved-anims h4 {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+}
+
+.anim-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.4rem;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 0.3rem;
+    font-size: 0.62rem;
+    background: var(--bg);
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.anim-item:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+}
+
+.anim-item .anim-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.anim-item .anim-del {
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.anim-item .anim-del:hover {
+    color: var(--accent2);
+}
+
+/* Onion skin toggle */
+.onion-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+}
+
+input[type=checkbox] {
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+/* Overlay indicators */
+.status-bar {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    display: flex;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(10, 10, 15, 0.85);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+}
+
+.badge.playing {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* Modal */
+.modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-bg.open {
+    display: flex;
+}
+
+.modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-width: 280px;
+    max-width: 340px;
+}
+
+.modal h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.modal input[type=text] {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.modal input[type=text]:focus {
+    border-color: var(--accent);
+}
+
+.modal-btns {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}

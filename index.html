@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PoseForge — Character Animator</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+
+<body>
+
+  <header>
+    <h1>POSE<span>FORGE</span></h1>
+    <div style="font-size:0.65rem;color:var(--text-dim)">Character Animator</div>
+    <div class="header-actions">
+      <button class="btn" id="resetPoseBtn">↺ Reset Pose</button>
+      <button class="btn" id="symmetryBtn">⇔ Mirror</button>
+      <button class="btn primary" id="saveAnimBtn">💾 Save Animation</button>
+      <button class="btn" id="exportBtn">⬇ Export JSON</button>
+      <button class="btn" id="importBtn">⬆ Import</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- Left sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <h3>View</h3>
+        <div class="slider-row">
+          <label>Rotate</label>
+          <input type="range" id="rotateSlider" min="-180" max="180" value="0">
+          <span class="slider-val" id="rotateVal">0°</span>
+        </div>
+        <div class="slider-row">
+          <label>Zoom</label>
+          <input type="range" id="zoomSlider" min="50" max="200" value="100">
+          <span class="slider-val" id="zoomVal">100%</span>
+        </div>
+        <button class="btn" id="resetViewBtn" style="width:100%;margin-top:0.3rem;font-size:0.62rem">Reset View</button>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>View Perspective</h3>
+        <select id="viewPerspectiveSelect"
+          style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem;margin-bottom:0.5rem">
+          <option value="front" selected>Front View</option>
+          <option value="side">Side View</option>
+        </select>
+        <h3>Body Type</h3>
+        <select id="bodyTypeSelect"
+          style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem">
+          <option value="adult-male" selected>Adult Male</option>
+          <option value="adult-female">Adult Female</option>
+          <option value="child">Child</option>
+          <option value="quadruped">Quadruped</option>
+        </select>
+      </div>
+
+       <div class="sidebar-section">
+          <h3>Animation Presets</h3>
+          <select id="animationPresetSelect"
+            style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem;margin-bottom:0.5rem">
+            <option value="">Select Animation...</option>
+            <option value="walk-cycle-human">Walk Cycle (Human Front - 12 frames)</option>
+            <option value="walk-jump-cycle-human">Walk / Jump Cycle (Human Front - 16 frames)</option>
+            <option value="run-cycle-human">Run Cycle (Human Front - 16 frames)</option>
+            <option value="walk-jump-cycle-human-side">Walk / Jump Cycle (Human Side - 16 frames)</option>
+            <option value="run-jump-cycle-human-side">Run / Jump Cycle (Human Side - 8 frames)</option>
+            <option value="walk-cycle-human-side">Walk Cycle (Human Side - 8 frames)</option>
+            <option value="run-cycle-human-side">Run Cycle (Human Side - 8 frames)</option>
+            <option value="walk-cycle-quadruped">Walk Cycle (Quadruped Front - 12 frames)</option>
+            <option value="run-cycle-quadruped">Run Cycle (Quadruped Front - 12 frames)</option>
+            <option value="walk-cycle-quadruped-side">Walk Cycle (Quadruped Side - 8 frames)</option>
+            <option value="run-cycle-quadruped-side">Run Cycle (Quadruped Side - 12 frames)</option>
+          </select>
+          <button class="btn" id="loadPresetBtn" style="width:100%;font-size:0.62rem">Load Preset</button>
+        </div>
+
+      <div class="sidebar-section">
+        <h3>Skeleton</h3>
+        <button class="tool-btn active" id="modeMove">
+          <span class="icon">✥</span> Move Node
+        </button>
+        <button class="tool-btn" id="modePan">
+          <span class="icon">✋</span> Pan Canvas
+        </button>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Character Scale</h3>
+        <div class="slider-row">
+          <label>Size</label>
+          <input type="range" id="scaleSlider" min="50" max="200" value="100">
+          <span class="slider-val" id="scaleVal">100%</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Display</h3>
+        <label
+          style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim);margin-bottom:0.4rem">
+          <input type="checkbox" id="showLabels" checked> Node labels
+        </label>
+        <label
+          style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim);margin-bottom:0.4rem">
+          <input type="checkbox" id="showGrid" checked> Grid
+        </label>
+        <label
+          style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim)">
+          <input type="checkbox" id="showShadow"> Ground shadow
+        </label>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Node Info</h3>
+        <div id="nodeInfo" style="font-size:0.62rem;color:var(--text-dim);line-height:1.6">
+          No node selected.<br>Click & drag a node to pose.
+        </div>
+      </div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="mainCanvas"></canvas>
+      <div class="status-bar">
+        <div class="badge" id="frameBadge">Frame 1 / 1</div>
+        <div class="badge" id="playBadge" style="display:none">▶ PLAYING</div>
+      </div>
+      <div class="canvas-hint" id="canvasHint">Drag nodes to pose • Add frames in the timeline →</div>
+    </div>
+
+    <!-- Right animation panel -->
+    <div class="anim-panel">
+      <div class="anim-header">
+        <span>🎬</span>
+        <h3>Timeline</h3>
+      </div>
+
+      <div class="anim-controls">
+        <button class="btn" id="addFrameBtn">+ Frame</button>
+        <button class="btn" id="dupFrameBtn">⧉ Dup</button>
+        <button class="btn danger" id="delFrameBtn">✕ Del</button>
+      </div>
+
+      <div class="playback-row">
+        <button class="btn" id="prevFrameBtn">◀</button>
+        <button class="btn primary" id="playBtn">▶ Play</button>
+        <button class="btn" id="nextFrameBtn">▶</button>
+        <div class="fps-control">
+          <span>FPS</span>
+          <input type="number" id="fpsInput" value="12" min="1" max="60">
+        </div>
+        <label style="font-size:0.6rem;color:var(--text-dim);display:flex;align-items:center;gap:0.3rem;cursor:pointer">
+          <input type="checkbox" id="loopToggle" checked> Loop
+        </label>
+      </div>
+
+      <div class="onion-toggle">
+        <input type="checkbox" id="onionToggle">
+        <label for="onionToggle">Onion skin (prev frame)</label>
+      </div>
+
+      <div class="timeline" id="timeline"></div>
+
+      <div class="saved-anims">
+        <h4>Saved Animations</h4>
+        <div id="savedAnimList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Save modal -->
+  <div class="modal-bg" id="saveModal">
+    <div class="modal">
+      <h3>💾 Save Animation</h3>
+      <input type="text" id="animNameInput" placeholder="Animation name (e.g. Walk Cycle)">
+      <div class="modal-btns">
+        <button class="btn" id="cancelSaveBtn">Cancel</button>
+        <button class="btn primary" id="confirmSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

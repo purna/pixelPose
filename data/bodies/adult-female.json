@@ -1,0 +1,73 @@
+{
+  "name": "Adult Female",
+  "description": "Standard human female proportions",
+  "height": 165,
+  "nodes": [
+    { "id": "head", "label": "Head", "x": 0, "y": -155 },
+    { "id": "neck", "label": "Neck", "x": 0, "y": -130 },
+    { "id": "shoulder_l", "label": "Shldr L", "x": -35, "y": -100 },
+    { "id": "shoulder_r", "label": "Shldr R", "x": 35, "y": -100 },
+    { "id": "chest", "label": "Chest", "x": 0, "y": -100 },
+    { "id": "elbow_l", "label": "Elbow L", "x": -58, "y": -58 },
+    { "id": "elbow_r", "label": "Elbow R", "x": 58, "y": -58 },
+    { "id": "hand_l", "label": "Hand L", "x": -72, "y": -18 },
+    { "id": "hand_r", "label": "Hand R", "x": 72, "y": -18 },
+    { "id": "pelvis", "label": "Pelvis", "x": 0, "y": -27 },
+    { "id": "bum", "label": "Bum", "x": 0, "y": -4 },
+    { "id": "hip_l", "label": "Hip L", "x": -30, "y": -4 },
+    { "id": "hip_r", "label": "Hip R", "x": 30, "y": -4 },
+    { "id": "knee_l", "label": "Knee L", "x": -32, "y": 54 },
+    { "id": "knee_r", "label": "Knee R", "x": 32, "y": 54 },
+    { "id": "foot_l", "label": "Foot L", "x": -34, "y": 117 },
+    { "id": "foot_r", "label": "Foot R", "x": 34, "y": 117 }
+  ],
+  "bones": [
+    ["head", "neck"],
+    ["neck", "chest"],
+    ["chest", "shoulder_l"],
+    ["chest", "shoulder_r"],
+    ["shoulder_l", "elbow_l"],
+    ["shoulder_r", "elbow_r"],
+    ["elbow_l", "hand_l"],
+    ["elbow_r", "hand_r"],
+    ["chest", "pelvis"],
+    ["pelvis", "bum"],
+    ["bum", "hip_l"],
+    ["bum", "hip_r"],
+    ["hip_l", "knee_l"],
+    ["hip_r", "knee_r"],
+    ["knee_l", "foot_l"],
+    ["knee_r", "foot_r"]
+  ],
+  "constraints": {
+    "distances": {
+      "head-neck": 25,
+      "neck-chest": 30,
+      "chest-shoulder_l": 35,
+      "chest-shoulder_r": 35,
+      "shoulder_l-elbow_l": 32,
+      "shoulder_r-elbow_r": 32,
+      "elbow_l-hand_l": 28,
+      "elbow_r-hand_r": 28,
+      "chest-pelvis": 73,
+      "pelvis-bum": 23,
+      "bum-hip_l": 30,
+      "bum-hip_r": 30,
+      "hip_l-knee_l": 38,
+      "hip_r-knee_r": 38,
+      "knee_l-foot_l": 43,
+      "knee_r-foot_r": 43
+    },
+    "angles": {
+      "neck": { "min": -30, "max": 30 },
+      "shoulder_l": { "min": 0, "max": 180 },
+      "shoulder_r": { "min": 0, "max": 180 },
+      "elbow_l": { "min": 0, "max": 150 },
+      "elbow_r": { "min": 0, "max": 150 },
+      "hip_l": { "min": 0, "max": 180 },
+      "hip_r": { "min": 0, "max": 180 },
+      "knee_l": { "min": 0, "max": 150 },
+      "knee_r": { "min": 0, "max": 150 }
+    }
+  }
+}

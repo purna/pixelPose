@@ -1,0 +1,233 @@
+{
+  "name": "Quadruped Animal (Side View - Animation Ready)",
+  "description": "Quadruped rig with spine-driven posture, front/rear separation, and motion-ready stance.",
+  "height": 80,
+  "nodes": [
+    {
+      "id": "head",
+      "label": "Head",
+      "x": -28,
+      "y": -62
+    },
+    {
+      "id": "neck",
+      "label": "Neck",
+      "x": -18,
+      "y": -42
+    },
+    {
+      "id": "chest",
+      "label": "Chest",
+      "x": -6,
+      "y": -26
+    },
+    {
+      "id": "shoulder_l",
+      "label": "Shldr L",
+      "x": -8,
+      "y": -28
+    },
+    {
+      "id": "shoulder_r",
+      "label": "Shldr R",
+      "x": -2,
+      "y": -28
+    },
+    {
+      "id": "elbow_l",
+      "label": "Elbow L",
+      "x": -18,
+      "y": -6
+    },
+    {
+      "id": "elbow_r",
+      "label": "Elbow R",
+      "x": 4,
+      "y": -4
+    },
+    {
+      "id": "hand_l",
+      "label": "Front Paw L",
+      "x": -20,
+      "y": 16
+    },
+    {
+      "id": "hand_r",
+      "label": "Front Paw R",
+      "x": 6,
+      "y": 16
+    },
+    {
+      "id": "pelvis",
+      "label": "Pelvis",
+      "x": 10,
+      "y": 6
+    },
+    {
+      "id": "bum",
+      "label": "Bum",
+      "x": 12,
+      "y": 22
+    },
+    {
+      "id": "hip_l",
+      "label": "Hip L",
+      "x": 8,
+      "y": 22
+    },
+    {
+      "id": "hip_r",
+      "label": "Hip R",
+      "x": 16,
+      "y": 22
+    },
+    {
+      "id": "knee_l",
+      "label": "Knee L",
+      "x": 2,
+      "y": 44
+    },
+    {
+      "id": "knee_r",
+      "label": "Knee R",
+      "x": 18,
+      "y": 42
+    },
+    {
+      "id": "foot_l",
+      "label": "Rear Paw L",
+      "x": 0,
+      "y": 64
+    },
+    {
+      "id": "foot_r",
+      "label": "Rear Paw R",
+      "x": 20,
+      "y": 64
+    }
+  ],
+  "bones": [
+    [
+      "head",
+      "neck"
+    ],
+    [
+      "neck",
+      "chest"
+    ],
+    [
+      "chest",
+      "shoulder_l"
+    ],
+    [
+      "chest",
+      "shoulder_r"
+    ],
+    [
+      "shoulder_l",
+      "elbow_l"
+    ],
+    [
+      "shoulder_r",
+      "elbow_r"
+    ],
+    [
+      "elbow_l",
+      "hand_l"
+    ],
+    [
+      "elbow_r",
+      "hand_r"
+    ],
+    [
+      "chest",
+      "pelvis"
+    ],
+    [
+      "pelvis",
+      "bum"
+    ],
+    [
+      "bum",
+      "hip_l"
+    ],
+    [
+      "bum",
+      "hip_r"
+    ],
+    [
+      "hip_l",
+      "knee_l"
+    ],
+    [
+      "hip_r",
+      "knee_r"
+    ],
+    [
+      "knee_l",
+      "foot_l"
+    ],
+    [
+      "knee_r",
+      "foot_r"
+    ]
+  ],
+  "constraints": {
+    "distances": {
+      "head-neck": 20,
+      "neck-chest": 16,
+      "chest-shoulder_l": 18,
+      "chest-shoulder_r": 18,
+      "shoulder_l-elbow_l": 20,
+      "shoulder_r-elbow_r": 20,
+      "elbow_l-hand_l": 20,
+      "elbow_r-hand_r": 20,
+      "chest-pelvis": 38,
+      "pelvis-bum": 16,
+      "bum-hip_l": 18,
+      "bum-hip_r": 18,
+      "hip_l-knee_l": 22,
+      "hip_r-knee_r": 22,
+      "knee_l-foot_l": 22,
+      "knee_r-foot_r": 22
+    },
+    "angles": {
+      "neck": {
+        "min": -50,
+        "max": 50
+      },
+      "shoulder_l": {
+        "min": -100,
+        "max": 180
+      },
+      "shoulder_r": {
+        "min": -100,
+        "max": 180
+      },
+      "elbow_l": {
+        "min": -160,
+        "max": 160
+      },
+      "elbow_r": {
+        "min": -160,
+        "max": 160
+      },
+      "hip_l": {
+        "min": -100,
+        "max": 180
+      },
+      "hip_r": {
+        "min": -100,
+        "max": 180
+      },
+      "knee_l": {
+        "min": -160,
+        "max": 160
+      },
+      "knee_r": {
+        "min": -160,
+        "max": 160
+      }
+    }
+  }
+}
