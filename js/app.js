@@ -878,37 +878,38 @@ function updateAnimationPresets(bodyType, viewPerspective) {
  }
 
 async function loadAnimationPreset(presetName) {
-  if (!presetName) return;
+   if (!presetName) return;
 
-  try {
-    const response = await fetch(`data/animations/${presetName}.json`);
-    const animData = await response.json();
+   try {
+     const response = await fetch(`data/animations/${presetName}.json`);
+     const animData = await response.json();
 
-    // Clear current frames
-    frames = [];
+     // Clear current frames
+     frames = [];
 
-    // Load frames from preset
-    animData.frames.forEach((frameData, index) => {
-      frames.push({
-        nodes: JSON.parse(JSON.stringify(frameData.nodes)),
-        label: frameData.label || `Frame ${index + 1}`
-      });
-    });
+     // Load frames from preset
+     animData.frames.forEach((frameData, index) => {
+       frames.push({
+         nodes: JSON.parse(JSON.stringify(frameData.nodes)),
+         label: frameData.label || `Frame ${index + 1}`
+       });
+     });
 
-    currentFrame = 0;
-    restoreNodes(frames[0].nodes);
+     currentFrame = 0;
+     restoreNodes(frames[0].nodes);
+     currentAnimName = animData.name; // Set current animation name
 
-    // Update UI
-    updateTimelineUI();
-    updateFrameBadge();
-    render();
+     // Update UI
+     updateTimelineUI();
+     updateFrameBadge();
+     render();
 
-    console.log(`Loaded ${animData.name} animation`);
+     console.log(`Loaded ${animData.name} animation`);
 
-  } catch (error) {
-    console.error('Error loading animation preset:', error);
-  }
-}
+   } catch (error) {
+     console.error('Error loading animation preset:', error);
+   }
+ }
 
 // ─── INIT ─────────────────────────────────────────────────────────────
 async function init() {
