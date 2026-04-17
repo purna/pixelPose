@@ -1,7 +1,7 @@
 /**
  * History Manager
  * 
- * Manages undo/redo for node pose changes
+ * Manages undo/redo for node pose changes and bounding box state
  */
 
 class HistoryManager {
@@ -11,6 +11,8 @@ class HistoryManager {
         this.maxHistorySize = 50;
         this.nodesGetter = null;
         this.nodesSetter = null;
+        this.boxStateGetter = null;
+        this.boxStateSetter = null;
     }
 
     setNodeHandlers(getter, setter) {
@@ -18,17 +20,30 @@ class HistoryManager {
         this.nodesSetter = setter;
     }
 
+    setBoxHandlers(getter, setter) {
+        this.boxStateGetter = getter;
+        this.boxStateSetter = setter;
+    }
+
     saveState() {
-        if (!this.nodesGetter) return;
+        const state = {};
         
-        const currentNodes = this.nodesGetter();
-        const snapshot = JSON.parse(JSON.stringify(currentNodes));
+        if (this.nodesGetter) {
+            const currentNodes = this.nodesGetter();
+            state.nodes = JSON.parse(JSON.stringify(currentNodes));
+        }
+        
+        if (this.boxStateGetter) {
+            state.box = this.boxStateGetter();
+        }
+
+        if (!state.nodes && !state.box) return;
 
         if (this.currentIndex < this.history.length - 1) {
             this.history = this.history.slice(0, this.currentIndex + 1);
         }
 
-        this.history.push(snapshot);
+        this.history.push(state);
         this.currentIndex++;
 
         if (this.history.length > this.maxHistorySize) {
@@ -40,22 +55,38 @@ class HistoryManager {
     }
 
     undo() {
-        if (!this.canUndo() || !this.nodesGetter || !this.nodesSetter) return false;
+        if (!this.canUndo()) return false;
         
         this.currentIndex--;
-        const snapshot = this.history[this.currentIndex];
-        this.nodesSetter(JSON.parse(JSON.stringify(snapshot)));
+        const state = this.history[this.currentIndex];
+        
+        if (state) {
+            if (this.nodesSetter && state.nodes) {
+                this.nodesSetter(JSON.parse(JSON.stringify(state.nodes)));
+            }
+            if (this.boxStateSetter && state.box) {
+                this.boxStateSetter(state.box);
+            }
+        }
         
         this.updateButtons();
         return true;
     }
 
     redo() {
-        if (!this.canRedo() || !this.nodesGetter || !this.nodesSetter) return false;
+        if (!this.canRedo()) return false;
         
         this.currentIndex++;
-        const snapshot = this.history[this.currentIndex];
-        this.nodesSetter(JSON.parse(JSON.stringify(snapshot)));
+        const state = this.history[this.currentIndex];
+        
+        if (state) {
+            if (this.nodesSetter && state.nodes) {
+                this.nodesSetter(JSON.parse(JSON.stringify(state.nodes)));
+            }
+            if (this.boxStateSetter && state.box) {
+                this.boxStateSetter(state.box);
+            }
+        }
         
         this.updateButtons();
         return true;

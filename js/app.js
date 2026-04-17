@@ -36,6 +36,14 @@ let charColors = {
 };
 let tutorialEnabled = false;
 let lockLimbLengths = false;
+let showBoundingBox = false;
+let spriteBoxX = 0, spriteBoxY = 0;
+let spriteBoxWidth = 300, spriteBoxHeight = 300;
+let isResizingBox = false;
+let resizeBoxHandle = null;
+let isDraggingBox = false;
+let resizePrevW = null;
+const BOX_HANDLE_SIZE = 10;
 let historyManager = new HistoryManager();
 
 const PELVIS_CHILDREN = ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head',
@@ -310,6 +318,36 @@ function render() {
   // Main skeleton
   drawSkeleton(ctx, nodes, 1, null);
 
+  // Sprite preview bounding box
+  if (showBoundingBox) {
+    const boxW = spriteBoxWidth / charScale;
+    const boxH = spriteBoxHeight / charScale;
+    const boxX = spriteBoxX / charScale;
+    const boxY = spriteBoxY / charScale;
+    const top = boxY - boxH/2 + 150/charScale;
+    
+    ctx.strokeStyle = '#00ffcc';
+    ctx.lineWidth = 2 / charScale;
+    ctx.strokeRect(boxX - boxW/2, top, boxW, boxH);
+    
+    const handleSize = 12 / charScale;
+    const handleHitSize = 30 / charScale;
+    ctx.fillStyle = '#00ffcc';
+    const handles = [
+      { x: boxX - boxW/2, y: top },
+      { x: boxX + boxW/2, y: top },
+      { x: boxX - boxW/2, y: top + boxH },
+      { x: boxX + boxW/2, y: top + boxH },
+      { x: boxX, y: top },
+      { x: boxX, y: top + boxH },
+      { x: boxX - boxW/2, y: boxY + 150/charScale },
+      { x: boxX + boxW/2, y: boxY + 150/charScale },
+    ];
+    handles.forEach(h => {
+      ctx.fillRect(h.x - handleSize/2, h.y - handleSize/2, handleSize, handleSize);
+    });
+  }
+
   ctx.restore();
   ctx.restore();
 }
@@ -509,6 +547,50 @@ canvas.addEventListener('mouseup', endInteract);
 canvas.addEventListener('touchend', endInteract);
 canvas.addEventListener('mouseleave', endInteract);
 
+function hitBoxHandle(wx, wy) {
+  const boxW = spriteBoxWidth / charScale;
+  const boxH = spriteBoxHeight / charScale;
+  const boxX = spriteBoxX / charScale;
+  const boxY = spriteBoxY / charScale;
+  const top = boxY - boxH/2 + 150/charScale;
+  const left = boxX - boxW/2;
+  const handleHitSize = 30 / charScale;
+  
+  const handles = [
+    { id: 'top', x: boxX, y: top },
+    { id: 'bottom', x: boxX, y: top + boxH },
+    { id: 'left', x: left, y: boxY + 150/charScale },
+    { id: 'right', x: left + boxW, y: boxY + 150/charScale },
+    { id: 'top-left', x: left, y: top },
+    { id: 'top-right', x: left + boxW, y: top },
+    { id: 'bottom-left', x: left, y: top + boxH },
+    { id: 'bottom-right', x: left + boxW, y: top + boxH },
+  ];
+  
+  for (const h of handles) {
+    if (Math.abs(wx - h.x) < handleHitSize && Math.abs(wy - h.y) < handleHitSize) {
+      return h.id;
+    }
+  }
+  return null;
+}
+
+function hitBoxBody(wx, wy) {
+  const boxW = spriteBoxWidth / charScale;
+  const boxH = spriteBoxHeight / charScale;
+  const boxX = spriteBoxX / charScale;
+  const boxY = spriteBoxY / charScale;
+  const top = boxY - boxH/2 + 150/charScale;
+  const left = boxX - boxW/2;
+  
+  return wx >= left && wx <= left + boxW && wy >= top && wy <= top + boxH;
+}
+
+let boxDragStartX = 0;
+let boxDragStartY = 0;
+let boxStartX = 0;
+let boxStartY = 0;
+
 function startInteract(e) {
   const pos = getPos(e);
   if (mode === 'pan') {
@@ -516,6 +598,28 @@ function startInteract(e) {
     isDragging = true;
     return;
   }
+  
+  if (showBoundingBox) {
+    const w = screenToWorld(pos.x, pos.y);
+    const handle = hitBoxHandle(w.x, w.y);
+    if (handle) {
+      isResizingBox = true;
+      resizeBoxHandle = handle;
+      resizePrevW = null;
+      isDragging = true;
+      return;
+    }
+    if (hitBoxBody(w.x, w.y)) {
+      isDraggingBox = true;
+      boxDragStartX = w.x;
+      boxDragStartY = w.y;
+      boxStartX = spriteBoxX;
+      boxStartY = spriteBoxY;
+      isDragging = true;
+      return;
+    }
+  }
+  
   const w = screenToWorld(pos.x, pos.y);
   const clickedNode = hitNode(w.x, w.y);
   
@@ -553,6 +657,77 @@ function doInteract(e) {
     render();
     return;
   }
+  
+  if (isResizingBox) {
+    const w = screenToWorld(pos.x, pos.y);
+    if (resizePrevW) {
+      const dx = (w.x - resizePrevW.x) * charScale;
+      const dy = (w.y - resizePrevW.y) * charScale;
+      
+      if (resizeBoxHandle === 'top') {
+        const newH = Math.max(50, spriteBoxHeight + dy);
+        spriteBoxY -= (newH - spriteBoxHeight) / 2;
+        spriteBoxHeight = newH;
+      } else if (resizeBoxHandle === 'bottom') {
+        const newH = Math.max(50, spriteBoxHeight + dy);
+        spriteBoxY += (newH - spriteBoxHeight) / 2;
+        spriteBoxHeight = newH;
+      } else if (resizeBoxHandle === 'left') {
+        const newW = Math.max(50, spriteBoxWidth + dx);
+        spriteBoxX -= (newW - spriteBoxWidth) / 2;
+        spriteBoxWidth = newW;
+      } else if (resizeBoxHandle === 'right') {
+        const newW = Math.max(50, spriteBoxWidth + dx);
+        spriteBoxX += (newW - spriteBoxWidth) / 2;
+        spriteBoxWidth = newW;
+      } else if (resizeBoxHandle === 'top-left') {
+        const newW = Math.max(50, spriteBoxWidth + dx);
+        const newH = Math.max(50, spriteBoxHeight + dy);
+        spriteBoxX -= (newW - spriteBoxWidth) / 2;
+        spriteBoxY -= (newH - spriteBoxHeight) / 2;
+        spriteBoxWidth = newW;
+        spriteBoxHeight = newH;
+      } else if (resizeBoxHandle === 'top-right') {
+        const newW = Math.max(50, spriteBoxWidth - dx);
+        const newH = Math.max(50, spriteBoxHeight + dy);
+        spriteBoxX += (newW - spriteBoxWidth) / 2;
+        spriteBoxY -= (newH - spriteBoxHeight) / 2;
+        spriteBoxWidth = newW;
+        spriteBoxHeight = newH;
+      } else if (resizeBoxHandle === 'bottom-left') {
+        const newW = Math.max(50, spriteBoxWidth + dx);
+        const newH = Math.max(50, spriteBoxHeight - dy);
+        spriteBoxX -= (newW - spriteBoxWidth) / 2;
+        spriteBoxY += (newH - spriteBoxHeight) / 2;
+        spriteBoxWidth = newW;
+        spriteBoxHeight = newH;
+      } else if (resizeBoxHandle === 'bottom-right') {
+        const newW = Math.max(50, spriteBoxWidth - dx);
+        const newH = Math.max(50, spriteBoxHeight - dy);
+        spriteBoxX += (newW - spriteBoxWidth) / 2;
+        spriteBoxY += (newH - spriteBoxHeight) / 2;
+        spriteBoxWidth = newW;
+        spriteBoxHeight = newH;
+      }
+      
+      document.getElementById('spriteFrameSize').value = Math.max(spriteBoxWidth, spriteBoxHeight);
+      document.getElementById('spriteFrameSizeVal').textContent = Math.round(Math.max(spriteBoxWidth, spriteBoxHeight));
+    }
+    resizePrevW = { x: w.x, y: w.y };
+    render();
+    return;
+  }
+  
+  if (isDraggingBox) {
+    const w = screenToWorld(pos.x, pos.y);
+    spriteBoxX += w.x - boxDragStartX;
+    spriteBoxY += w.y - boxDragStartY;
+    boxDragStartX = w.x;
+    boxDragStartY = w.y;
+    render();
+    return;
+  }
+  
   if (!dragNode) return;
   const w = screenToWorld(pos.x, pos.y);
   const dx = w.x - dragNode.x;
@@ -601,13 +776,20 @@ function doInteract(e) {
 }
 
 function endInteract() {
-  if (isDragging && dragNode) {
+  const wasResizingBox = isResizingBox;
+  const wasDraggingBox = isDraggingBox;
+  
+  if (isDragging && (dragNode || wasResizingBox || wasDraggingBox)) {
     saveCurrentToFrame();
     historyManager.saveState();
     renderThumb(currentFrame);
   }
   isDragging = false;
   dragNode = null;
+  isResizingBox = false;
+  isDraggingBox = false;
+  resizeBoxHandle = null;
+  resizePrevW = null;
   panStart = null;
 }
 
@@ -742,16 +924,144 @@ function exportJSON() {
     const data = JSON.stringify({ 
         frames, 
         savedAnimations, 
-        currentAnimName, // Include the name of the currently loaded animation
-        version: 1 
+        currentAnimName,
+        spriteBox: {
+          x: spriteBoxX,
+          y: spriteBoxY,
+          width: spriteBoxWidth,
+          height: spriteBoxHeight,
+          scale: charScale
+        },
+        version: 2 
     }, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    // Use current animation name for filename if available, otherwise default
     const filename = currentAnimName ? `${currentAnimName.replace(/\s+/g, '_')}.json` : 'poseforge_animation.json';
     a.href = url; a.download = filename; a.click();
     URL.revokeObjectURL(url);
+}
+
+async function exportSpriteSheet() {
+    if (frames.length === 0) return;
+    saveCurrentToFrame();
+    
+    const originalNodes = snapshotNodes();
+    const cols = Math.ceil(Math.sqrt(frames.length));
+    const rows = Math.ceil(frames.length / cols);
+    
+    const useBox = showBoundingBox;
+    const frameW = useBox ? Math.round(spriteBoxWidth) : spriteFrameSize;
+    const frameH = useBox ? Math.round(spriteBoxHeight) : spriteFrameSize;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * frameW;
+    canvas.height = rows * frameH;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#0a0a0f';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const fitScale = Math.min(frameW / spriteBoxWidth, frameH / spriteBoxHeight) * charScale;
+    const contentScale = fitScale * 1.5;
+    
+    for (let i = 0; i < frames.length; i++) {
+        restoreNodes(frames[i].nodes);
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        
+        const offscreen = document.createElement('canvas');
+        offscreen.width = frameW;
+        offscreen.height = frameH;
+        const octx = offscreen.getContext('2d');
+        octx.fillStyle = '#0a0a0f';
+        octx.fillRect(0, 0, frameW, frameH);
+        octx.save();
+        octx.translate(frameW / 2, frameH / 2);
+        octx.scale(contentScale, contentScale);
+        drawSkeleton(octx, nodes, 1, null);
+        octx.restore();
+        
+        if (showBoundingBox) {
+          ctx.strokeStyle = '#00ffcc';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(col * frameW + 1, row * frameH + 1, frameW - 2, frameH - 2);
+        }
+        
+        ctx.drawImage(offscreen, col * frameW, row * frameH);
+    }
+    
+    restoreNodes(originalNodes);
+    
+    const link = document.createElement('a');
+    link.download = `${currentAnimName || 'animation'}_spritesheet.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
+async function exportAPNG() {
+    if (frames.length === 0) return;
+    saveCurrentToFrame();
+    
+    const originalNodes = snapshotNodes();
+    const delay = Math.round(1000 / (parseInt(document.getElementById('fpsInput').value) || 12));
+    const width = 400, height = 400;
+    
+    const canvas = document.createElement('canvas');
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    
+    // Render all frames to images
+    const imageDataList = [];
+    for (let i = 0; i < frames.length; i++) {
+        restoreNodes(frames[i].nodes);
+        ctx.fillStyle = '#0a0a0f';
+        ctx.fillRect(0, 0, width, height);
+        ctx.save();
+        ctx.translate(200, 200);
+        ctx.scale(charScale, charScale);
+        drawSkeleton(ctx, nodes, 1, null);
+        ctx.restore();
+        imageDataList.push(ctx.getImageData(0, 0, width, height));
+    }
+    
+    restoreNodes(originalNodes);
+    
+    // Use UPNG.js-like approach if available, otherwise export first frame as PNG
+    if (typeof UPNG !== 'undefined') {
+        const imgs = imageDataList.map(d => new Uint8Array(d.data.buffer));
+        const apng = UPNG.encode(imgs, width, height, frames.map(() => delay));
+        const blob = new Blob([apng], { type: 'image/png' });
+        const link = document.createElement('a');
+        link.download = `${currentAnimName || 'animation'}.png`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+    } else {
+        // Fallback: export sprite sheet as frames laid out horizontally
+        const spriteCanvas = document.createElement('canvas');
+        spriteCanvas.width = width * frames.length;
+        spriteCanvas.height = height;
+        const sctx = spriteCanvas.getContext('2d');
+        sctx.fillStyle = '#0a0a0f';
+        sctx.fillRect(0, 0, spriteCanvas.width, spriteCanvas.height);
+        
+        for (let i = 0; i < frames.length; i++) {
+            restoreNodes(frames[i].nodes);
+            sctx.fillStyle = '#0a0a0f';
+            sctx.fillRect(i * width, 0, width, height);
+            sctx.save();
+            sctx.translate(i * width + 200, 200);
+            sctx.scale(charScale, charScale);
+            drawSkeleton(sctx, nodes, 1, null);
+            sctx.restore();
+        }
+        
+        restoreNodes(originalNodes);
+        const link = document.createElement('a');
+        link.download = `${currentAnimName || 'animation'}_frames.png`;
+        link.href = spriteCanvas.toDataURL('image/png');
+        link.click();
+    }
 }
 
 document.getElementById('importFile').addEventListener('change', e => {
@@ -774,11 +1084,21 @@ document.getElementById('importFile').addEventListener('change', e => {
                 localStorage.setItem('poseforge_anims', JSON.stringify(savedAnimations));
                 renderSavedList();
             }
-            // Set current animation name if present in imported data
             if (data.currentAnimName !== undefined) {
                 currentAnimName = data.currentAnimName;
             } else {
                 currentAnimName = null;
+            }
+            if (data.spriteBox) {
+                spriteBoxX = data.spriteBox.x || 0;
+                spriteBoxY = data.spriteBox.y || 0;
+                spriteBoxWidth = data.spriteBox.width || 300;
+                spriteBoxHeight = data.spriteBox.height || 300;
+                charScale = data.spriteBox.scale || 1;
+                document.getElementById('scaleSlider').value = charScale * 100;
+                document.getElementById('scaleVal').textContent = Math.round(charScale * 100) + '%';
+                document.getElementById('spriteFrameSize').value = Math.max(spriteBoxWidth, spriteBoxHeight);
+                document.getElementById('spriteFrameSizeVal').textContent = Math.round(Math.max(spriteBoxWidth, spriteBoxHeight));
             }
         } catch(err) { alert('Invalid file.'); }
     };
@@ -889,6 +1209,20 @@ document.getElementById('settingsBtn').addEventListener('click', () => {
   document.getElementById('settingsModal').classList.add('open');
 });
 
+document.getElementById('undoBtn').addEventListener('click', () => {
+  if (historyManager.undo()) {
+    restoreNodes(historyManager.history[historyManager.currentIndex]?.nodes || nodes);
+    render();
+  }
+});
+
+document.getElementById('redoBtn').addEventListener('click', () => {
+  if (historyManager.redo()) {
+    restoreNodes(historyManager.history[historyManager.currentIndex]?.nodes || nodes);
+    render();
+  }
+});
+
 document.getElementById('closeSettingsBtn').addEventListener('click', () => {
   document.getElementById('settingsModal').classList.remove('open');
 });
@@ -932,6 +1266,16 @@ document.getElementById('enableTutorial').addEventListener('change', e => {
   } else if (window.tutorialSystem) {
     window.tutorialSystem.hideTutorial();
   }
+});
+
+// Sprite export settings
+document.getElementById('spriteBoundingBox').addEventListener('change', e => {
+  showBoundingBox = e.target.checked;
+});
+
+document.getElementById('spriteFrameSize').addEventListener('input', e => {
+  spriteFrameSize = parseInt(e.target.value);
+  document.getElementById('spriteFrameSizeVal').textContent = spriteFrameSize;
 });
 
 // Body type selection
@@ -1113,6 +1457,26 @@ async function init() {
 
   // Initialize history manager
   historyManager.setNodeHandlers(() => nodes, (n) => { nodes = n; });
+  historyManager.setBoxHandlers(
+    () => ({ 
+      x: spriteBoxX, 
+      y: spriteBoxY, 
+      width: spriteBoxWidth, 
+      height: spriteBoxHeight,
+      scale: charScale
+    }),
+    (box) => {
+      spriteBoxX = box.x;
+      spriteBoxY = box.y;
+      spriteBoxWidth = box.width;
+      spriteBoxHeight = box.height;
+      charScale = box.scale || 1;
+      document.getElementById('scaleSlider').value = charScale * 100;
+      document.getElementById('scaleVal').textContent = Math.round(charScale * 100) + '%';
+      document.getElementById('spriteFrameSize').value = Math.max(spriteBoxWidth, spriteBoxHeight);
+      document.getElementById('spriteFrameSizeVal').textContent = Math.round(Math.max(spriteBoxWidth, spriteBoxHeight));
+    }
+  );
   historyManager.saveState(); // Save initial state
 
   // Initialize tutorial system
