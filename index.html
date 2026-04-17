@@ -15,6 +15,7 @@
     <h1>PIXEL<span>POSE</span></h1>
     <div style="font-size:0.65rem;color:var(--text-dim)">Character Animator</div>
     <div class="header-actions">
+      <button class="btn" id="settingsBtn">⚙ Settings</button>
       <button class="btn" id="resetPoseBtn">↺ Reset Pose</button>
       <button class="btn" id="symmetryBtn">⇔ Mirror</button>
       <button class="btn primary" id="saveAnimBtn">💾 Save Animation</button>
@@ -28,21 +29,6 @@
 
     <!-- Left sidebar -->
     <div class="sidebar">
-      <div class="sidebar-section">
-        <h3>View</h3>
-        <div class="slider-row">
-          <label>Rotate</label>
-          <input type="range" id="rotateSlider" min="-180" max="180" value="0">
-          <span class="slider-val" id="rotateVal">0°</span>
-        </div>
-        <div class="slider-row">
-          <label>Zoom</label>
-          <input type="range" id="zoomSlider" min="50" max="200" value="100">
-          <span class="slider-val" id="zoomVal">100%</span>
-        </div>
-        <button class="btn" id="resetViewBtn" style="width:100%;margin-top:0.3rem;font-size:0.62rem">Reset View</button>
-      </div>
-
       <div class="sidebar-section">
         <h3>View Perspective</h3>
         <select id="viewPerspectiveSelect"
@@ -97,6 +83,14 @@
           <input type="range" id="scaleSlider" min="50" max="200" value="100">
           <span class="slider-val" id="scaleVal">100%</span>
         </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Pelvis Controls</h3>
+        <label
+          style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim);margin-bottom:0.4rem">
+          <input type="checkbox" id="footAnchor"> Anchor feet to ground
+        </label>
       </div>
 
       <div class="sidebar-section">
@@ -182,6 +176,47 @@
       <div class="modal-btns">
         <button class="btn" id="cancelSaveBtn">Cancel</button>
         <button class="btn primary" id="confirmSaveBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal-bg" id="settingsModal">
+    <div class="modal">
+      <h3>⚙ Settings</h3>
+      <div class="settings-content">
+        <div class="settings-section">
+          <h4>Colors</h4>
+          <div class="color-row">
+            <label>Left Arm</label>
+            <input type="color" id="armLColor" value="#0055aa">
+          </div>
+          <div class="color-row">
+            <label>Right Arm</label>
+            <input type="color" id="armRColor" value="#005533">
+          </div>
+          <div class="color-row">
+            <label>Left Leg</label>
+            <input type="color" id="legLColor" value="#0044cc">
+          </div>
+          <div class="color-row">
+            <label>Right Leg</label>
+            <input type="color" id="legRColor" value="#006644">
+          </div>
+          <div class="color-row">
+            <label>Body/Torso</label>
+            <input type="color" id="bodyColor" value="#1a3344">
+          </div>
+        </div>
+        <div class="settings-section">
+          <h4>Tutorial</h4>
+          <label style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim)">
+            <input type="checkbox" id="enableTutorial"> Enable tutorial system
+          </label>
+        </div>
+      </div>
+      <div class="modal-btns">
+        <button class="btn" id="closeSettingsBtn">Close</button>
       </div>
     </div>
   </div>

@@ -1,6 +1,10 @@
 // app.js - Main application logic for PoseForge
 import { loadBodyDefinition, getCurrentNodes, getCurrentBones, getCurrentConstraints, NODE_RADIUS } from './skeleton.js';
 import Config from './config.js';
+import { TutorialConfig } from './tutorialConfig.js';
+import { HistoryManager } from './historyManager.js';
+
+let tutorialConfig = new TutorialConfig();
 
 // ─── STATE ─────────────────────────────────────────────────────────────
 let nodes = [];
@@ -16,14 +20,28 @@ let dragNode = null;
 let mode = 'move'; // 'move' | 'pan'
 let panStart = null;
 let panOffset = { x: 0, y: 0 };
-let viewRotation = 0;
-let viewScale = 1.0;
 let charScale = 1.0;
 let showLabels = true;
 let showGrid = true;
 let showShadow = false;
 let onionSkin = false;
-let currentAnimName = null; // Track currently loaded animation name
+let currentAnimName = null;
+let footAnchor = false;
+let charColors = {
+  armL: '#0055aa',
+  armR: '#005533',
+  legL: '#0044cc',
+  legR: '#006644',
+  body: '#1a3344'
+};
+let tutorialEnabled = false;
+let historyManager = new HistoryManager();
+
+const PELVIS_CHILDREN = ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head',
+  'elbow_l', 'hand_l', 'elbow_r', 'hand_r',
+  'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'];
+const FOOT_NODES = ['foot_l', 'foot_r'];
+const GROUND_Y = 130;
 
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
@@ -217,8 +235,6 @@ function render() {
 
   ctx.save();
   ctx.translate(cx, cy);
-  ctx.rotate(viewRotation * Math.PI / 180);
-  ctx.scale(viewScale, viewScale);
 
   // Grid
   if (showGrid) {
@@ -247,13 +263,19 @@ function render() {
   ctx.beginPath(); ctx.moveTo(-300, groundY); ctx.lineTo(300, groundY); ctx.stroke();
   ctx.setLineDash([]);
 
+  // Floor contact line (solid white)
+  const floorY = 150 * charScale;
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(-400, floorY); ctx.lineTo(400, floorY); ctx.stroke();
+
   // Ground shadow
   if (showShadow) {
     ctx.save();
     ctx.scale(charScale, charScale);
     ctx.beginPath();
     ctx.ellipse(0, 142, 45, 8, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,255,204,0.06)';
+    ctx.fillStyle = 'rgba(0,255,204,0.15)';
     ctx.fill();
     ctx.restore();
   }
@@ -305,12 +327,12 @@ function drawSkeleton(ctx, nodeList, alpha, overrideColor) {
 
   // --- Color scheme ---
   const C = {
-    body:    ghost ? overrideColor : '#1a3344',
+    body:    ghost ? overrideColor : charColors.body,
     torso:   ghost ? overrideColor : '#0d2233',
-    armL:    ghost ? overrideColor : '#0055aa',
-    armR:    ghost ? overrideColor : '#005533',
-    legL:    ghost ? overrideColor : '#0044cc',
-    legR:    ghost ? overrideColor : '#006644',
+    armL:    ghost ? overrideColor : charColors.armL,
+    armR:    ghost ? overrideColor : charColors.armR,
+    legL:    ghost ? overrideColor : charColors.legL,
+    legR:    ghost ? overrideColor : charColors.legR,
     head:    ghost ? overrideColor : '#00ffcc',
     joint:   ghost ? overrideColor : '#00ffcc',
     jointL:  ghost ? overrideColor : '#0088ff',
@@ -433,12 +455,9 @@ function screenToWorld(sx, sy) {
   const w = canvas.width, h = canvas.height;
   const cx = w / 2 + panOffset.x;
   const cy = h / 2 + panOffset.y;
-  let dx = (sx - cx) / viewScale;
-  let dy = (sy - cy) / viewScale;
-  const rad = -viewRotation * Math.PI / 180;
-  const rx = dx * Math.cos(rad) - dy * Math.sin(rad);
-  const ry = dx * Math.sin(rad) + dy * Math.cos(rad);
-  return { x: rx / charScale, y: ry / charScale };
+  let dx = sx - cx;
+  let dy = sy - cy;
+  return { x: dx / charScale, y: dy / charScale };
 }
 
 // ─── HIT TEST ─────────────────────────────────────────────────────────
@@ -497,8 +516,31 @@ function doInteract(e) {
   }
   if (!dragNode) return;
   const w = screenToWorld(pos.x, pos.y);
-  dragNode.x = w.x;
-  dragNode.y = w.y;
+  const dx = w.x - dragNode.x;
+  const dy = w.y - dragNode.y;
+
+  if (dragNode.id === 'pelvis') {
+    const movingChildren = footAnchor 
+      ? PELVIS_CHILDREN.filter(id => !FOOT_NODES.includes(id))
+      : PELVIS_CHILDREN;
+    nodes.forEach(n => {
+      if (movingChildren.includes(n.id)) {
+        n.x += dx;
+        n.y += dy;
+      }
+    });
+    dragNode.x = w.x;
+    dragNode.y = w.y;
+    if (footAnchor) {
+      FOOT_NODES.forEach(fid => {
+        const f = nodes.find(n => n.id === fid);
+        if (f) f.y = GROUND_Y;
+      });
+    }
+  } else {
+    dragNode.x = w.x;
+    dragNode.y = w.y;
+  }
   updateNodeInfo(dragNode);
   render();
 }
@@ -651,45 +693,10 @@ document.getElementById('importFile').addEventListener('change', e => {
 });
 
 // ─── VIEW CONTROLS ────────────────────────────────────────────────────
-document.getElementById('rotateSlider').addEventListener('input', e => {
-  viewRotation = parseInt(e.target.value);
-  document.getElementById('rotateVal').textContent = viewRotation + '°';
-  render();
-});
-
-document.getElementById('zoomSlider').addEventListener('input', e => {
-  viewScale = parseInt(e.target.value) / 100;
-  document.getElementById('zoomVal').textContent = e.target.value + '%';
-  render();
-});
-
-document.getElementById('resetViewBtn').addEventListener('click', () => {
-  viewRotation = 0; viewScale = 1; panOffset = {x:0,y:0};
-  document.getElementById('rotateSlider').value = 0;
-  document.getElementById('zoomSlider').value = 100;
-  document.getElementById('rotateVal').textContent = '0°';
-  document.getElementById('zoomVal').textContent = '100%';
-  render();
-});
-
-document.getElementById('zoomSlider').addEventListener('input', e => {
-  viewScale = parseInt(e.target.value) / 100;
-  document.getElementById('zoomVal').textContent = e.target.value + '%';
-  render();
-});
 
 document.getElementById('scaleSlider').addEventListener('input', e => {
   charScale = parseInt(e.target.value) / 100;
   document.getElementById('scaleVal').textContent = e.target.value + '%';
-  render();
-});
-
-document.getElementById('resetViewBtn').addEventListener('click', () => {
-  viewRotation = 0; viewScale = 1; panOffset = {x:0,y:0};
-  document.getElementById('rotateSlider').value = 0;
-  document.getElementById('zoomSlider').value = 100;
-  document.getElementById('rotateVal').textContent = '0°';
-  document.getElementById('zoomVal').textContent = '100%';
   render();
 });
 
@@ -726,6 +733,7 @@ document.getElementById('showLabels').addEventListener('change', e => { showLabe
 document.getElementById('showGrid').addEventListener('change', e => { showGrid = e.target.checked; render(); });
 document.getElementById('showShadow').addEventListener('change', e => { showShadow = e.target.checked; render(); });
 document.getElementById('onionToggle').addEventListener('change', e => { onionSkin = e.target.checked; render(); });
+document.getElementById('footAnchor').addEventListener('change', e => { footAnchor = e.target.checked; });
 
 document.getElementById('addFrameBtn').addEventListener('click', addFrame);
 document.getElementById('dupFrameBtn').addEventListener('click', dupFrame);
@@ -780,6 +788,56 @@ document.getElementById('animNameInput').addEventListener('keydown', e => {
   if (e.key === 'Escape') document.getElementById('cancelSaveBtn').click();
 });
 
+// Settings modal
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  document.getElementById('settingsModal').classList.add('open');
+});
+
+document.getElementById('closeSettingsBtn').addEventListener('click', () => {
+  document.getElementById('settingsModal').classList.remove('open');
+});
+
+document.getElementById('settingsModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('settingsModal'))
+    document.getElementById('settingsModal').classList.remove('open');
+});
+
+// Color inputs
+document.getElementById('armLColor').addEventListener('input', e => {
+  charColors.armL = e.target.value;
+  render();
+});
+
+document.getElementById('armRColor').addEventListener('input', e => {
+  charColors.armR = e.target.value;
+  render();
+});
+
+document.getElementById('legLColor').addEventListener('input', e => {
+  charColors.legL = e.target.value;
+  render();
+});
+
+document.getElementById('legRColor').addEventListener('input', e => {
+  charColors.legR = e.target.value;
+  render();
+});
+
+document.getElementById('bodyColor').addEventListener('input', e => {
+  charColors.body = e.target.value;
+  render();
+});
+
+// Tutorial toggle
+document.getElementById('enableTutorial').addEventListener('change', e => {
+  tutorialEnabled = e.target.checked;
+  if (tutorialEnabled && window.tutorialSystem) {
+    window.tutorialSystem.startTutorial('main');
+  } else if (window.tutorialSystem) {
+    window.tutorialSystem.hideTutorial();
+  }
+});
+
 // Body type selection
 document.getElementById('viewPerspectiveSelect').addEventListener('change', async (e) => {
   const bodyType = document.getElementById('bodyTypeSelect').value;
@@ -811,16 +869,24 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' && !isPlaying) gotoFrame(currentFrame + 1);
   if (e.key === ' ') { e.preventDefault(); if (isPlaying) stopPlay(); else play(); }
   if (e.key === 'n' || e.key === 'N') addFrame();
+  if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+    e.preventDefault();
+    if (historyManager.undo()) { restoreNodes(historyManager.history[historyManager.currentIndex]); render(); }
+  }
+  if ((e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) || (e.key === 'y' && (e.ctrlKey || e.metaKey))) {
+    e.preventDefault();
+    if (historyManager.redo()) { restoreNodes(historyManager.history[historyManager.currentIndex]); render(); }
+  }
 });
 
-// Mouse wheel zoom
+// Mouse wheel - adjust character scale
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
   const delta = e.deltaY > 0 ? -5 : 5;
-  const slider = document.getElementById('zoomSlider');
+  const slider = document.getElementById('scaleSlider');
   slider.value = Math.max(50, Math.min(200, parseInt(slider.value) + delta));
-  viewScale = parseInt(slider.value) / 100;
-  document.getElementById('zoomVal').textContent = slider.value + '%';
+  charScale = parseInt(slider.value) / 100;
+  document.getElementById('scaleVal').textContent = slider.value + '%';
   render();
 }, { passive: false });
 
@@ -926,6 +992,21 @@ async function init() {
   updateFrameBadge();
   loadSavedAnimations();
   render();
+
+  // Initialize history manager
+  historyManager.setNodeHandlers(() => nodes, (n) => { nodes = n; });
+  historyManager.saveState(); // Save initial state
+
+  // Initialize tutorial system
+  import('./tutorialSystem.js').then(({ TutorialSystem }) => {
+    window.tutorialSystem = new TutorialSystem(tutorialConfig);
+    window.tutorialSystem.init();
+    
+    // Check if tutorial should auto-start
+    if (tutorialEnabled) {
+      window.tutorialSystem.startTutorial('main');
+    }
+  });
 }
 
 init();
