@@ -35,6 +35,7 @@ let charColors = {
   body: '#1a3344'
 };
 let tutorialEnabled = false;
+let lockLimbLengths = false;
 let historyManager = new HistoryManager();
 
 const PELVIS_CHILDREN = ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head',
@@ -42,6 +43,23 @@ const PELVIS_CHILDREN = ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'he
   'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'];
 const FOOT_NODES = ['foot_l', 'foot_r'];
 const GROUND_Y = 130;
+
+const NODE_HIERARCHY = {
+  'shoulder_l': ['elbow_l', 'hand_l'],
+  'shoulder_r': ['elbow_r', 'hand_r'],
+  'elbow_l': ['hand_l'],
+  'elbow_r': ['hand_r'],
+  'hip_l': ['knee_l', 'foot_l'],
+  'hip_r': ['knee_r', 'foot_r'],
+  'knee_l': ['foot_l'],
+  'knee_r': ['foot_r'],
+  'neck': ['head'],
+  'chest': ['shoulder_l', 'shoulder_r', 'neck', 'head', 'elbow_l', 'hand_l', 'elbow_r', 'hand_r'],
+  'bum': ['hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'],
+  'pelvis': ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head', 'elbow_l', 'hand_l', 'elbow_r', 'hand_r', 'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r']
+};
+
+let selectedNodes = [];
 
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
@@ -406,7 +424,9 @@ function drawSkeleton(ctx, nodeList, alpha, overrideColor) {
   // ---- JOINT DOTS (only on main render, not ghost) ----
   if (!ghost) {
     nodeList.forEach(n => {
-      const isSelected = dragNode && dragNode.id === n.id;
+      const isPrimarySelected = dragNode && dragNode.id === n.id;
+      const isMultiSelected = selectedNodes.some(sn => sn.id === n.id);
+      const isSelected = isPrimarySelected || isMultiSelected;
       if (n.id === 'head') return; // already drawn
 
       let jColor = C.joint;
@@ -497,10 +517,29 @@ function startInteract(e) {
     return;
   }
   const w = screenToWorld(pos.x, pos.y);
-  dragNode = hitNode(w.x, w.y);
-  if (dragNode) {
+  const clickedNode = hitNode(w.x, w.y);
+  
+  if (clickedNode) {
+    if (e.shiftKey) {
+      const idx = selectedNodes.findIndex(n => n.id === clickedNode.id);
+      if (idx >= 0) {
+        selectedNodes.splice(idx, 1);
+      } else {
+        selectedNodes.push(clickedNode);
+      }
+    } else {
+      const alreadySelected = selectedNodes.some(n => n.id === clickedNode.id);
+      if (alreadySelected && selectedNodes.length > 1) {
+        // Keep all selected when clicking on one of already selected nodes
+      } else {
+        selectedNodes = [clickedNode];
+      }
+    }
+    dragNode = clickedNode;
     isDragging = true;
-    updateNodeInfo(dragNode);
+    updateNodeInfo(clickedNode);
+  } else {
+    selectedNodes = [];
   }
 }
 
@@ -538,8 +577,24 @@ function doInteract(e) {
       });
     }
   } else {
-    dragNode.x = w.x;
-    dragNode.y = w.y;
+    const constrained = constrainDistances(dragNode, w.x, w.y);
+    dragNode.x = constrained.x;
+    dragNode.y = constrained.y;
+    if (NODE_HIERARCHY[dragNode.id]) {
+      NODE_HIERARCHY[dragNode.id].forEach(childId => {
+        const child = nodes.find(n => n.id === childId);
+        if (child) {
+          child.x += dx;
+          child.y += dy;
+        }
+      });
+    }
+    selectedNodes.forEach(n => {
+      if (n.id !== dragNode.id) {
+        n.x += dx;
+        n.y += dy;
+      }
+    });
   }
   updateNodeInfo(dragNode);
   render();
@@ -548,11 +603,50 @@ function doInteract(e) {
 function endInteract() {
   if (isDragging && dragNode) {
     saveCurrentToFrame();
+    historyManager.saveState();
     renderThumb(currentFrame);
   }
   isDragging = false;
   dragNode = null;
   panStart = null;
+}
+
+function constrainDistances(movedNode, newX, newY) {
+  if (!lockLimbLengths || !bones.length) return { x: newX, y: newY };
+  
+  const distances = constraints.distances || {};
+  const result = { x: newX, y: newY };
+  
+  const connectedBones = bones.filter(b => b[0] === movedNode.id || b[1] === movedNode.id);
+  
+  for (const bone of connectedBones) {
+    const otherId = bone[0] === movedNode.id ? bone[1] : bone[0];
+    const other = nodes.find(n => n.id === otherId);
+    if (!other) continue;
+    
+    const boneKey = `${movedNode.id}-${otherId}`;
+    const reverseKey = `${otherId}-${movedNode.id}`;
+    const constraint = distances[boneKey] || distances[reverseKey];
+    
+    if (!constraint || typeof constraint === 'number') continue;
+    
+    const minDist = constraint.min || constraint.default * 0.8;
+    const maxDist = constraint.max || constraint.default * 1.2;
+    
+    const currentDist = Math.hypot(result.x - other.x, result.y - other.y);
+    
+    if (currentDist < minDist) {
+      const angle = Math.atan2(result.y - other.y, result.x - other.x);
+      result.x = other.x + Math.cos(angle) * minDist;
+      result.y = other.y + Math.sin(angle) * minDist;
+    } else if (currentDist > maxDist) {
+      const angle = Math.atan2(result.y - other.y, result.x - other.x);
+      result.x = other.x + Math.cos(angle) * maxDist;
+      result.y = other.y + Math.sin(angle) * maxDist;
+    }
+  }
+  
+  return result;
 }
 
 function updateNodeInfo(n) {
@@ -777,7 +871,9 @@ document.getElementById('cancelSaveBtn').addEventListener('click', () => {
 });
 
 document.getElementById('confirmSaveBtn').addEventListener('click', () => {
-    const name = document.getElementById('animNameInput').value.trim() || 'Untitled';
+    let name = document.getElementById('animNameInput').value.trim();
+    if (!name) name = 'Untitled';
+    if (name.length > 64) name = name.substring(0, 64);
     saveAnimation(name);
     currentAnimName = name; // Set current animation name when saved
     document.getElementById('saveModal').classList.remove('open');
@@ -853,7 +949,29 @@ document.getElementById('loadPresetBtn').addEventListener('click', () => {
   loadAnimationPreset(presetName);
 });
 
-document.getElementById('exportBtn').addEventListener('click', exportJSON);
+document.getElementById('exportBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('exportMenu').classList.toggle('open');
+});
+
+document.addEventListener('click', () => {
+  document.getElementById('exportMenu').classList.remove('open');
+});
+
+document.querySelectorAll('.export-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const format = btn.dataset.format;
+    if (format === 'json') {
+      exportJSON();
+    } else if (format === 'sprite') {
+      exportSpriteSheet();
+    } else if (format === 'apng') {
+      exportAPNG();
+    }
+    document.getElementById('exportMenu').classList.remove('open');
+  });
+});
+
 document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
 
 // Modal bg click to close

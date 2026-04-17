@@ -561,3 +561,44 @@ input[type=checkbox] {
     cursor: pointer;
     padding: 0;
 }
+
+/* Export dropdown */
+.export-dropdown {
+    position: relative;
+}
+
+.export-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.3rem 0;
+    min-width: 180px;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.export-menu.open {
+    display: block;
+}
+
+.export-option {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.8rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.export-option:hover {
+    background: var(--panel2);
+    color: var(--accent);
+}

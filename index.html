@@ -19,7 +19,14 @@
       <button class="btn" id="resetPoseBtn">↺ Reset Pose</button>
       <button class="btn" id="symmetryBtn">⇔ Mirror</button>
       <button class="btn primary" id="saveAnimBtn">💾 Save Animation</button>
-      <button class="btn" id="exportBtn">⬇ Export JSON</button>
+      <div class="export-dropdown">
+        <button class="btn" id="exportBtn">⬇ Export ▾</button>
+        <div class="export-menu" id="exportMenu">
+          <button class="export-option" data-format="json">📄 JSON (Animation Data)</button>
+          <button class="export-option" data-format="sprite">🖼️ Sprite Sheet (PNG)</button>
+          <button class="export-option" data-format="apng">🎬 Animated PNG (APNG)</button>
+        </div>
+      </div>
       <button class="btn" id="importBtn">⬆ Import</button>
       <input type="file" id="importFile" accept=".json" style="display:none">
     </div>
@@ -172,7 +179,7 @@
   <div class="modal-bg" id="saveModal">
     <div class="modal">
       <h3>💾 Save Animation</h3>
-      <input type="text" id="animNameInput" placeholder="Animation name (e.g. Walk Cycle)">
+      <input type="text" id="animNameInput" placeholder="Animation name (e.g. Walk Cycle)" maxlength="64">
       <div class="modal-btns">
         <button class="btn" id="cancelSaveBtn">Cancel</button>
         <button class="btn primary" id="confirmSaveBtn">Save</button>
