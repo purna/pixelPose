@@ -58,37 +58,31 @@ export function renderSavedList() {
   
   saved.forEach((anim, index) => {
     const item = document.createElement('div');
-    item.className = 'anim-item';
-    const catLabel = (anim.category || 'human').charAt(0).toUpperCase() + (anim.category || 'human').slice(1);
+    item.className = 'sa-item';
     item.innerHTML = `
-      <div class="anim-card">
-        <div class="anim-card-header">
-          <span class="anim-card-name">${anim.name || 'Untitled'}</span>
-          <span class="anim-card-badge">${catLabel}</span>
-        </div>
-        <div class="anim-card-meta">
-          <span>${anim.author || 'Unknown'}</span>
-          <span class="dot">·</span>
-          <span>${anim.frames?.length || 0} frames</span>
-        </div>
+      <div class="sa-info">
+        <span class="sa-name">${anim.name || 'Untitled'}</span>
+        <span class="sa-meta">${anim.author || 'Unknown'} · ${anim.frames?.length || 0} frames</span>
       </div>
-      <div class="anim-card-actions">
-        <button class="anim-card-btn edit" title="Edit">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <div class="sa-actions">
+        <button class="sa-btn sa-edit edit" title="Edit">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
-        <button class="anim-card-btn delete" title="Delete">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button class="sa-btn sa-del delete" title="Delete">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            <line x1="10" y1="11" x2="10" y2="17"/>
+            <line x1="14" y1="11" x2="14" y2="17"/>
           </svg>
         </button>
       </div>
     `;
     
-    item.querySelector('.anim-card').onclick = () => callbacks.onLoadSaved(index);
+    item.onclick = () => callbacks.onLoadSaved(index);
     item.querySelector('.edit').onclick = (e) => { e.stopPropagation(); callbacks.onEditSaved(index); };
     item.querySelector('.delete').onclick = (e) => { e.stopPropagation(); callbacks.onDeleteSaved(index); };
     list.appendChild(item);

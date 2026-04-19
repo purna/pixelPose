@@ -24,6 +24,10 @@ export function initSidebar(state, callbacks) {
     setActiveTool('modePan');
   });
 
+  document.getElementById('ikToggle').addEventListener('change', (e) => {
+    state.useIK = e.target.checked;
+  });
+
   // Render helper
   function render() {
     if (callbacks.onRender) callbacks.onRender();
@@ -46,6 +50,11 @@ export function initSidebar(state, callbacks) {
 
   document.getElementById('showLabels').addEventListener('change', (e) => {
     state.view.showLabels = e.target.checked;
+    render();
+  });
+
+  document.getElementById('showDistances').addEventListener('change', (e) => {
+    state.view.showDistances = e.target.checked;
     render();
   });
 
@@ -97,7 +106,7 @@ export function initSidebar(state, callbacks) {
 }
 
 function setActiveTool(toolId) {
-  document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tool-btn, .float-btn').forEach(btn => btn.classList.remove('active'));
   document.getElementById(toolId).classList.add('active');
 }
 

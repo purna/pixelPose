@@ -289,22 +289,22 @@
   ],
   "constraints": {
     "distances": {
-      "head-neck": 20,
-      "neck-chest": 16,
-      "chest-shoulder_l": 18,
-      "chest-shoulder_r": 18,
-      "shoulder_l-elbow_l": 20,
-      "shoulder_r-elbow_r": 20,
-      "elbow_l-hand_l": 20,
-      "elbow_r-hand_r": 20,
-      "chest-pelvis": 38,
-      "pelvis-bum": 16,
-      "bum-hip_l": 18,
-      "bum-hip_r": 18,
-      "hip_l-knee_l": 22,
-      "hip_r-knee_r": 22,
-      "knee_l-foot_l": 22,
-      "knee_r-foot_r": 22
+      "head-neck": 5,
+      "chest-neck": 18.8,
+      "chest-shoulder_l": 2.7,
+      "chest-shoulder_r": 7.6,
+      "elbow_l-shoulder_l": 28.5,
+      "elbow_r-shoulder_r": 23.2,
+      "elbow_l-hand_l": 26.7,
+      "elbow_r-hand_r": 18.9,
+      "chest-pelvis": 76.2,
+      "bum-pelvis": 15.2,
+      "bum-hip_l": 3.8,
+      "bum-hip_r": 3.8,
+      "hip_l-knee_l": 21.4,
+      "hip_r-knee_r": 18.9,
+      "foot_l-knee_l": 18.9,
+      "foot_r-knee_r": 20.8
     },
     "angles": {
       "neck": {
@@ -342,6 +342,72 @@
       "knee_r": {
         "min": -160,
         "max": 160
+      }
+    },
+    "distanceLimits": {
+      "head-neck": {
+        "min": 11.2,
+        "max": 33.6
+      },
+      "chest-neck": {
+        "min": 10,
+        "max": 30
+      },
+      "chest-shoulder_l": {
+        "min": 1.4,
+        "max": 4.2
+      },
+      "chest-shoulder_r": {
+        "min": 4.1,
+        "max": 12.1
+      },
+      "elbow_l-shoulder_l": {
+        "min": 15.2,
+        "max": 45.6
+      },
+      "elbow_r-shoulder_r": {
+        "min": 12.4,
+        "max": 37.1
+      },
+      "elbow_l-hand_l": {
+        "min": 14.2,
+        "max": 42.6
+      },
+      "elbow_r-hand_r": {
+        "min": 10.1,
+        "max": 30.2
+      },
+      "chest-pelvis": {
+        "min": 40.6,
+        "max": 121.8
+      },
+      "bum-pelvis": {
+        "min": 8.1,
+        "max": 24.2
+      },
+      "bum-hip_l": {
+        "min": 2,
+        "max": 6
+      },
+      "bum-hip_r": {
+        "min": 2,
+        "max": 6
+      },
+      "hip_l-knee_l": {
+        "min": 11.4,
+        "max": 34.2
+      },
+      "hip_r-knee_r": {
+        "min": 10.1,
+        "max": 30.2
+      },
+      "foot_l-knee_l": {
+        "min": 10.1,
+        "max": 30.2
+      },
+      "foot_r-knee_r": {
+        "min": 11.1,
+        "max": 33.2
       }
     }
   },
@@ -638,7 +704,7 @@
       ],
       "constraints": {
         "distances": {
-          "head-neck": 20,
+          "head-neck": 3,
           "neck-chest": 16,
           "chest-shoulder_l": 18,
           "chest-shoulder_r": 18,

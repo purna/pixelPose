@@ -1,5 +1,6 @@
 import { state } from './state.js';
 import { saveHistory } from './history.js';
+import { solveIK } from './kinematics.js';
 
 const NODE_RADIUS = 7;
 
@@ -26,6 +27,13 @@ export function moveDrag(state, dx, dy) {
   if (!state.dragNode) return;
 
   const dragNode = state.dragNode;
+
+  if (state.useIK && dragNode.id !== 'pelvis') {
+    dragNode.x += dx;
+    dragNode.y += dy;
+    solveIK(state);
+    return;
+  }
 
   if (dragNode.id === 'pelvis') {
     const movingChildren = state.footAnchor 

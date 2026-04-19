@@ -7,7 +7,8 @@
   <title>PIXELPOSE — Character Animator</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/modal.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/upng-js/2.1.0/UPNG.min.js "></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/upng-js/2.1.0/UPNG.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script type="module" src="js/app.js"></script>
 </head>
 
@@ -68,12 +69,9 @@
 
       <div class="sidebar-section">
         <h3>Skeleton</h3>
-        <button class="tool-btn active" id="modeMove">
-          <span class="icon">✥</span> Move Node
-        </button>
-        <button class="tool-btn" id="modePan">
-          <span class="icon">✋</span> Pan Canvas
-        </button>
+        <label class="checkbox-label" style="margin-top: 10px;">
+          <input type="checkbox" id="ikToggle"> Use IK (Kinematics)
+        </label>
       </div>
 
       <div class="sidebar-section">
@@ -92,14 +90,17 @@
         </label>
       </div>
 
-      <div class="sidebar-section">
-        <h3>Display</h3>
-        <label class="checkbox-label">
-          <input type="checkbox" id="showLabels" checked> Node labels
-        </label>
-        <label class="checkbox-label">
-          <input type="checkbox" id="showGrid" checked> Grid
-        </label>
+<div class="sidebar-section">
+         <h3>Display</h3>
+         <label class="checkbox-label">
+           <input type="checkbox" id="showLabels" checked> Node labels
+         </label>
+         <label class="checkbox-label">
+           <input type="checkbox" id="showDistances"> Node distances
+         </label>
+         <label class="checkbox-label">
+           <input type="checkbox" id="showGrid" checked> Grid
+         </label>
         <label class="checkbox-label">
           <input type="checkbox" id="displayBoundingBox"> Show bounding box
         </label>
@@ -114,56 +115,75 @@
           No node selected.<br>Click & drag a node to pose.
         </div>
       </div>
-    </div>
-
-    <!-- Canvas -->
-    <div class="canvas-wrap" id="canvasWrap">
-      <canvas id="mainCanvas"></canvas>
-      <div class="status-bar">
-        <div class="badge" id="frameBadge">Frame 1 / 1</div>
-        <div class="badge" id="playBadge" style="display:none">▶ PLAYING</div>
-      </div>
-      <div class="canvas-hint" id="canvasHint">Drag nodes to pose • Add frames in the timeline →</div>
-    </div>
-
-    <!-- Right animation panel -->
-    <div class="anim-panel">
-      <div class="anim-header">
-        <span>🎬</span>
-        <h3>Timeline</h3>
-      </div>
-
-      <div class="anim-controls">
-        <button class="btn" id="addFrameBtn">+ Frame</button>
-        <button class="btn" id="dupFrameBtn">⧉ Dup</button>
-        <button class="btn danger" id="delFrameBtn">✕ Del</button>
-      </div>
-
-      <div class="playback-row">
-        <button class="btn" id="prevFrameBtn">◀</button>
-        <button class="btn primary" id="playBtn">▶ Play</button>
-        <button class="btn" id="nextFrameBtn">▶</button>
-        <div class="fps-control">
-          <span>FPS</span>
-          <input type="number" id="fpsInput" value="12" min="1" max="60">
-        </div>
-        <label class="label-small">
-          <input type="checkbox" id="loopToggle" checked> Loop
-        </label>
-      </div>
-
-      <div class="onion-toggle">
-        <input type="checkbox" id="onionToggle">
-        <label for="onionToggle">Onion skin (prev frame)</label>
-      </div>
-
-      <div class="timeline" id="timeline"></div>
 
       <div class="saved-anims">
         <h4>Saved Animations</h4>
         <div id="savedAnimList"></div>
       </div>
     </div>
+
+    <!-- Main Content wrapper containing canvas and timeline vertically -->
+    <div class="main-content" style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+
+      <!-- Canvas -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="floating-toolbar">
+        <button class="float-btn active" id="modeMove" data-tooltip="Move Node">
+          <i class="fas fa-arrows-alt"></i>
+        </button>
+        <button class="float-btn" id="modePan" data-tooltip="Pan Canvas">
+          <i class="fas fa-hand-paper"></i>
+        </button>
+      </div>
+
+      <canvas id="mainCanvas"></canvas>
+      <div class="status-bar">
+        <div class="badge" id="frameBadge">Frame 1 / 1</div>
+        <div class="badge" id="playBadge" style="display:none">▶ PLAYING</div>
+      </div>
+      <div class="canvas-hint" id="canvasHint">Drag nodes to pose • Add frames in the timeline ↓</div>
+    </div>
+
+    <!-- Bottom animation panel -->
+    <div class="anim-panel horizontal">
+      <div class="anim-header-strip">
+        <div class="anim-header">
+          <i class="fas fa-clapperboard" style="color: var(--text-dim); font-size: 1.1em;"></i>
+          <h3>Timeline</h3>
+        </div>
+
+        <div class="anim-controls">
+          <button class="btn" id="addFrameBtn"><i class="fas fa-plus"></i> Frame</button>
+          <button class="btn" id="dupFrameBtn"><i class="fas fa-copy"></i> Dup</button>
+          <button class="btn danger" id="delFrameBtn"><i class="fas fa-trash"></i></button>
+        </div>
+
+        <div class="playback-row">
+          <button class="btn" id="prevFrameBtn"><i class="fas fa-backward-step"></i></button>
+          <button class="btn primary" id="playBtn"><i class="fas fa-play"></i> Play</button>
+          <button class="btn" id="nextFrameBtn"><i class="fas fa-forward-step"></i></button>
+          <div class="fps-control">
+            <span>FPS</span>
+            <input type="number" id="fpsInput" value="12" min="1" max="60">
+          </div>
+          <label class="label-small">
+            <input type="checkbox" id="loopToggle" checked> Loop
+          </label>
+          <label class="label-small">
+            <input type="checkbox" id="tweenToggle" checked> Tween
+          </label>
+        </div>
+
+        <div class="onion-toggle">
+          <input type="checkbox" id="onionToggle">
+          <label for="onionToggle">Onion skin</label>
+        </div>
+      </div>
+
+      <div class="timeline horizontal" id="timeline"></div>
+    </div>
+    
+    </div> <!-- Close main-content -->
 
   </div>
 

@@ -4,7 +4,7 @@
   "description": "Detailed walk animation for human",
   "category": "human",
   "bodyType": "adult-male",
-   "height": 180,
+  "height": 180,
   "frames": [
     {
       "nodes": [
@@ -3131,5 +3131,25 @@
     }
   ],
   "currentAnimName": "Really professionally made stickman walk cycle",
-  "version": 1
+  "version": 1,
+  "constraints": {
+    "distances": {
+      "head-neck": 8,
+      "chest-neck": 49,
+      "chest-shoulder_l": 5.3,
+      "chest-shoulder_r": 5.3,
+      "elbow_l-shoulder_l": 67.8,
+      "elbow_r-shoulder_r": 78,
+      "elbow_l-hand_l": 57.4,
+      "elbow_r-hand_r": 59.3,
+      "chest-pelvis": 101.5,
+      "bum-pelvis": 33.8,
+      "bum-hip_l": 5.6,
+      "bum-hip_r": 5.6,
+      "hip_l-knee_l": 91.4,
+      "hip_r-knee_r": 87,
+      "foot_l-knee_l": 90,
+      "foot_r-knee_r": 90
+    }
+  }
 }

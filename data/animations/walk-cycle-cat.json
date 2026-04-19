@@ -1841,5 +1841,25 @@
     }
   ],
   "currentAnimName": "cat walk",
-  "version": 1
+  "version": 1,
+  "constraints": {
+    "distances": {
+      "head-neck": 5,
+      "chest-neck": 18.8,
+      "chest-shoulder_l": 2.7,
+      "chest-shoulder_r": 7.6,
+      "elbow_l-shoulder_l": 28.5,
+      "elbow_r-shoulder_r": 23.2,
+      "elbow_l-hand_l": 26.7,
+      "elbow_r-hand_r": 18.9,
+      "chest-pelvis": 76.2,
+      "bum-pelvis": 15.2,
+      "bum-hip_l": 3.8,
+      "bum-hip_r": 3.8,
+      "hip_l-knee_l": 21.4,
+      "hip_r-knee_r": 18.9,
+      "foot_l-knee_l": 18.9,
+      "foot_r-knee_r": 20.8
+    }
+  }
 }

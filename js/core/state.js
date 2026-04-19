@@ -36,6 +36,7 @@ export const state = {
     charScale: 1,
     showGrid: true,
     showLabels: true,
+    showDistances: false,
     showShadow: false,
     showBoundingBox: false,
     onionSkin: false
@@ -77,6 +78,7 @@ export const state = {
   },
 
   // Settings
+  useIK: false,
   lockLimbLengths: false,
 
   // Hierarchy constants (for human body)

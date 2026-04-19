@@ -17,6 +17,14 @@ export function initTimeline(state, cb) {
     callbacks.onLoopToggle(e.target.checked);
   });
 
+  const tweenToggle = document.getElementById('tweenToggle');
+  if (tweenToggle) {
+    tweenToggle.addEventListener('change', (e) => {
+      state.playback.tweening = e.target.checked;
+    });
+    state.playback.tweening = tweenToggle.checked;
+  }
+
   document.getElementById('onionToggle').addEventListener('change', (e) => {
     state.view.onionSkin = e.target.checked;
     callbacks.onOnionToggle(e.target.checked);
@@ -65,38 +73,87 @@ export function initTimeline(state, cb) {
   });
 }
 
+let tweenAnimId = null;
+
 function startPlayback() {
   state.playback.isPlaying = true;
   document.getElementById('playBadge').style.display = 'block';
   document.getElementById('playBtn').textContent = '⏸';
   
   const interval = 1000 / state.playback.fps;
-  state.playback.interval = setInterval(() => {
+  let lastTime = performance.now();
+  let timeAccumulator = 0;
+  
+  function loop(currentTime) {
     if (!state.playback.isPlaying) return;
-    let next = state.currentFrame + 1;
-    if (next >= state.frames.length) {
-      if (state.playback.loop) {
-        next = 0;
-      } else {
-        stopPlayback();
-        return;
+    
+    const deltaTime = currentTime - lastTime;
+    lastTime = currentTime;
+    timeAccumulator += deltaTime;
+    
+    // Check if we advanced a whole frame boundary
+    if (timeAccumulator >= interval) {
+      const framesToAdvance = Math.floor(timeAccumulator / interval);
+      timeAccumulator = timeAccumulator % interval;
+      
+      let next = state.currentFrame + framesToAdvance;
+      if (next >= state.frames.length) {
+        if (state.playback.loop) {
+          next = next % state.frames.length;
+        } else {
+          state.currentFrame = state.frames.length - 1;
+          stopPlayback();
+          return;
+        }
       }
+      state.currentFrame = next;
+      updateTimeline();
+      updateFrameBadge();
     }
-    state.currentFrame = next;
-    // Use the callback to actually switch frames (ensures proper restoration)
-    callbacks.onFrameSelect(next);
-    updateFrameBadge();
-  }, interval);
+    
+    // Tweening logic
+    if (state.playback.tweening && state.frames.length > 1) {
+      const fromFrame = state.currentFrame;
+      let toFrame = fromFrame + 1;
+      if (toFrame >= state.frames.length) {
+        toFrame = state.playback.loop ? 0 : fromFrame;
+      }
+      
+      const t = timeAccumulator / interval; // 0 to 1
+      const fNodes = state.frames[fromFrame].nodes;
+      const tNodes = state.frames[toFrame].nodes;
+      
+      for (let i = 0; i < state.nodes.length; i++) {
+         const fromNode = fNodes.find(n => n.id === state.nodes[i].id);
+         const toNode = tNodes.find(n => n.id === state.nodes[i].id);
+         if (fromNode && toNode) {
+            state.nodes[i].x = fromNode.x + (toNode.x - fromNode.x) * t;
+            state.nodes[i].y = fromNode.y + (toNode.y - fromNode.y) * t;
+         }
+      }
+    } else {
+      // Direct assignment when tweening is off
+      state.nodes = JSON.parse(JSON.stringify(state.frames[state.currentFrame].nodes));
+    }
+    
+    if (callbacks.onRender) callbacks.onRender();
+    tweenAnimId = requestAnimationFrame(loop);
+  }
+  
+  tweenAnimId = requestAnimationFrame(loop);
 }
 
 function stopPlayback() {
   state.playback.isPlaying = false;
   document.getElementById('playBadge').style.display = 'none';
-  document.getElementById('playBtn').textContent = '▶';
-  if (state.playback.interval) {
-    clearInterval(state.playback.interval);
-    state.playback.interval = null;
+  document.getElementById('playBtn').textContent = '▶ Play';
+  
+  if (tweenAnimId) {
+    cancelAnimationFrame(tweenAnimId);
+    tweenAnimId = null;
   }
+  // Immediately snap safely back to current frame
+  callbacks.onFrameSelect(state.currentFrame);
 }
 
 function restartPlayback() {

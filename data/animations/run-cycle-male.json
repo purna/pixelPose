@@ -5,59 +5,130 @@
   "category": "human",
   "bodyType": "adult-male",
   "height": 180,
-
   "bones": [
-    ["head", "neck"],
-    ["neck", "chest"],
-    ["chest", "shoulder_l"],
-    ["chest", "shoulder_r"],
-    ["shoulder_l", "elbow_l"],
-    ["shoulder_r", "elbow_r"],
-    ["elbow_l", "hand_l"],
-    ["elbow_r", "hand_r"],
-    ["chest", "pelvis"],
-    ["pelvis", "bum"],
-    ["bum", "hip_l"],
-    ["bum", "hip_r"],
-    ["hip_l", "knee_l"],
-    ["hip_r", "knee_r"],
-    ["knee_l", "foot_l"],
-    ["knee_r", "foot_r"]
+    [
+      "head",
+      "neck"
+    ],
+    [
+      "neck",
+      "chest"
+    ],
+    [
+      "chest",
+      "shoulder_l"
+    ],
+    [
+      "chest",
+      "shoulder_r"
+    ],
+    [
+      "shoulder_l",
+      "elbow_l"
+    ],
+    [
+      "shoulder_r",
+      "elbow_r"
+    ],
+    [
+      "elbow_l",
+      "hand_l"
+    ],
+    [
+      "elbow_r",
+      "hand_r"
+    ],
+    [
+      "chest",
+      "pelvis"
+    ],
+    [
+      "pelvis",
+      "bum"
+    ],
+    [
+      "bum",
+      "hip_l"
+    ],
+    [
+      "bum",
+      "hip_r"
+    ],
+    [
+      "hip_l",
+      "knee_l"
+    ],
+    [
+      "hip_r",
+      "knee_r"
+    ],
+    [
+      "knee_l",
+      "foot_l"
+    ],
+    [
+      "knee_r",
+      "foot_r"
+    ]
   ],
-
   "constraints": {
     "distances": {
-      "head-neck": 25,
-      "neck-chest": 35,
-      "chest-shoulder_l": 42,
-      "chest-shoulder_r": 42,
-      "shoulder_l-elbow_l": 35,
-      "shoulder_r-elbow_r": 35,
-      "elbow_l-hand_l": 30,
-      "elbow_r-hand_r": 30,
-      "chest-pelvis": 82,
-      "pelvis-bum": 26,
-      "bum-hip_l": 26,
-      "bum-hip_r": 26,
-      "hip_l-knee_l": 42,
-      "hip_r-knee_r": 42,
-      "knee_l-foot_l": 46,
-      "knee_r-foot_r": 46
+      "head-neck": 8,
+      "chest-neck": 49,
+      "chest-shoulder_l": 5.3,
+      "chest-shoulder_r": 5.3,
+      "elbow_l-shoulder_l": 67.8,
+      "elbow_r-shoulder_r": 78,
+      "elbow_l-hand_l": 57.4,
+      "elbow_r-hand_r": 59.3,
+      "chest-pelvis": 101.5,
+      "bum-pelvis": 33.8,
+      "bum-hip_l": 5.6,
+      "bum-hip_r": 5.6,
+      "hip_l-knee_l": 91.4,
+      "hip_r-knee_r": 87,
+      "foot_l-knee_l": 90,
+      "foot_r-knee_r": 90
     },
-
     "angles": {
-      "neck": { "min": -35, "max": 35 },
-      "shoulder_l": { "min": -25, "max": 180 },
-      "shoulder_r": { "min": -25, "max": 180 },
-      "elbow_l": { "min": 0, "max": 150 },
-      "elbow_r": { "min": 0, "max": 150 },
-      "hip_l": { "min": -25, "max": 180 },
-      "hip_r": { "min": -25, "max": 180 },
-      "knee_l": { "min": 0, "max": 150 },
-      "knee_r": { "min": 0, "max": 150 }
+      "neck": {
+        "min": -35,
+        "max": 35
+      },
+      "shoulder_l": {
+        "min": -25,
+        "max": 180
+      },
+      "shoulder_r": {
+        "min": -25,
+        "max": 180
+      },
+      "elbow_l": {
+        "min": 0,
+        "max": 150
+      },
+      "elbow_r": {
+        "min": 0,
+        "max": 150
+      },
+      "hip_l": {
+        "min": -25,
+        "max": 180
+      },
+      "hip_r": {
+        "min": -25,
+        "max": 180
+      },
+      "knee_l": {
+        "min": 0,
+        "max": 150
+      },
+      "knee_r": {
+        "min": 0,
+        "max": 150
+      }
     }
   },
-
   "frames": [
     {
       "nodes": [

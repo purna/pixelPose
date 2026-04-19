@@ -1841,5 +1841,25 @@
     }
   ],
   "currentAnimName": "dog walk",
-  "version": 1
+  "version": 1,
+  "constraints": {
+    "distances": {
+      "head-neck": 2.9,
+      "chest-neck": 54.5,
+      "chest-shoulder_l": 8.7,
+      "chest-shoulder_r": 7.6,
+      "elbow_l-shoulder_l": 41.1,
+      "elbow_r-shoulder_r": 46,
+      "elbow_l-hand_l": 57.6,
+      "elbow_r-hand_r": 58.3,
+      "chest-pelvis": 108.8,
+      "bum-pelvis": 15.2,
+      "bum-hip_l": 3.8,
+      "bum-hip_r": 3.8,
+      "hip_l-knee_l": 41,
+      "hip_r-knee_r": 39.4,
+      "foot_l-knee_l": 64.7,
+      "foot_r-knee_r": 60.6
+    }
+  }
 }

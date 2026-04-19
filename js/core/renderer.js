@@ -234,9 +234,47 @@ function drawSkeleton(ctx, nodeList, alpha, overrideColor, st, isGhost) {
         ctx.fillText(n.label, n.x, n.y - NODE_RADIUS - 4);
       });
     }
+
+    if (st.view.showDistances) {
+      drawBoneDistances(ctx, nodeList, st.bones, st);
+    }
   }
 
   ctx.globalAlpha = 1;
+}
+
+function drawBoneDistances(ctx, nodes, bones, st) {
+  const scale = st.view.charScale;
+  
+  bones.forEach(([aId, bId]) => {
+    const a = nodes.find(n => n.id === aId);
+    const b = nodes.find(n => n.id === bId);
+    if (!a || !b) return;
+    
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2;
+    
+    const key = [aId, bId].sort().join('-');
+    const targetDist = st.constraints.distances?.[key];
+    
+    ctx.save();
+    ctx.translate(mx, my);
+    ctx.scale(1/scale, 1/scale);
+    
+    ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
+    ctx.font = 'bold 9px Space Mono, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    if (targetDist !== undefined) {
+      ctx.fillText(targetDist.toFixed(1), 0, 0);
+    } else {
+      const actual = Math.hypot(b.x - a.x, b.y - a.y);
+      ctx.fillText(actual.toFixed(1), 0, 0);
+    }
+    
+    ctx.restore();
+  });
 }
 
 export { NODE_RADIUS };
