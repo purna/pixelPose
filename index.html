@@ -20,6 +20,7 @@
       <button class="btn" id="redoBtn" disabled title="Redo (Ctrl+Y)">↷</button>
       <button class="btn" id="settingsBtn">⚙ Settings</button>
       <button class="btn" id="resetPoseBtn">↺ Reset Pose</button>
+      <button class="btn" id="flipHBtn" title="Flip Horizontally">↔ Flip</button>
       <button class="btn" id="symmetryBtn">⇔ Mirror</button>
       <button class="btn primary" id="saveAnimBtn">💾 Save Animation</button>
       <div class="export-dropdown">
@@ -40,38 +41,28 @@
     <!-- Left sidebar -->
     <div class="sidebar">
       <div class="sidebar-section">
-        <h3>View Perspective</h3>
-        <select id="viewPerspectiveSelect"
-          style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem;margin-bottom:0.5rem">
-          <option value="front" selected>Front View</option>
-          <option value="side">Side View</option>
-        </select>
         <h3>Body Type</h3>
         <select id="bodyTypeSelect"
-          style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem">
-          <option value="adult-male" selected>Adult Male</option>
-          <option value="adult-female">Adult Female</option>
-          <option value="child">Child</option>
-          <option value="quadruped">Quadruped</option>
+          style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem;margin-bottom:0.5rem">
+          <optgroup label="Human">
+            <option value="adult-male">Male</option>
+            <option value="adult-female">Female</option>
+            <option value="child">Child</option>
+          </optgroup>
+          <optgroup label="Animals">
+            <option value="horse">Horse</option>
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+          </optgroup>
         </select>
+
       </div>
 
       <div class="sidebar-section">
         <h3>Animation Presets</h3>
         <select id="animationPresetSelect"
           style="width:100%;padding:0.4rem;background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:4px;font-family:'Space Mono',monospace;font-size:0.65rem;margin-bottom:0.5rem">
-          <option value="">Select Animation...</option>
-          <option value="walk-cycle-human">Walk Cycle (Human Front - 12 frames)</option>
-          <option value="walk-jump-cycle-human">Walk / Jump Cycle (Human Front - 16 frames)</option>
-          <option value="run-cycle-human">Run Cycle (Human Front - 16 frames)</option>
-          <option value="walk-jump-cycle-human-side">Walk / Jump Cycle (Human Side - 16 frames)</option>
-          <option value="run-jump-cycle-human-side">Run / Jump Cycle (Human Side - 8 frames)</option>
-          <option value="walk-cycle-human-side">Walk Cycle (Human Side - 8 frames)</option>
-          <option value="run-cycle-human-side">Run Cycle (Human Side - 8 frames)</option>
-          <option value="walk-cycle-quadruped">Walk Cycle (Quadruped Front - 12 frames)</option>
-          <option value="run-cycle-quadruped">Run Cycle (Quadruped Front - 12 frames)</option>
-          <option value="walk-cycle-quadruped-side">Walk Cycle (Quadruped Side - 8 frames)</option>
-          <option value="run-cycle-quadruped-side">Run Cycle (Quadruped Side - 12 frames)</option>
+          <option value="">Loading...</option>
         </select>
         <button class="btn" id="loadPresetBtn" style="width:100%;font-size:0.62rem">Load Preset</button>
       </div>
@@ -112,6 +103,10 @@
         <label
           style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim);margin-bottom:0.4rem">
           <input type="checkbox" id="showGrid" checked> Grid
+        </label>
+        <label
+          style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim)">
+          <input type="checkbox" id="displayBoundingBox"> Show bounding box
         </label>
         <label
           style="font-size:0.65rem;display:flex;align-items:center;gap:0.4rem;cursor:pointer;color:var(--text-dim)">
@@ -180,9 +175,47 @@
 
   <!-- Save modal -->
   <div class="modal-bg" id="saveModal">
-    <div class="modal">
+    <div class="modal save-modal">
       <h3>💾 Save Animation</h3>
-      <input type="text" id="animNameInput" placeholder="Animation name (e.g. Walk Cycle)" maxlength="64">
+      <div class="form-group">
+        <label>Name <span class="char-count">0/64</span></label>
+        <input type="text" id="animNameInput" placeholder="e.g. Walk Cycle" maxlength="64">
+      </div>
+      <div class="form-group">
+        <label>Author <span class="char-count">0/32</span></label>
+        <input type="text" id="animAuthorInput" placeholder="Your name" maxlength="32">
+      </div>
+      <div class="form-group">
+        <label>Description <span class="char-count">0/200</span></label>
+        <textarea id="animDescInput" placeholder="Describe the animation..." maxlength="200"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="flex: 0 0 90px;">
+          <label>Height (cm)</label>
+          <input type="number" id="animHeightInput" min="1" max="500" value="180">
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="animCategorySelect">
+            <option value="human">Human</option>
+            <option value="animal">Animal</option>
+            <option value="fantasy">Fantasy</option>
+            <option value="robot">Robot</option>
+            <option value="creature">Creature</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Body Type</label>
+          <select id="animBodyTypeSelect">
+            <option value="adult-male">Male</option>
+            <option value="adult-female">Female</option>
+            <option value="child">Child</option>
+            <option value="horse">Horse</option>
+            <option value="dog">Dog</option>
+            <option value="cat">Cat</option>
+          </select>
+        </div>
+      </div>
       <div class="modal-btns">
         <button class="btn" id="cancelSaveBtn">Cancel</button>
         <button class="btn primary" id="confirmSaveBtn">Save</button>
@@ -232,9 +265,15 @@
             <input type="checkbox" id="spriteBoundingBox"> Show bounding box
           </label>
           <div class="color-row">
+            <label>Background</label>
+            <input type="color" id="spriteBgColor" value="#000000">
+            <label style="font-size:0.6rem;color:var(--text-dim)">Transparent</label>
+            <input type="checkbox" id="spriteBgTransparent" checked>
+          </div>
+          <div class="color-row">
             <label>Frame Size</label>
-            <input type="range" id="spriteFrameSize" min="100" max="600" value="300" style="width:80px">
-            <span id="spriteFrameSizeVal" style="font-size:0.6rem;color:var(--text-dim);width:35px">300</span>
+            <input type="range" id="spriteFrameSize" min="100" max="600" value="375" style="width:80px">
+            <span id="spriteFrameSizeVal" style="font-size:0.6rem;color:var(--text-dim);width:35px">375</span>
           </div>
         </div>
       </div>

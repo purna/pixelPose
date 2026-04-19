@@ -70,12 +70,31 @@ export const NODE_RADIUS = 7;
 // Load body definition from JSON
 export async function loadBodyDefinition(bodyType) {
   try {
-    const response = await fetch(`data/bodies/${bodyType}.json`);
+    let filePath = bodyType;
+    if (!bodyType.endsWith('.json')) {
+      filePath = bodyType + '.json';
+    }
+    if (!filePath.includes('/')) {
+      filePath = 'data/bodies/' + filePath;
+    }
+    const response = await fetch(filePath);
+    if (!response.ok) {
+      console.error('Body file not found:', bodyType);
+      return null;
+    }
     const bodyData = await response.json();
 
-    currentNodes = bodyData.nodes;
-    currentBones = bodyData.bones;
-    currentConstraints = bodyData.constraints;
+    if (bodyData.nodes && bodyData.nodes.length > 0) {
+      currentNodes = bodyData.nodes;
+    } else if (bodyData.frames && bodyData.frames[0] && bodyData.frames[0].nodes && bodyData.frames[0].nodes.length > 0) {
+      currentNodes = bodyData.frames[0].nodes;
+    } else {
+      console.error('No nodes found in body definition:', bodyType);
+      return null;
+    }
+    
+    currentBones = bodyData.bones || [];
+    currentConstraints = bodyData.constraints || { distances: {}, angles: {} };
 
     return bodyData;
   } catch (error) {
@@ -86,13 +105,17 @@ export async function loadBodyDefinition(bodyType) {
 
 // Get current skeleton data
 export function getCurrentNodes() {
+  if (!currentNodes || currentNodes.length === 0) {
+    console.warn('getCurrentNodes: currentNodes is empty');
+    return [];
+  }
   return JSON.parse(JSON.stringify(currentNodes));
 }
 
 export function getCurrentBones() {
-  return [...currentBones];
+  return currentBones && currentBones.length > 0 ? [...currentBones] : [];
 }
 
 export function getCurrentConstraints() {
-  return JSON.parse(JSON.stringify(currentConstraints));
+  return currentConstraints ? JSON.parse(JSON.stringify(currentConstraints)) : { distances: {}, angles: {} };
 }

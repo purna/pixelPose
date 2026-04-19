@@ -1,0 +1,238 @@
+{
+  "name": "Run Cycle (Side View - Advanced Biomechanics)",
+  "author": "Nigel Morris",
+  "description": "8-frame run cycle with torso rotation, foot roll, and proper spacing based on Animator's Survival Kit principles.",
+  "category": "human",
+  "bodyType": "adult-male",
+  "height": 180,
+
+  "bones": [
+    ["head", "neck"],
+    ["neck", "chest"],
+    ["chest", "shoulder_l"],
+    ["chest", "shoulder_r"],
+    ["shoulder_l", "elbow_l"],
+    ["shoulder_r", "elbow_r"],
+    ["elbow_l", "hand_l"],
+    ["elbow_r", "hand_r"],
+    ["chest", "pelvis"],
+    ["pelvis", "bum"],
+    ["bum", "hip_l"],
+    ["bum", "hip_r"],
+    ["hip_l", "knee_l"],
+    ["hip_r", "knee_r"],
+    ["knee_l", "foot_l"],
+    ["knee_r", "foot_r"]
+  ],
+
+  "constraints": {
+    "distances": {
+      "head-neck": 25,
+      "neck-chest": 35,
+      "chest-shoulder_l": 42,
+      "chest-shoulder_r": 42,
+      "shoulder_l-elbow_l": 35,
+      "shoulder_r-elbow_r": 35,
+      "elbow_l-hand_l": 30,
+      "elbow_r-hand_r": 30,
+      "chest-pelvis": 82,
+      "pelvis-bum": 26,
+      "bum-hip_l": 26,
+      "bum-hip_r": 26,
+      "hip_l-knee_l": 42,
+      "hip_r-knee_r": 42,
+      "knee_l-foot_l": 46,
+      "knee_r-foot_r": 46
+    },
+
+    "angles": {
+      "neck": { "min": -35, "max": 35 },
+      "shoulder_l": { "min": -25, "max": 180 },
+      "shoulder_r": { "min": -25, "max": 180 },
+      "elbow_l": { "min": 0, "max": 150 },
+      "elbow_r": { "min": 0, "max": 150 },
+      "hip_l": { "min": -25, "max": 180 },
+      "hip_r": { "min": -25, "max": 180 },
+      "knee_l": { "min": 0, "max": 150 },
+      "knee_r": { "min": 0, "max": 150 }
+    }
+  },
+  "frames": [
+    {
+      "label": "Contact (R)",
+      "nodes": [
+        {"id":"head","x":-2,"y":-158},
+        {"id":"neck","x":-2,"y":-134},
+        {"id":"chest","x":-1,"y":-100},
+        {"id":"shoulder_l","x":2,"y":-110},
+        {"id":"shoulder_r","x":-6,"y":-110},
+        {"id":"elbow_l","x":24,"y":-82},
+        {"id":"elbow_r","x":-30,"y":-76},
+        {"id":"hand_l","x":38,"y":-46},
+        {"id":"hand_r","x":-46,"y":-40},
+        {"id":"pelvis","x":-4,"y":-22},
+        {"id":"bum","x":-4,"y":2},
+        {"id":"hip_l","x":-4,"y":2},
+        {"id":"hip_r","x":-4,"y":2},
+        {"id":"knee_l","x":28,"y":56},
+        {"id":"knee_r","x":-32,"y":44},
+        {"id":"foot_l","x":42,"y":130},
+        {"id":"foot_r","x":-50,"y":128}
+      ]
+    },
+    {
+      "label": "Recoil",
+      "nodes": [
+        {"id":"head","x":-3,"y":-150},
+        {"id":"neck","x":-3,"y":-126},
+        {"id":"chest","x":-2,"y":-94},
+        {"id":"shoulder_l","x":0,"y":-104},
+        {"id":"shoulder_r","x":-6,"y":-104},
+        {"id":"elbow_l","x":12,"y":-76},
+        {"id":"elbow_r","x":-20,"y":-70},
+        {"id":"hand_l","x":22,"y":-40},
+        {"id":"hand_r","x":-30,"y":-34},
+        {"id":"pelvis","x":-3,"y":-14},
+        {"id":"bum","x":-3,"y":10},
+        {"id":"hip_l","x":-3,"y":10},
+        {"id":"hip_r","x":-3,"y":10},
+        {"id":"knee_l","x":16,"y":64},
+        {"id":"knee_r","x":-12,"y":54},
+        {"id":"foot_l","x":22,"y":130},
+        {"id":"foot_r","x":-12,"y":124}
+      ]
+    },
+    {
+      "label": "Passing (R)",
+      "nodes": [
+        {"id":"head","x":-3,"y":-156},
+        {"id":"neck","x":-3,"y":-132},
+        {"id":"chest","x":-3,"y":-98},
+        {"id":"shoulder_l","x":-3,"y":-108},
+        {"id":"shoulder_r","x":-3,"y":-108},
+        {"id":"elbow_l","x":2,"y":-78},
+        {"id":"elbow_r","x":-8,"y":-74},
+        {"id":"hand_l","x":6,"y":-42},
+        {"id":"hand_r","x":-12,"y":-38},
+        {"id":"pelvis","x":-3,"y":-18},
+        {"id":"bum","x":-3,"y":6},
+        {"id":"hip_l","x":-3,"y":6},
+        {"id":"hip_r","x":-3,"y":6},
+        {"id":"knee_l","x":-2,"y":36},
+        {"id":"knee_r","x":6,"y":58},
+        {"id":"foot_l","x":4,"y":106},
+        {"id":"foot_r","x":-2,"y":128}
+      ]
+    },
+    {
+      "label": "Up (R)",
+      "nodes": [
+        {"id":"head","x":-2,"y":-168},
+        {"id":"neck","x":-2,"y":-144},
+        {"id":"chest","x":-3,"y":-108},
+        {"id":"shoulder_l","x":-5,"y":-118},
+        {"id":"shoulder_r","x":-1,"y":-118},
+        {"id":"elbow_l","x":-12,"y":-82},
+        {"id":"elbow_r","x":10,"y":-82},
+        {"id":"hand_l","x":-18,"y":-44},
+        {"id":"hand_r","x":16,"y":-44},
+        {"id":"pelvis","x":-2,"y":-32},
+        {"id":"bum","x":-2,"y":-8},
+        {"id":"hip_l","x":-2,"y":-8},
+        {"id":"hip_r","x":-2,"y":-8},
+        {"id":"knee_l","x":-10,"y":28},
+        {"id":"knee_r","x":12,"y":34},
+        {"id":"foot_l","x":-16,"y":82},
+        {"id":"foot_r","x":18,"y":88}
+      ]
+    },
+    {
+      "label": "Contact (L)",
+      "nodes": [
+        {"id":"head","x":-2,"y":-158},
+        {"id":"neck","x":-2,"y":-134},
+        {"id":"chest","x":-3,"y":-100},
+        {"id":"shoulder_l","x":-6,"y":-110},
+        {"id":"shoulder_r","x":2,"y":-110},
+        {"id":"elbow_l","x":-30,"y":-76},
+        {"id":"elbow_r","x":24,"y":-82},
+        {"id":"hand_l","x":-46,"y":-40},
+        {"id":"hand_r","x":38,"y":-46},
+        {"id":"pelvis","x":-2,"y":-22},
+        {"id":"bum","x":-2,"y":2},
+        {"id":"hip_l","x":-2,"y":2},
+        {"id":"hip_r","x":-2,"y":2},
+        {"id":"knee_l","x":-32,"y":44},
+        {"id":"knee_r","x":28,"y":56},
+        {"id":"foot_l","x":-50,"y":128},
+        {"id":"foot_r","x":42,"y":130}
+      ]
+    },
+    {
+      "label": "Recoil (L)",
+      "nodes": [
+        {"id":"head","x":-3,"y":-150},
+        {"id":"neck","x":-3,"y":-126},
+        {"id":"chest","x":-4,"y":-94},
+        {"id":"shoulder_l","x":-6,"y":-104},
+        {"id":"shoulder_r","x":0,"y":-104},
+        {"id":"elbow_l","x":-20,"y":-70},
+        {"id":"elbow_r","x":12,"y":-76},
+        {"id":"hand_l","x":-30,"y":-34},
+        {"id":"hand_r","x":22,"y":-40},
+        {"id":"pelvis","x":-3,"y":-14},
+        {"id":"bum","x":-3,"y":10},
+        {"id":"hip_l","x":-3,"y":10},
+        {"id":"hip_r","x":-3,"y":10},
+        {"id":"knee_l","x":-12,"y":54},
+        {"id":"knee_r","x":16,"y":64},
+        {"id":"foot_l","x":-12,"y":124},
+        {"id":"foot_r","x":22,"y":130}
+      ]
+    },
+    {
+      "label": "Passing (L)",
+      "nodes": [
+        {"id":"head","x":-3,"y":-156},
+        {"id":"neck","x":-3,"y":-132},
+        {"id":"chest","x":-3,"y":-98},
+        {"id":"shoulder_l","x":-3,"y":-108},
+        {"id":"shoulder_r","x":-3,"y":-108},
+        {"id":"elbow_l","x":-8,"y":-74},
+        {"id":"elbow_r","x":2,"y":-78},
+        {"id":"hand_l","x":-12,"y":-38},
+        {"id":"hand_r","x":6,"y":-42},
+        {"id":"pelvis","x":-3,"y":-18},
+        {"id":"bum","x":-3,"y":6},
+        {"id":"hip_l","x":-3,"y":6},
+        {"id":"hip_r","x":-3,"y":6},
+        {"id":"knee_l","x":6,"y":58},
+        {"id":"knee_r","x":-2,"y":36},
+        {"id":"foot_l","x":-2,"y":128},
+        {"id":"foot_r","x":4,"y":106}
+      ]
+    },
+    {
+      "label": "Up (L)",
+      "nodes": [
+        {"id":"head","x":-2,"y":-168},
+        {"id":"neck","x":-2,"y":-144},
+        {"id":"chest","x":-1,"y":-108},
+        {"id":"shoulder_l","x":-1,"y":-118},
+        {"id":"shoulder_r","x":-5,"y":-118},
+        {"id":"elbow_l","x":10,"y":-82},
+        {"id":"elbow_r","x":-12,"y":-82},
+        {"id":"hand_l","x":16,"y":-44},
+        {"id":"hand_r","x":-18,"y":-44},
+        {"id":"pelvis","x":-4,"y":-32},
+        {"id":"bum","x":-4,"y":-8},
+        {"id":"hip_l","x":-4,"y":-8},
+        {"id":"hip_r","x":-4,"y":-8},
+        {"id":"knee_l","x":12,"y":34},
+        {"id":"knee_r","x":-10,"y":28},
+        {"id":"foot_l","x":18,"y":88},
+        {"id":"foot_r","x":-16,"y":82}
+      ]
+    }
+  ]
+}
