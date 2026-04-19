@@ -1,7 +1,25 @@
 import { state } from '../core/state.js';
 
+const DISTANCE_SCALE = 2;
+
 let callbacks = null;
 let editingIndex = -1;
+
+export function calculateCurrentDistances(nodes, bones) {
+  const distances = {};
+  bones.forEach(([aId, bId]) => {
+    const a = nodes.find(n => n.id === aId);
+    const b = nodes.find(n => n.id === bId);
+    if (a && b) {
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const actualDist = Math.hypot(dx, dy);
+      const key = [aId, bId].sort().join('-');
+      distances[key] = Math.round(actualDist * DISTANCE_SCALE * 10) / 10;
+    }
+  });
+  return distances;
+}
 
 export function initModals(state, cb) {
   callbacks = cb;
@@ -75,6 +93,8 @@ export function closeSaveModal() {
   document.getElementById('saveModal').classList.remove('open');
   editingIndex = -1;
   document.getElementById('saveModalTitle').textContent = '💾 Save Animation';
+  const updateDistCheck = document.getElementById('updateDistancesCheck');
+  if (updateDistCheck) updateDistCheck.checked = false;
 }
 
 export function getSaveFormData() {
@@ -84,7 +104,8 @@ export function getSaveFormData() {
     description: document.getElementById('animDescInput').value.trim(),
     height: parseInt(document.getElementById('animHeightInput').value) || 180,
     category: document.getElementById('animCategorySelect').value,
-    bodyType: document.getElementById('animBodyTypeSelect').value
+    bodyType: document.getElementById('animBodyTypeSelect').value,
+    updateDistances: document.getElementById('updateDistancesCheck')?.checked || false
   };
 }
 

@@ -28,6 +28,10 @@ export function initSidebar(state, callbacks) {
     state.useIK = e.target.checked;
   });
 
+  document.getElementById('lockLengthsToggle').addEventListener('change', (e) => {
+    state.lockLimbLengths = e.target.checked;
+  });
+
   // Render helper
   function render() {
     if (callbacks.onRender) callbacks.onRender();

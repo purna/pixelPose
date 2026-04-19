@@ -201,6 +201,13 @@ function stopPlayback() {
 
 // ─── SAVE / LOAD ANIMATION ───
 function saveNewAnimation(data) {
+  let constraints = state.constraints;
+  if (data.updateDistances && state.nodes.length > 0 && state.bones.length > 0) {
+    constraints = {
+      ...state.constraints,
+      distances: modals.calculateCurrentDistances(state.nodes, state.bones)
+    };
+  }
   const animData = {
     name: data.name,
     author: data.author,
@@ -210,7 +217,7 @@ function saveNewAnimation(data) {
     bodyType: data.bodyType,
     frames: state.frames,
     bones: state.bones,
-    constraints: state.constraints,
+    constraints: constraints,
     created: Date.now()
   };
   const saved = JSON.parse(localStorage.getItem('poseforge_anims') || '[]');
@@ -228,6 +235,12 @@ function editSavedAnimation(index, data) {
     saved[index].height = data.height;
     saved[index].category = data.category;
     saved[index].bodyType = data.bodyType;
+    if (data.updateDistances && state.nodes.length > 0 && state.bones.length > 0) {
+      saved[index].constraints = {
+        ...saved[index].constraints,
+        distances: modals.calculateCurrentDistances(state.nodes, state.bones)
+      };
+    }
     localStorage.setItem('poseforge_anims', JSON.stringify(saved));
     renderSavedList();
   }

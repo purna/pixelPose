@@ -794,6 +794,16 @@ input[type="checkbox"].toggle:checked::before {
     max-height: 120px;
 }
 
+.save-modal .form-group:has(.toggle) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.save-modal input[type="checkbox"].toggle {
+    margin-left: auto;
+}
+
 .modal-btns {
     display: flex;
     gap: 10px;

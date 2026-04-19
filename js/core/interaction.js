@@ -32,11 +32,15 @@ export function moveDrag(state, dx, dy) {
     dragNode.x += dx;
     dragNode.y += dy;
     solveIK(state);
-  } else if (dragNode.id === 'pelvis') {
+  } else if (state.lockLimbLengths && dragNode.id !== 'pelvis') {
+    dragNode.x += dx;
+    dragNode.y += dy;
+    solveIK(state);
+} else if (dragNode.id === 'pelvis') {
     const movingChildren = state.footAnchor 
       ? state.PELVIS_CHILDREN.filter(id => !state.FOOT_NODES.includes(id))
       : state.PELVIS_CHILDREN;
-      
+        
     state.nodes.forEach(n => {
       if (movingChildren.includes(n.id)) {
         n.x += dx;
@@ -51,6 +55,10 @@ export function moveDrag(state, dx, dy) {
         const f = state.nodes.find(n => n.id === fid);
         if (f) f.y = state.GROUND_Y;
       });
+    }
+    
+    if (state.lockLimbLengths) {
+      solveIK(state);
     }
   } else {
     // Move the dragged node freely (constraints disabled)
