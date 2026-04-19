@@ -119,3 +119,44 @@ export function getCurrentBones() {
 export function getCurrentConstraints() {
   return currentConstraints ? JSON.parse(JSON.stringify(currentConstraints)) : { distances: {}, angles: {} };
 }
+
+// Constrain a node's position to maintain bone distances
+export function constrainDistances(node, x, y, bones, nodes, constraints) {
+  if (!constraints || !constraints.distances) {
+    return { x, y };
+  }
+
+  let constrainedX = x;
+  let constrainedY = y;
+  const radius = NODE_RADIUS;
+
+  bones.forEach(([a, b]) => {
+    const otherId = a === node.id ? b : (b === node.id ? a : null);
+    if (!otherId) return;
+
+    const other = nodes.find(n => n.id === otherId);
+    if (!other) return;
+
+    const key = [node.id, otherId].sort().join('-');
+    const targetDist = constraints.distances[key];
+    if (!targetDist) return;
+
+    const dx = x - other.x;
+    const dy = y - other.y;
+    const dist = Math.hypot(dx, dy);
+    const minDist = targetDist - 2 * radius;
+    const maxDist = targetDist + 2 * radius;
+
+    if (dist < minDist) {
+      const angle = Math.atan2(dy, dx);
+      constrainedX = other.x + Math.cos(angle) * minDist;
+      constrainedY = other.y + Math.sin(angle) * minDist;
+    } else if (dist > maxDist) {
+      const angle = Math.atan2(dy, dx);
+      constrainedX = other.x + Math.cos(angle) * maxDist;
+      constrainedY = other.y + Math.sin(angle) * maxDist;
+    }
+  });
+
+  return { x: constrainedX, y: constrainedY };
+}

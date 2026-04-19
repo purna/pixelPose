@@ -194,10 +194,248 @@
 .save-modal h3 {
     margin: 0 0 20px 0;
     font-size: 1.25rem;
+    font-weight: 600;
     color: var(--text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Modal Inputs - Unified for all modals */
+.modal input[type=text],
+.modal input[type=number],
+.modal select,
+.modal textarea,
+.save-modal input,
+.save-modal select,
+.save-modal textarea {
+    width: 100%;
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal input[type=text]:focus,
+.modal input[type=number]:focus,
+.modal select:focus,
+.modal textarea:focus,
+.save-modal input:focus,
+.save-modal select:focus,
+.save-modal textarea:focus {
+    border-color: #a855f7;
+    box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+}
+
+.modal input::placeholder,
+.save-modal input::placeholder,
+.save-modal textarea::placeholder {
+    color: var(--text-dim);
+    opacity: 0.6;
+}
+
+/* =============================================
+   SAVED ANIMATIONS LIST
+   ============================================= */
+#savedAnimList {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.anim-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background: var(--bg-light);
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.anim-item:hover {
+    background: var(--bg-medium);
+}
+
+.anim-info {
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.anim-name {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+}
+
+/* Card Style Animations */
+.anim-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--bg-light);
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.anim-item:hover {
+    background: var(--bg-medium);
+    border-color: var(--border-color);
+}
+
+.anim-card {
+    flex: 1;
+    min-width: 0;
+}
+
+.anim-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.anim-card-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.anim-card-badge {
+    font-size: 0.55rem;
+    padding: 2px 6px;
+    background: var(--accent-primary);
+    color: var(--bg-darkest);
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.anim-card-meta {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+}
+
+.anim-card-meta .dot {
+    margin: 0 4px;
+}
+
+.anim-card-actions {
+    display: flex;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.anim-item:hover .anim-card-actions {
+    opacity: 1;
+}
+
+.anim-card-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 6px;
+    background: var(--bg-dark);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.anim-card-btn.edit:hover {
+    background: var(--accent-primary);
+    color: var(--bg-darkest);
+}
+
+.anim-card-btn.delete:hover {
+    background: var(--accent-secondary);
+    color: white;
+}
+
+.anim-edit:hover {
+    background: var(--accent-primary);
+    color: var(--bg-darkest);
+}
+
+.anim-del:hover {
+    background: var(--accent-secondary);
+    color: white;
+}
+
+/* Edit Meta Form */
+.edit-meta-form {
+    width: 100%;
+}
+
+.edit-meta-form input,
+.edit-meta-form select,
+.edit-meta-form textarea {
+    width: 100%;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    margin-bottom: 6px;
+}
+
+.edit-meta-form textarea {
+    min-height: 40px;
+    resize: vertical;
+}
+
+.edit-row {
+    display: flex;
+    gap: 6px;
+}
+
+.edit-row input {
+    width: 60px !important;
+    flex: 0 0 60px;
+}
+
+.edit-row select {
+    flex: 1;
+}
+
+.edit-btns {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+}
+
+.btn.small {
+    padding: 4px 10px;
+    font-size: 0.65rem;
 }
 
 .save-modal .form-group {
@@ -304,6 +542,24 @@
     font-size: 0.9rem;
 }
 
-.loading-spinner.active {
-    display: block;
+/* =============================================
+   CHAR COUNT IN LABELS
+   ============================================= */
+.save-modal .form-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.save-modal .char-count {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
+    opacity: 0.7;
 }

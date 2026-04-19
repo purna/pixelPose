@@ -1,1668 +1,587 @@
-// app.js - Main application logic for PoseForge
-import { loadBodyDefinition, getCurrentNodes, getCurrentBones, getCurrentConstraints, NODE_RADIUS } from './skeleton.js';
+import { state } from './core/state.js';
+import { render as doRender } from './core/renderer.js';
+import * as interaction from './core/interaction.js';
+import * as anim from './core/animation.js';
+import * as hierarchy from './core/hierarchy.js';
+import { saveHistory, undo, redo } from './core/history.js';
+import { loadBodyDefinition, getCurrentNodes, getCurrentBones, getCurrentConstraints } from './skeleton.js';
 import Config from './config.js';
-import { TutorialConfig } from './tutorialConfig.js';
-import { HistoryManager } from './historyManager.js';
 
-let tutorialConfig = new TutorialConfig();
-
-// ─── STATE ─────────────────────────────────────────────────────────────
-let nodes = [];
-let bones = [];
-let constraints = {};
-let frames = []; // array of snapshots
-let currentFrame = 0;
-let isPlaying = false;
-let playInterval = null;
-let savedAnimations = [];
-let isDragging = false;
-let dragNode = null;
-let mode = 'move'; // 'move' | 'pan'
-let panStart = null;
-let panOffset = { x: 0, y: 0 };
-let charScale = 1.0;
-let showLabels = true;
-let showGrid = true;
-let showShadow = false;
-let onionSkin = false;
-let currentAnimName = null;
-let currentAnimAuthor = '';
-let currentAnimDescription = '';
-let currentAnimHeight = 180;
-let currentAnimCategory = 'human';
-let currentAnimBodyType = 'adult-male';
-let footAnchor = false;
-let charColors = {
-  armL: '#0055aa',
-  armR: '#005533',
-  legL: '#0044cc',
-  legR: '#006644',
-  body: '#1a3344'
-};
-let tutorialEnabled = false;
-let lockLimbLengths = false;
-let showBoundingBox = false;
-let spriteFrameSize = 300;
-let spriteBoxX = 0, spriteBoxY = 150;
-let spriteBoxWidth = 375, spriteBoxHeight = 375;
-let isResizingBox = false;
-let resizeBoxHandle = null;
-let isDraggingBox = false;
-let resizePrevW = null;
-const BOX_HANDLE_SIZE = 10;
-let historyManager = new HistoryManager();
-
-const PELVIS_CHILDREN = ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head',
-  'elbow_l', 'hand_l', 'elbow_r', 'hand_r',
-  'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'];
-const FOOT_NODES = ['foot_l', 'foot_r'];
-const GROUND_Y = 130;
-
-const NODE_HIERARCHY = {
-  'shoulder_l': ['elbow_l', 'hand_l'],
-  'shoulder_r': ['elbow_r', 'hand_r'],
-  'elbow_l': ['hand_l'],
-  'elbow_r': ['hand_r'],
-  'hip_l': ['knee_l', 'foot_l'],
-  'hip_r': ['knee_r', 'foot_r'],
-  'knee_l': ['foot_l'],
-  'knee_r': ['foot_r'],
-  'neck': ['head'],
-  'chest': ['shoulder_l', 'shoulder_r', 'neck', 'head', 'elbow_l', 'hand_l', 'elbow_r', 'hand_r'],
-  'bum': ['hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'],
-  'pelvis': ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head', 'elbow_l', 'hand_l', 'elbow_r', 'hand_r', 'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r']
-};
-
-let selectedNodes = [];
+import * as sidebar from './ui/sidebar.js';
+import * as timeline from './ui/timeline.js';
+import * as modals from './ui/modals.js';
+import * as importExport from './ui/importExport.js';
 
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
-// ─── RESIZE ────────────────────────────────────────────────────────────
+// ─── HELPERS ───
+function screenToWorld(sx, sy) {
+  const rect = canvas.getBoundingClientRect();
+  const cx = canvas.width / 2 + state.view.panOffset.x;
+  const cy = canvas.height / 2 + state.view.panOffset.y;
+  return {
+    x: (sx - rect.left - cx) / state.view.charScale,
+    y: (sy - rect.top - cy) / state.view.charScale
+  };
+}
+
+function render() {
+  doRender(ctx, canvas, state);
+}
+
 function resize() {
   const wrap = document.getElementById('canvasWrap');
   canvas.width = wrap.clientWidth;
   canvas.height = wrap.clientHeight;
-  render();
-}
-window.addEventListener('resize', resize);
-
-// ─── SNAPSHOT ──────────────────────────────────────────────────────────
-function snapshotNodes() {
-  return JSON.parse(JSON.stringify(nodes));
 }
 
-function restoreNodes(snap) {
-  nodes = JSON.parse(JSON.stringify(snap));
-}
+// ─── BODY LOADING ───
+async function loadBody(bodyType) {
+  const bodyData = await loadBodyDefinition(bodyType);
+  if (!bodyData) return;
 
-function saveCurrentToFrame() {
-  if (frames.length === 0) return;
-  frames[currentFrame].nodes = snapshotNodes();
-  renderThumb(currentFrame);
-}
+  state.nodes = getCurrentNodes();
+  state.bones = getCurrentBones();
+  state.constraints = getCurrentConstraints();
+  state.meta.bodyType = bodyType;
+  state.meta.height = bodyData.height || 180;
+  if (!state.meta.name) state.meta.name = bodyData.name;
 
-function gotoFrame(idx) {
-  if (frames.length === 0) return;
-  saveCurrentToFrame();
-  currentFrame = Math.max(0, Math.min(idx, frames.length - 1));
-  restoreNodes(frames[currentFrame].nodes);
-  updateTimelineUI();
-  render();
-  updateFrameBadge();
-}
-
-// ─── FRAMES ────────────────────────────────────────────────────────────
-function addFrame() {
-  saveCurrentToFrame();
-  const snap = snapshotNodes();
-  frames.push({ nodes: snap, label: `Frame ${frames.length + 1}` });
-  currentFrame = frames.length - 1;
-  updateTimelineUI();
-  renderThumb(currentFrame);
-  updateFrameBadge();
-  render();
-}
-
-function dupFrame() {
-  if (frames.length === 0) return;
-  saveCurrentToFrame();
-  const snap = snapshotNodes();
-  frames.splice(currentFrame + 1, 0, {
-    nodes: JSON.parse(JSON.stringify(snap)),
-    label: `Frame ${frames.length + 1}`
-  });
-  currentFrame = currentFrame + 1;
-  updateTimelineUI();
-  render();
-  updateFrameBadge();
-}
-
-function deleteFrame() {
-  if (frames.length <= 1) return;
-  frames.splice(currentFrame, 1);
-  currentFrame = Math.min(currentFrame, frames.length - 1);
-  restoreNodes(frames[currentFrame].nodes);
-  updateTimelineUI();
-  render();
-  updateFrameBadge();
-}
-
-function updateFrameBadge() {
-  document.getElementById('frameBadge').textContent =
-    `Frame ${currentFrame + 1} / ${frames.length}`;
-}
-
-// ─── TIMELINE UI ───────────────────────────────────────────────────────
-function updateTimelineUI() {
-  const tl = document.getElementById('timeline');
-  tl.innerHTML = '';
-  frames.forEach((f, i) => {
-    const item = document.createElement('div');
-    item.className = 'frame-item' + (i === currentFrame ? ' current' : '');
-    item.dataset.idx = i;
-
-    const num = document.createElement('span');
-    num.className = 'frame-num';
-    num.textContent = i + 1;
-
-    const thumb = document.createElement('canvas');
-    thumb.className = 'frame-thumb';
-    thumb.width = 50;
-    thumb.height = 36;
-    thumb.id = `thumb-${i}`;
-
-    const label = document.createElement('span');
-    label.className = 'frame-label';
-    label.textContent = f.label;
-
-    const del = document.createElement('button');
-    del.className = 'frame-del';
-    del.textContent = '×';
-    del.onclick = (e) => { e.stopPropagation(); if (frames.length > 1) { frames.splice(i,1); if(currentFrame >= frames.length) currentFrame = frames.length-1; restoreNodes(frames[currentFrame].nodes); updateTimelineUI(); render(); updateFrameBadge(); } };
-
-    item.appendChild(num);
-    item.appendChild(thumb);
-    item.appendChild(label);
-    item.appendChild(del);
-    item.addEventListener('click', () => gotoFrame(i));
-    tl.appendChild(item);
-  });
-
-  frames.forEach((_, i) => renderThumb(i));
-}
-
-function renderThumb(idx) {
-  const tc = document.getElementById(`thumb-${idx}`);
-  if (!tc) return;
-  const tctx = tc.getContext('2d');
-  const w = tc.width, h = tc.height;
-  tctx.clearRect(0, 0, w, h);
-  tctx.fillStyle = '#0a0a14';
-  tctx.fillRect(0, 0, w, h);
-
-  const snap = frames[idx].nodes;
-  const cx = w / 2, cy = h / 2;
-  const sc = 0.18 * charScale;
-
-  tctx.save();
-  tctx.translate(cx, cy);
-  tctx.scale(sc, sc);
-
-  // draw shaped limbs in thumbnail
-  function thumbLimb(ax, ay, bx, by, wa, wb, color) {
-    const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy);
-    if (len < 1) return;
-    const nx = -dy / len, ny = dx / len;
-    tctx.beginPath();
-    tctx.moveTo(ax + nx * wa, ay + ny * wa);
-    tctx.lineTo(bx + nx * wb, by + ny * wb);
-    tctx.lineTo(bx - nx * wb, by - ny * wb);
-    tctx.lineTo(ax - nx * wa, ay - ny * wa);
-    tctx.closePath();
-    tctx.fillStyle = color;
-    tctx.fill();
-  }
-  const sn = id => snap.find(n => n.id === id);
-  // back leg
-  if (sn('hip_r') && sn('knee_r')) thumbLimb(sn('hip_r').x, sn('hip_r').y, sn('knee_r').x, sn('knee_r').y, 4, 3, '#002211');
-  if (sn('knee_r') && sn('foot_r')) thumbLimb(sn('knee_r').x, sn('knee_r').y, sn('foot_r').x, sn('foot_r').y, 3, 2, '#001108');
-  // back arm
-  if (sn('shoulder_r') && sn('elbow_r')) thumbLimb(sn('shoulder_r').x, sn('shoulder_r').y, sn('elbow_r').x, sn('elbow_r').y, 3, 2, '#002211');
-  if (sn('elbow_r') && sn('hand_r')) thumbLimb(sn('elbow_r').x, sn('elbow_r').y, sn('hand_r').x, sn('hand_r').y, 2, 1, '#001108');
-  // torso
-  if (sn('chest') && sn('pelvis')) thumbLimb(sn('chest').x, sn('chest').y, sn('pelvis').x, sn('pelvis').y, 8, 6, '#0d2233');
-  if (sn('pelvis') && sn('bum')) thumbLimb(sn('pelvis').x, sn('pelvis').y, sn('bum').x, sn('bum').y, 6, 7, '#1a3344');
-  if (sn('neck') && sn('chest')) thumbLimb(sn('neck').x, sn('neck').y, sn('chest').x, sn('chest').y, 3, 5, '#0d2233');
-  // front leg
-  if (sn('hip_l') && sn('knee_l')) thumbLimb(sn('hip_l').x, sn('hip_l').y, sn('knee_l').x, sn('knee_l').y, 5, 4, '#0044cc');
-  if (sn('knee_l') && sn('foot_l')) thumbLimb(sn('knee_l').x, sn('knee_l').y, sn('foot_l').x, sn('foot_l').y, 4, 2, '#0044cc');
-  // front arm
-  if (sn('shoulder_l') && sn('elbow_l')) thumbLimb(sn('shoulder_l').x, sn('shoulder_l').y, sn('elbow_l').x, sn('elbow_l').y, 4, 3, '#0055aa');
-  if (sn('elbow_l') && sn('hand_l')) thumbLimb(sn('elbow_l').x, sn('elbow_l').y, sn('hand_l').x, sn('hand_l').y, 3, 2, '#0055aa');
-  // head
-  if (sn('head')) {
-    tctx.beginPath();
-    tctx.arc(sn('head').x, sn('head').y, 10, 0, Math.PI * 2);
-    tctx.fillStyle = '#0d2233';
-    tctx.fill();
-    tctx.strokeStyle = '#00ffcc';
-    tctx.lineWidth = 1;
-    tctx.stroke();
-  }
-  tctx.restore();
-}
-
-// ─── RENDER ────────────────────────────────────────────────────────────
-function render() {
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0, 0, w, h);
-
-  // Background
-  ctx.fillStyle = '#0a0a0f';
-  ctx.fillRect(0, 0, w, h);
-
-  const cx = w / 2 + panOffset.x;
-  const cy = h / 2 + panOffset.y;
-
-  ctx.save();
-  ctx.translate(cx, cy);
-
-  // Grid
-  if (showGrid) {
-    ctx.strokeStyle = 'rgba(40,40,60,0.8)';
-    ctx.lineWidth = 1;
-    const step = 40;
-    const range = 1200;
-    for (let x = -range; x <= range; x += step) {
-      ctx.beginPath(); ctx.moveTo(x, -range); ctx.lineTo(x, range); ctx.stroke();
-    }
-    for (let y = -range; y <= range; y += step) {
-      ctx.beginPath(); ctx.moveTo(-range, y); ctx.lineTo(range, y); ctx.stroke();
-    }
-    // Axes
-    ctx.strokeStyle = 'rgba(0,255,204,0.1)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(-range, 0); ctx.lineTo(range, 0); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, -range); ctx.lineTo(0, range); ctx.stroke();
-  }
-
-  // Ground line
-  const groundY = 145 * charScale;
-  ctx.strokeStyle = 'rgba(0,255,204,0.15)';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([6, 8]);
-  ctx.beginPath(); ctx.moveTo(-300, groundY); ctx.lineTo(300, groundY); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Floor contact line (solid white)
-  const floorY = 150 * charScale;
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.moveTo(-400, floorY); ctx.lineTo(400, floorY); ctx.stroke();
-
-  // Ground shadow
-  if (showShadow) {
-    ctx.save();
-    ctx.scale(charScale, charScale);
-    ctx.beginPath();
-    ctx.ellipse(0, 142, 45, 8, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0,255,204,0.15)';
-    ctx.fill();
-    ctx.restore();
-  }
-
-  ctx.save();
-  ctx.scale(charScale, charScale);
-
-  // Onion skin
-  if (onionSkin && currentFrame > 0 && frames.length > 1) {
-    const prevSnap = frames[currentFrame - 1].nodes;
-    drawSkeleton(ctx, prevSnap, 0.15, '#7b61ff');
-  }
-
-  // Main skeleton
-  drawSkeleton(ctx, nodes, 1, null);
-
-  // Sprite preview bounding box
-  if (showBoundingBox) {
-    const boxW = spriteBoxWidth / charScale;
-    const boxH = spriteBoxHeight / charScale;
-    const boxX = spriteBoxX / charScale;
-    const boxBottom = spriteBoxY / charScale;
-    const top = boxBottom - boxH;
+  // Compute dynamic hierarchy from bones
+  if (state.bones.length > 0) {
+    const rootNode = state.nodes.find(n => n.id === 'pelvis') ? 'pelvis' : state.bones[0][0];
+    const tree = hierarchy.buildTree(state.bones, rootNode);
+    const hierarchyMap = hierarchy.computeAllDescendants(tree.children);
+    state.currentHierarchy = hierarchyMap;
+    state.currentPelvisChildren = hierarchyMap[rootNode] ? [...hierarchyMap[rootNode]] : [];
     
-    ctx.strokeStyle = '#00ffcc';
-    ctx.lineWidth = 2 / charScale;
-    ctx.strokeRect(boxX - boxW/2, top, boxW, boxH);
+    const isHuman = ['adult-male', 'adult-female', 'child'].includes(bodyType);
+    state.currentFootNodes = [];
+    Object.keys(tree.children).forEach(node => {
+      const children = tree.children[node];
+      if (!children || children.length === 0) {
+        if (node.startsWith('foot')) state.currentFootNodes.push(node);
+        else if (node.startsWith('hand') && !isHuman) state.currentFootNodes.push(node);
+        else if (node.includes('paw')) state.currentFootNodes.push(node);
+      }
+    });
+    state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
+  }
+
+  anim.initFrames(state);
+  timeline.updateTimeline();
+  timeline.updateFrameBadge();
+  sidebar.updateAnimationList(bodyType);
+  saveHistory();
+  render();
+}
+
+// ─── ANIMATION LOADING ───
+async function loadAnimationPreset(presetName) {
+  if (!presetName) return;
+  try {
+    let filePath = presetName;
+    if (!filePath.endsWith('.json')) filePath = presetName + '.json';
+    if (!filePath.includes('/')) filePath = 'data/animations/' + filePath;
     
-    const handleSize = 12 / charScale;
-    const handleHitSize = 30 / charScale;
-    ctx.fillStyle = '#00ffcc';
-    const handles = [
-      { x: boxX - boxW/2, y: top },
-      { x: boxX + boxW/2, y: top },
-      { x: boxX - boxW/2, y: top + boxH },
-      { x: boxX + boxW/2, y: top + boxH },
-      { x: boxX, y: top },
-      { x: boxX, y: top + boxH },
-      { x: boxX - boxW/2, y: top + boxH },
-      { x: boxX + boxW/2, y: top + boxH },
-    ];
-    handles.forEach(h => {
-      ctx.fillRect(h.x - handleSize/2, h.y - handleSize/2, handleSize, handleSize);
-    });
-  }
+    const resp = await fetch(filePath);
+    if (!resp.ok) throw new Error('Not found');
+    const animData = await resp.json();
 
-  ctx.restore();
-  ctx.restore();
-}
+    // Load bones & constraints
+    if (animData.bones && animData.bones.length > 0) {
+      state.bones = animData.bones;
+    }
+    if (animData.constraints) {
+      state.constraints = animData.constraints;
+    }
 
-function drawSkeleton(ctx, nodeList, alpha, overrideColor) {
-  const ghost = !!overrideColor;
+    // Meta
+    state.meta.name = animData.name || presetName;
+    state.meta.author = animData.author || '';
+    state.meta.description = animData.description || '';
+    state.meta.height = animData.height || 180;
+    state.meta.category = animData.category || 'human';
+    state.meta.bodyType = animData.bodyType || state.meta.bodyType;
 
-  // Helper: get node by id
-  const N = id => nodeList.find(n => n.id === id);
-
-  // --- Draw tapered limb segment (thick at top, thin at bottom) ---
-  function drawLimb(ax, ay, bx, by, widthA, widthB, color, alphaVal) {
-    ctx.globalAlpha = alphaVal;
-    const dx = bx - ax, dy = by - ay;
-    const len = Math.hypot(dx, dy);
-    if (len < 1) return;
-    const nx = -dy / len, ny = dx / len; // normal
-
-    ctx.beginPath();
-    ctx.moveTo(ax + nx * widthA, ay + ny * widthA);
-    ctx.lineTo(bx + nx * widthB, by + ny * widthB);
-    ctx.lineTo(bx - nx * widthB, by - ny * widthB);
-    ctx.lineTo(ax - nx * widthA, ay - ny * widthA);
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-
-    // Outline
-    ctx.strokeStyle = 'rgba(0,0,0,0.4)';
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-  }
-
-  // --- Color scheme ---
-  const C = {
-    body:    ghost ? overrideColor : charColors.body,
-    torso:   ghost ? overrideColor : '#0d2233',
-    armL:    ghost ? overrideColor : charColors.armL,
-    armR:    ghost ? overrideColor : charColors.armR,
-    legL:    ghost ? overrideColor : charColors.legL,
-    legR:    ghost ? overrideColor : charColors.legR,
-    head:    ghost ? overrideColor : '#00ffcc',
-    joint:   ghost ? overrideColor : '#00ffcc',
-    jointL:  ghost ? overrideColor : '#0088ff',
-    jointR:  ghost ? overrideColor : '#00ff88',
-  };
-
-  const baseAlpha = alpha;
-
-  // ---- BACK LEG (right = farther in side view, draw first) ----
-  const hip_r = N('hip_r'), knee_r = N('knee_r'), foot_r = N('foot_r');
-  if (hip_r && knee_r) drawLimb(hip_r.x, hip_r.y, knee_r.x, knee_r.y, 7, 5, ghost ? overrideColor : '#003322', baseAlpha * 0.7);
-  if (knee_r && foot_r) drawLimb(knee_r.x, knee_r.y, foot_r.x, foot_r.y, 5, 3, ghost ? overrideColor : '#002211', baseAlpha * 0.7);
-
-  // ---- BACK ARM (right = back arm) ----
-  const shr = N('shoulder_r'), elr = N('elbow_r'), handr = N('hand_r');
-  if (shr && elr) drawLimb(shr.x, shr.y, elr.x, elr.y, 5, 4, ghost ? overrideColor : '#003311', baseAlpha * 0.65);
-  if (elr && handr) drawLimb(elr.x, elr.y, handr.x, handr.y, 4, 3, ghost ? overrideColor : '#002200', baseAlpha * 0.65);
-
-  // ---- TORSO ----
-  const chest = N('chest'), pelvis = N('pelvis'), bum = N('bum');
-  if (chest && pelvis) drawLimb(chest.x, chest.y, pelvis.x, pelvis.y, 14, 11, C.torso, baseAlpha);
-  if (pelvis && bum)   drawLimb(pelvis.x, pelvis.y, bum.x, bum.y, 11, 13, C.body, baseAlpha);
-
-  // Neck line
-  const neck = N('neck');
-  if (chest && neck) drawLimb(neck.x, neck.y, chest.x, chest.y, 5, 7, C.body, baseAlpha);
-
-  // ---- FRONT LEG (left) ----
-  const hip_l = N('hip_l'), knee_l = N('knee_l'), foot_l = N('foot_l');
-  if (hip_l && knee_l) drawLimb(hip_l.x, hip_l.y, knee_l.x, knee_l.y, 8, 6, C.legL, baseAlpha);
-  if (knee_l && foot_l) drawLimb(knee_l.x, knee_l.y, foot_l.x, foot_l.y, 6, 3, C.legL, baseAlpha);
-
-  // ---- FRONT ARM (left) ----
-  const shl = N('shoulder_l'), ell = N('elbow_l'), handl = N('hand_l');
-  if (shl && ell) drawLimb(shl.x, shl.y, ell.x, ell.y, 6, 5, C.armL, baseAlpha);
-  if (ell && handl) drawLimb(ell.x, ell.y, handl.x, handl.y, 5, 3, C.armL, baseAlpha);
-
-  // ---- HEAD ----
-  const head = N('head');
-  if (head && !ghost) {
-    ctx.globalAlpha = baseAlpha;
-    // Head circle
-    ctx.beginPath();
-    ctx.arc(head.x, head.y, 18, 0, Math.PI * 2);
-    ctx.fillStyle = '#0d2233';
-    ctx.fill();
-    ctx.strokeStyle = '#00ffcc';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // Eye dot
-    ctx.beginPath();
-    ctx.arc(head.x - 5, head.y - 2, 3, 0, Math.PI * 2);
-    ctx.fillStyle = '#00ffcc';
-    ctx.fill();
-
-    // Nose nub
-    ctx.beginPath();
-    ctx.arc(head.x - 18, head.y + 4, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#00ffcc';
-    ctx.fill();
-  } else if (head && ghost) {
-    ctx.globalAlpha = baseAlpha;
-    ctx.beginPath();
-    ctx.arc(head.x, head.y, 18, 0, Math.PI * 2);
-    ctx.strokeStyle = overrideColor;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-
-  // ---- JOINT DOTS (only on main render, not ghost) ----
-  if (!ghost) {
-    nodeList.forEach(n => {
-      const isPrimarySelected = dragNode && dragNode.id === n.id;
-      const isMultiSelected = selectedNodes.some(sn => sn.id === n.id);
-      const isSelected = isPrimarySelected || isMultiSelected;
-      if (n.id === 'head') return; // already drawn
-
-      let jColor = C.joint;
-      if (n.id.includes('_l')) jColor = C.jointL;
-      else if (n.id.includes('_r')) jColor = C.jointR;
-
-      const r = isSelected ? NODE_RADIUS + 2 : NODE_RADIUS - 2;
-
-      if (isSelected) {
-        ctx.globalAlpha = 0.25;
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, r + 6, 0, Math.PI * 2);
-        ctx.fillStyle = '#00ffcc';
-        ctx.fill();
-      }
-
-      ctx.globalAlpha = alpha;
-      ctx.beginPath();
-      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
-      ctx.fillStyle = isSelected ? '#ffffff' : jColor;
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    });
-
-    // Labels
-    if (showLabels) {
-      nodeList.forEach(n => {
-        ctx.globalAlpha = 0.55;
-        ctx.fillStyle = '#aabbcc';
-        ctx.font = '9px Space Mono, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(n.label, n.x, n.y - NODE_RADIUS - 4);
+    // Merge node labels from current skeleton
+    state.frames = [];
+    animData.frames.forEach((frameData, idx) => {
+      const animNodes = JSON.parse(JSON.stringify(frameData.nodes));
+      const merged = mergeNodeLabels(state.nodes, animNodes);
+      state.frames.push({
+        nodes: merged,
+        label: frameData.label || `Frame ${idx + 1}`
       });
-    }
-  }
-
-  ctx.globalAlpha = 1;
-}
-
-// ─── REMOVED CONSTRAINTS ──────────────────────────────────────────────
-
-// ─── WORLD ↔ SCREEN COORDS ────────────────────────────────────────────
-function screenToWorld(sx, sy) {
-  const w = canvas.width, h = canvas.height;
-  const cx = w / 2 + panOffset.x;
-  const cy = h / 2 + panOffset.y;
-  let dx = sx - cx;
-  let dy = sy - cy;
-  return { x: dx / charScale, y: dy / charScale };
-}
-
-// ─── HIT TEST ─────────────────────────────────────────────────────────
-function hitNode(wx, wy) {
-  let closest = null, minDist = NODE_RADIUS * 2.5;
-  nodes.forEach(n => {
-    const d = Math.hypot(n.x - wx, n.y - wy);
-    if (d < minDist) { minDist = d; closest = n; }
-  });
-  return closest;
-}
-
-// ─── MOUSE / TOUCH ────────────────────────────────────────────────────
-function getPos(e) {
-  const rect = canvas.getBoundingClientRect();
-  if (e.touches) {
-    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-  }
-  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-}
-
-canvas.addEventListener('mousedown', startInteract);
-canvas.addEventListener('touchstart', startInteract, { passive: true });
-
-canvas.addEventListener('mousemove', doInteract);
-canvas.addEventListener('touchmove', doInteract, { passive: false });
-
-canvas.addEventListener('mouseup', endInteract);
-canvas.addEventListener('touchend', endInteract);
-canvas.addEventListener('mouseleave', endInteract);
-
-function hitBoxHandle(wx, wy) {
-  const boxW = spriteBoxWidth / charScale;
-  const boxH = spriteBoxHeight / charScale;
-  const boxX = spriteBoxX / charScale;
-  const boxBottom = spriteBoxY / charScale;
-  const top = boxBottom - boxH;
-  const left = boxX - boxW/2;
-  const handleHitSize = 30 / charScale;
-  
-  const handles = [
-    { id: 'top', x: boxX, y: top },
-    { id: 'bottom', x: boxX, y: top + boxH },
-    { id: 'left', x: left, y: boxBottom },
-    { id: 'right', x: left + boxW, y: boxBottom },
-    { id: 'top-left', x: left, y: top },
-    { id: 'top-right', x: left + boxW, y: top },
-    { id: 'bottom-left', x: left, y: top + boxH },
-    { id: 'bottom-right', x: left + boxW, y: top + boxH },
-  ];
-  
-  for (const h of handles) {
-    if (Math.abs(wx - h.x) < handleHitSize && Math.abs(wy - h.y) < handleHitSize) {
-      return h.id;
-    }
-  }
-  return null;
-}
-
-function hitBoxBody(wx, wy) {
-  const boxW = spriteBoxWidth / charScale;
-  const boxH = spriteBoxHeight / charScale;
-  const boxX = spriteBoxX / charScale;
-  const boxBottom = spriteBoxY / charScale;
-  const top = boxBottom - boxH;
-  const left = boxX - boxW/2;
-  
-  return wx >= left && wx <= left + boxW && wy >= top && wy <= top + boxH;
-}
-
-let boxDragStartX = 0;
-let boxDragStartY = 0;
-let boxStartX = 0;
-let boxStartY = 0;
-
-function startInteract(e) {
-  const pos = getPos(e);
-  if (mode === 'pan') {
-    panStart = { x: pos.x - panOffset.x, y: pos.y - panOffset.y };
-    isDragging = true;
-    return;
-  }
-  
-  if (showBoundingBox) {
-    const w = screenToWorld(pos.x, pos.y);
-    const handle = hitBoxHandle(w.x, w.y);
-    if (handle) {
-      isResizingBox = true;
-      resizeBoxHandle = handle;
-      resizePrevW = null;
-      isDragging = true;
-      return;
-    }
-    if (hitBoxBody(w.x, w.y)) {
-      isDraggingBox = true;
-      boxDragStartX = w.x;
-      boxDragStartY = w.y;
-      boxStartX = spriteBoxX;
-      boxStartY = spriteBoxY;
-      isDragging = true;
-      return;
-    }
-  }
-  
-  const w = screenToWorld(pos.x, pos.y);
-  const clickedNode = hitNode(w.x, w.y);
-  
-  if (clickedNode) {
-    if (e.shiftKey) {
-      const idx = selectedNodes.findIndex(n => n.id === clickedNode.id);
-      if (idx >= 0) {
-        selectedNodes.splice(idx, 1);
-      } else {
-        selectedNodes.push(clickedNode);
-      }
-    } else {
-      const alreadySelected = selectedNodes.some(n => n.id === clickedNode.id);
-      if (alreadySelected && selectedNodes.length > 1) {
-        // Keep all selected when clicking on one of already selected nodes
-      } else {
-        selectedNodes = [clickedNode];
-      }
-    }
-    dragNode = clickedNode;
-    isDragging = true;
-    updateNodeInfo(clickedNode);
-  } else {
-    selectedNodes = [];
-  }
-}
-
-function doInteract(e) {
-  if (e.cancelable) e.preventDefault();
-  if (!isDragging) return;
-  const pos = getPos(e);
-  if (mode === 'pan') {
-    panOffset.x = pos.x - panStart.x;
-    panOffset.y = pos.y - panStart.y;
-    render();
-    return;
-  }
-  
-  if (isResizingBox) {
-    const w = screenToWorld(pos.x, pos.y);
-    if (resizePrevW) {
-      const dx = (w.x - resizePrevW.x) * charScale;
-      const dy = (w.y - resizePrevW.y) * charScale;
-      
-      if (resizeBoxHandle === 'top') {
-        const newH = Math.max(50, spriteBoxHeight - dy);
-        spriteBoxHeight = newH;
-      } else if (resizeBoxHandle === 'left') {
-        const newW = Math.max(50, spriteBoxWidth + dx);
-        spriteBoxX -= (newW - spriteBoxWidth) / 2;
-        spriteBoxWidth = newW;
-      } else if (resizeBoxHandle === 'right') {
-        const newW = Math.max(50, spriteBoxWidth + dx);
-        spriteBoxX += (newW - spriteBoxWidth) / 2;
-        spriteBoxWidth = newW;
-      } else if (resizeBoxHandle === 'top-left') {
-        const newW = Math.max(50, spriteBoxWidth + dx);
-        const newH = Math.max(50, spriteBoxHeight - dy);
-        spriteBoxX -= (newW - spriteBoxWidth) / 2;
-        spriteBoxWidth = newW;
-        spriteBoxHeight = newH;
-      } else if (resizeBoxHandle === 'top-right') {
-        const newW = Math.max(50, spriteBoxWidth - dx);
-        const newH = Math.max(50, spriteBoxHeight - dy);
-        spriteBoxX += (newW - spriteBoxWidth) / 2;
-        spriteBoxWidth = newW;
-        spriteBoxHeight = newH;
-      }
-      
-      document.getElementById('spriteFrameSize').value = Math.max(spriteBoxWidth, spriteBoxHeight);
-      document.getElementById('spriteFrameSizeVal').textContent = Math.round(Math.max(spriteBoxWidth, spriteBoxHeight));
-    }
-    resizePrevW = { x: w.x, y: w.y };
-    render();
-    return;
-  }
-  
-  if (isDraggingBox) {
-    const w = screenToWorld(pos.x, pos.y);
-    spriteBoxX += w.x - boxDragStartX;
-    spriteBoxY += w.y - boxDragStartY;
-    boxDragStartX = w.x;
-    boxDragStartY = w.y;
-    render();
-    return;
-  }
-  
-  if (!dragNode) return;
-  const w = screenToWorld(pos.x, pos.y);
-  const dx = w.x - dragNode.x;
-  const dy = w.y - dragNode.y;
-
-  if (dragNode.id === 'pelvis') {
-    const movingChildren = footAnchor 
-      ? PELVIS_CHILDREN.filter(id => !FOOT_NODES.includes(id))
-      : PELVIS_CHILDREN;
-    nodes.forEach(n => {
-      if (movingChildren.includes(n.id)) {
-        n.x += dx;
-        n.y += dy;
-      }
     });
-    dragNode.x = w.x;
-    dragNode.y = w.y;
-    if (footAnchor) {
-      FOOT_NODES.forEach(fid => {
-        const f = nodes.find(n => n.id === fid);
-        if (f) f.y = GROUND_Y;
-      });
-    }
-  } else {
-    const constrained = constrainDistances(dragNode, w.x, w.y);
-    dragNode.x = constrained.x;
-    dragNode.y = constrained.y;
-    if (NODE_HIERARCHY[dragNode.id]) {
-      NODE_HIERARCHY[dragNode.id].forEach(childId => {
-        const child = nodes.find(n => n.id === childId);
-        if (child) {
-          child.x += dx;
-          child.y += dy;
+
+    state.currentFrame = 0;
+    state.nodes = JSON.parse(JSON.stringify(state.frames[0].nodes));
+    
+    // Recompute hierarchy from bones (already in state.bones)
+    if (state.bones.length > 0) {
+      const rootNode = state.nodes.find(n => n.id === 'pelvis') ? 'pelvis' : state.bones[0][0];
+      const tree = hierarchy.buildTree(state.bones, rootNode);
+      const hierarchyMap = hierarchy.computeAllDescendants(tree.children);
+      state.currentHierarchy = hierarchyMap;
+      state.currentPelvisChildren = hierarchyMap[rootNode] || [];
+      const isHuman = ['adult-male', 'adult-female', 'child'].includes(state.meta.bodyType);
+      state.currentFootNodes = [];
+      Object.keys(tree.children).forEach(node => {
+        const children = tree.children[node];
+        if (!children || children.length === 0) {
+          if (node.startsWith('foot')) state.currentFootNodes.push(node);
+          else if (node.startsWith('hand') && !isHuman) state.currentFootNodes.push(node);
+          else if (node.includes('paw')) state.currentFootNodes.push(node);
         }
       });
+      state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
     }
-    selectedNodes.forEach(n => {
-      if (n.id !== dragNode.id) {
-        n.x += dx;
-        n.y += dy;
-      }
-    });
+
+    timeline.updateTimeline();
+    timeline.updateFrameBadge();
+    sidebar.updateAnimationList(state.meta.bodyType);
+    saveHistory();
+    render();
+  } catch (err) {
+    console.error('Error loading animation:', err);
+    alert('Failed to load animation');
   }
-  updateNodeInfo(dragNode);
+}
+
+function mergeNodeLabels(sourceNodes, targetNodes) {
+  const labelMap = {};
+  sourceNodes.forEach(n => { if (n.id && n.label) labelMap[n.id] = n.label; });
+  targetNodes.forEach(n => { 
+    if (n.id && labelMap[n.id] && !n.label) n.label = labelMap[n.id]; 
+  });
+  return targetNodes;
+}
+
+// ─── FRAME MANAGEMENT ───
+function deleteFrame(index) {
+  if (state.frames.length <= 1) return;
+  state.frames.splice(index, 1);
+  if (state.currentFrame >= state.frames.length) {
+    state.currentFrame = state.frames.length - 1;
+  }
+  state.nodes = JSON.parse(JSON.stringify(state.frames[state.currentFrame].nodes));
+  timeline.updateTimeline();
+  timeline.updateFrameBadge();
+  saveHistory();
   render();
 }
 
-function endInteract() {
-  const wasResizingBox = isResizingBox;
-  const wasDraggingBox = isDraggingBox;
+function startPlayback() {
+  state.playback.isPlaying = true;
+  document.getElementById('playBadge').style.display = 'block';
+  document.getElementById('playBtn').textContent = '⏸';
   
-  if (isDragging && (dragNode || wasResizingBox || wasDraggingBox)) {
-    saveCurrentToFrame();
-    historyManager.saveState();
-    renderThumb(currentFrame);
-  }
-  isDragging = false;
-  dragNode = null;
-  isResizingBox = false;
-  isDraggingBox = false;
-  resizeBoxHandle = null;
-  resizePrevW = null;
-  panStart = null;
-}
-
-function constrainDistances(movedNode, newX, newY) {
-  if (!lockLimbLengths || !bones.length) return { x: newX, y: newY };
-  
-  const distances = constraints.distances || {};
-  const result = { x: newX, y: newY };
-  
-  const connectedBones = bones.filter(b => b[0] === movedNode.id || b[1] === movedNode.id);
-  
-  for (const bone of connectedBones) {
-    const otherId = bone[0] === movedNode.id ? bone[1] : bone[0];
-    const other = nodes.find(n => n.id === otherId);
-    if (!other) continue;
-    
-    const boneKey = `${movedNode.id}-${otherId}`;
-    const reverseKey = `${otherId}-${movedNode.id}`;
-    const constraint = distances[boneKey] || distances[reverseKey];
-    
-    if (!constraint || typeof constraint === 'number') continue;
-    
-    const minDist = constraint.min || constraint.default * 0.8;
-    const maxDist = constraint.max || constraint.default * 1.2;
-    
-    const currentDist = Math.hypot(result.x - other.x, result.y - other.y);
-    
-    if (currentDist < minDist) {
-      const angle = Math.atan2(result.y - other.y, result.x - other.x);
-      result.x = other.x + Math.cos(angle) * minDist;
-      result.y = other.y + Math.sin(angle) * minDist;
-    } else if (currentDist > maxDist) {
-      const angle = Math.atan2(result.y - other.y, result.x - other.x);
-      result.x = other.x + Math.cos(angle) * maxDist;
-      result.y = other.y + Math.sin(angle) * maxDist;
+  const interval = 1000 / state.playback.fps;
+  state.playback.interval = setInterval(() => {
+    if (!state.playback.isPlaying) return;
+    let next = state.currentFrame + 1;
+    if (next >= state.frames.length) {
+      if (state.playback.loop) next = 0;
+      else { stopPlayback(); return; }
     }
-  }
-  
-  return result;
-}
-
-function updateNodeInfo(n) {
-  document.getElementById('nodeInfo').innerHTML =
-    `<b style="color:var(--accent)">${n.label}</b><br>x: ${Math.round(n.x)}&nbsp; y: ${Math.round(n.y)}`;
-}
-
-// ─── PLAYBACK ──────────────────────────────────────────────────────────
-function play() {
-  if (frames.length < 2) return;
-  isPlaying = true;
-  document.getElementById('playBtn').textContent = '⏹ Stop';
-  document.getElementById('playBadge').style.display = '';
-  const fps = parseInt(document.getElementById('fpsInput').value) || 12;
-  const loop = document.getElementById('loopToggle').checked;
-  playInterval = setInterval(() => {
-    let next = currentFrame + 1;
-    if (next >= frames.length) {
-      if (loop) next = 0;
-      else { stopPlay(); return; }
-    }
-    currentFrame = next;
-    restoreNodes(frames[currentFrame].nodes);
-    updateTimelineUI();
+    anim.gotoFrame(state, next);
+    timeline.updateFrameBadge();
     render();
-    updateFrameBadge();
-  }, 1000 / fps);
+  }, interval);
 }
 
-function stopPlay() {
-  isPlaying = false;
-  clearInterval(playInterval);
-  document.getElementById('playBtn').textContent = '▶ Play';
+function stopPlayback() {
+  state.playback.isPlaying = false;
   document.getElementById('playBadge').style.display = 'none';
+  document.getElementById('playBtn').textContent = '▶';
+  if (state.playback.interval) clearInterval(state.playback.interval);
 }
 
-// ─── SAVE / LOAD ANIMATIONS ────────────────────────────────────────────
-function loadSavedAnimations() {
-  try {
-    savedAnimations = JSON.parse(localStorage.getItem('poseforge_anims') || '[]');
-  } catch(e) { savedAnimations = []; }
-  renderSavedList();
-}
-
-function saveAnimation(name, author, description, height, category, bodyType, includeBodyData = false) {
-  saveCurrentToFrame();
-  const anim = { 
-    name, 
-    author: author || '',
-    description: description || '',
-    category: category || 'human',
-    bodyType: bodyType || 'adult-male',
-    height: height || 180,
-    frames: JSON.parse(JSON.stringify(frames)), 
-    created: Date.now() 
+// ─── SAVE / LOAD ANIMATION ───
+function saveNewAnimation(data) {
+  const animData = {
+    name: data.name,
+    author: data.author,
+    description: data.description,
+    height: data.height,
+    category: data.category,
+    bodyType: data.bodyType,
+    frames: state.frames,
+    bones: state.bones,
+    constraints: state.constraints,
+    created: Date.now()
   };
-  if (includeBodyData) {
-    anim.bones = JSON.parse(JSON.stringify(bones));
-    anim.constraints = JSON.parse(JSON.stringify(constraints));
+  const saved = JSON.parse(localStorage.getItem('poseforge_anims') || '[]');
+  saved.push(animData);
+  localStorage.setItem('poseforge_anims', JSON.stringify(saved));
+  renderSavedList();
+}
+
+function editSavedAnimation(index, data) {
+  const saved = JSON.parse(localStorage.getItem('poseforge_anims') || '[]');
+  if (saved[index]) {
+    saved[index].name = data.name;
+    saved[index].author = data.author;
+    saved[index].description = data.description;
+    saved[index].height = data.height;
+    saved[index].category = data.category;
+    saved[index].bodyType = data.bodyType;
+    localStorage.setItem('poseforge_anims', JSON.stringify(saved));
+    renderSavedList();
   }
-  savedAnimations.push(anim);
-  localStorage.setItem('poseforge_anims', JSON.stringify(savedAnimations));
-  renderSavedList();
 }
 
-function deleteAnimation(idx) {
-  savedAnimations.splice(idx, 1);
-  localStorage.setItem('poseforge_anims', JSON.stringify(savedAnimations));
-  renderSavedList();
+function loadSavedAnimation(index) {
+  const saved = JSON.parse(localStorage.getItem('poseforge_anims') || '[]');
+  const anim = saved[index];
+  if (!anim) return;
+  
+  state.frames = anim.frames || [];
+  state.bones = anim.bones || [];
+  state.constraints = anim.constraints || { distances: {}, angles: {} };
+  state.meta.name = anim.name;
+  state.meta.author = anim.author || '';
+  state.meta.description = anim.description || '';
+  state.meta.height = anim.height || 180;
+  state.meta.category = anim.category || 'human';
+  state.meta.bodyType = anim.bodyType || state.meta.bodyType;
+  
+  state.currentFrame = 0;
+  if (state.frames.length > 0) {
+    state.nodes = JSON.parse(JSON.stringify(state.frames[0].nodes));
+  }
+  
+  // Rebuild hierarchy
+  if (state.bones.length > 0) {
+    const rootNode = state.nodes.find(n => n.id === 'pelvis') ? 'pelvis' : state.bones[0][0];
+    const tree = hierarchy.buildTree(state.bones, rootNode);
+    const hierarchyMap = hierarchy.computeAllDescendants(tree.children);
+    state.currentHierarchy = hierarchyMap;
+    state.currentPelvisChildren = hierarchyMap[rootNode] || [];
+    const isHuman = ['adult-male', 'adult-female', 'child'].includes(state.meta.bodyType);
+    state.currentFootNodes = [];
+    Object.keys(tree.children).forEach(node => {
+      const children = tree.children[node];
+      if (!children || children.length === 0) {
+        if (node.startsWith('foot')) state.currentFootNodes.push(node);
+        else if (node.startsWith('hand') && !isHuman) state.currentFootNodes.push(node);
+        else if (node.includes('paw')) state.currentFootNodes.push(node);
+      }
+    });
+    state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
+  }
+  
+  timeline.updateTimeline();
+  timeline.updateFrameBadge();
+  sidebar.updateAnimationList(state.meta.bodyType);
+  saveHistory();
+  render();
 }
 
-function loadAnimation(idx) {
-    stopPlay();
-    const anim = savedAnimations[idx];
-    frames = JSON.parse(JSON.stringify(anim.frames));
-    currentFrame = 0;
-    currentAnimName = anim.name; // Track current animation name
-    restoreNodes(frames[0].nodes);
-    updateTimelineUI();
-    render();
-    updateFrameBadge();
+function deleteSavedAnimation(index) {
+  const saved = JSON.parse(localStorage.getItem('poseforge_anims') || '[]');
+  saved.splice(index, 1);
+  localStorage.setItem('poseforge_anims', JSON.stringify(saved));
+  renderSavedList();
 }
 
 function renderSavedList() {
-  const list = document.getElementById('savedAnimList');
-  list.innerHTML = '';
-  if (savedAnimations.length === 0) {
-    list.innerHTML = '<div style="font-size:0.6rem;color:var(--text-dim)">No saved animations yet.</div>';
-    return;
+  importExport.renderSavedList();
+}
+
+// ─── IMPORT ───
+async function importAnimation(file) {
+  const text = await file.text();
+  try {
+    const data = JSON.parse(text);
+    if (data.frames) {
+      state.frames = data.frames;
+      state.currentFrame = 0;
+      state.nodes = JSON.parse(JSON.stringify(state.frames[0].nodes));
+    }
+    if (data.bones) state.bones = data.bones;
+    if (data.constraints) state.constraints = data.constraints;
+    savedAnimations = data.savedAnimations || [];
+    state.meta.name = data.name || 'Imported';
+    state.meta.author = data.author || '';
+    state.meta.description = data.description || '';
+    state.meta.height = data.height || 180;
+    state.meta.category = data.category || 'human';
+    state.meta.bodyType = data.bodyType || state.meta.bodyType;
+    if (data.spriteBox) {
+      Object.assign(state.spriteBox, data.spriteBox);
+      state.view.charScale = state.spriteBox.scale || 1;
+    }
+    timeline.updateTimeline();
+    timeline.updateFrameBadge();
+    renderSavedList();
+    saveHistory();
+    render();
+  } catch (e) {
+    alert('Invalid file');
   }
-  savedAnimations.forEach((a, i) => {
-    const item = document.createElement('div');
-    item.className = 'anim-item';
-    item.innerHTML = `<span class="anim-name" title="${a.name}">${a.name}</span>
-      <span style="font-size:0.55rem;color:var(--text-dim)">${a.frames.length}f</span>
-      <button class="anim-del" title="Delete">×</button>`;
-    item.querySelector('.anim-name').onclick = () => loadAnimation(i);
-    item.querySelector('.anim-del').onclick = (e) => { e.stopPropagation(); if(confirm('Delete "'+a.name+'"?')) deleteAnimation(i); };
-    list.appendChild(item);
-  });
 }
 
-// ─── EXPORT / IMPORT ──────────────────────────────────────────────────
-function exportJSON() {
-    saveCurrentToFrame();
-    const exportData = { 
-        name: currentAnimName || 'Untitled',
-        author: currentAnimAuthor || '',
-        description: currentAnimDescription || '',
-        category: currentAnimCategory || 'human',
-        bodyType: currentAnimBodyType || 'adult-male',
-        height: currentAnimHeight || 180,
-        frames, 
-        bones,
-        constraints,
-        savedAnimations,
-        spriteBox: {
-          x: spriteBoxX,
-          y: spriteBoxY,
-          width: spriteBoxWidth,
-          height: spriteBoxHeight,
-          scale: charScale
-        },
-        version: 3 
-    };
-    const data = JSON.stringify(exportData, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const filename = currentAnimName ? `${currentAnimName.replace(/\s+/g, '_')}.json` : 'poseforge_animation.json';
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+// ─── EXPORT ───
+function exportAnimation(format) {
+  if (format === 'json') {
+    importExport.exportJSON();
+  } else if (format === 'sprite') {
+    importExport.exportSpriteSheet();
+  } else if (format === 'apng') {
+    importExport.exportAPNG();
+  }
 }
 
-async function exportSpriteSheet() {
-    if (frames.length === 0) return;
-    saveCurrentToFrame();
-    
-    const originalNodes = snapshotNodes();
-    
-    const savedDragNode = dragNode;
-    const savedSelectedNodes = [...selectedNodes];
-    dragNode = null;
-    selectedNodes = [];
-    
-    const cols = Math.ceil(Math.sqrt(frames.length));
-    const rows = Math.ceil(frames.length / cols);
-    
-    const frameW = spriteBoxWidth;
-    const frameH = spriteBoxHeight;
-    
-    const isTransparent = document.getElementById('spriteBgTransparent').checked;
-    const bgColor = document.getElementById('spriteBgColor').value;
-    
-    const spriteCanvas = document.createElement('canvas');
-    spriteCanvas.width = cols * frameW;
-    spriteCanvas.height = rows * frameH;
-    const sctx = spriteCanvas.getContext('2d');
-    if (!isTransparent) {
-      sctx.fillStyle = bgColor;
-      sctx.fillRect(0, 0, spriteCanvas.width, spriteCanvas.height);
-    }
-    
-    const baseSize = spriteBoxHeight;
-    const fitScale = Math.min(frameW / baseSize, frameH / baseSize) * charScale;
-    const contentScale = fitScale;
-    const boxBottom = spriteBoxY;
-    const boxCenterX = spriteBoxX;
-    
-    for (let i = 0; i < frames.length; i++) {
-        restoreNodes(frames[i].nodes);
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        
-        const offscreen = document.createElement('canvas');
-        offscreen.width = frameW;
-        offscreen.height = frameH;
-        const octx = offscreen.getContext('2d');
-        if (!isTransparent) {
-          octx.fillStyle = bgColor;
-          octx.fillRect(0, 0, frameW, frameH);
-        }
-        octx.save();
-        octx.translate(frameW / 2 - boxCenterX, frameH - boxBottom);
-        octx.scale(contentScale, contentScale);
-        drawSkeleton(octx, nodes, 1, null);
-        octx.restore();
-        
-        if (showBoundingBox) {
-          sctx.strokeStyle = '#00ffcc';
-          sctx.lineWidth = 2;
-          sctx.strokeRect(col * frameW + 1, row * frameH + 1, frameW - 2, frameH - 2);
-        }
-        
-        sctx.drawImage(offscreen, col * frameW, row * frameH);
-    }
-    
-    restoreNodes(originalNodes);
-    dragNode = savedDragNode;
-    selectedNodes = savedSelectedNodes;
-    
-    const link = document.createElement('a');
-    link.download = `${currentAnimName || 'animation'}_spritesheet.png`;
-    link.href = spriteCanvas.toDataURL('image/png');
-    link.click();
-}
-
-async function exportAPNG() {
-    if (frames.length === 0) return;
-    saveCurrentToFrame();
-    
-    const originalNodes = snapshotNodes();
-    const delay = Math.round(1000 / (parseInt(document.getElementById('fpsInput').value) || 12));
-    const width = spriteBoxWidth, height = spriteBoxHeight;
-    
-    const isTransparent = document.getElementById('spriteBgTransparent').checked;
-    const bgColor = document.getElementById('spriteBgColor').value;
-    
-    const canvas = document.createElement('canvas');
-    canvas.width = width; canvas.height = height;
-    const ctx = canvas.getContext('2d');
-    
-    // Render all frames to images
-    const imageDataList = [];
-    for (let i = 0; i < frames.length; i++) {
-        restoreNodes(frames[i].nodes);
-        if (!isTransparent) {
-          ctx.fillStyle = bgColor;
-          ctx.fillRect(0, 0, width, height);
-        }
-        ctx.save();
-        ctx.translate(width / 2 - spriteBoxX, height - spriteBoxY);
-        ctx.scale(charScale, charScale);
-        drawSkeleton(ctx, nodes, 1, null);
-        ctx.restore();
-        imageDataList.push(ctx.getImageData(0, 0, width, height));
-    }
-    
-    restoreNodes(originalNodes);
-    
-    // Use UPNG.js-like approach if available, otherwise export first frame as PNG
-    if (typeof UPNG !== 'undefined') {
-        const imgs = imageDataList.map(d => new Uint8Array(d.data.buffer));
-        const apng = UPNG.encode(imgs, width, height, frames.map(() => delay));
-        const blob = new Blob([apng], { type: 'image/png' });
-        const link = document.createElement('a');
-        link.download = `${currentAnimName || 'animation'}.png`;
-        link.href = URL.createObjectURL(blob);
-        link.click();
-        URL.revokeObjectURL(link.href);
-    } else {
-        // Fallback: export sprite sheet as frames laid out horizontally
-        const spriteCanvas = document.createElement('canvas');
-        spriteCanvas.width = width * frames.length;
-        spriteCanvas.height = height;
-        const sctx = spriteCanvas.getContext('2d');
-        if (!isTransparent) {
-          sctx.fillStyle = bgColor;
-          sctx.fillRect(0, 0, spriteCanvas.width, spriteCanvas.height);
-        }
-        
-        for (let i = 0; i < frames.length; i++) {
-            restoreNodes(frames[i].nodes);
-            if (!isTransparent) {
-              sctx.fillStyle = bgColor;
-              sctx.fillRect(i * width, 0, width, height);
-            }
-            sctx.save();
-            sctx.translate(i * width + width / 2 - spriteBoxX, height - spriteBoxY);
-            sctx.scale(charScale, charScale);
-            drawSkeleton(sctx, nodes, 1, null);
-            sctx.restore();
-        }
-        
-        restoreNodes(originalNodes);
-        const link = document.createElement('a');
-        link.download = `${currentAnimName || 'animation'}_frames.png`;
-        link.href = spriteCanvas.toDataURL('image/png');
-        link.click();
-    }
-}
-
-document.getElementById('importFile').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = ev => {
-        try {
-            const data = JSON.parse(ev.target.result);
-            if (data.frames) {
-                frames = data.frames;
-                currentFrame = 0;
-                restoreNodes(frames[0].nodes);
-                updateTimelineUI();
-                render();
-                updateFrameBadge();
-            }
-            if (data.savedAnimations || data.sprites) {
-                savedAnimations = data.savedAnimations || data.sprites || [];
-                localStorage.setItem('poseforge_anims', JSON.stringify(savedAnimations));
-                renderSavedList();
-            }
-            currentAnimName = data.name || data.currentAnimName || null;
-            currentAnimAuthor = data.author || '';
-            currentAnimDescription = data.description || '';
-            currentAnimHeight = data.height || 180;
-            currentAnimCategory = data.category || 'human';
-            currentAnimBodyType = data.bodyType || 'adult-male';
-            if (data.bones && data.bones.length > 0) {
-                bones = data.bones;
-            }
-            if (data.constraints) {
-                constraints = data.constraints;
-            }
-            if (data.spriteBox) {
-                spriteBoxX = data.spriteBox.x || 0;
-                spriteBoxY = data.spriteBox.y || 150;
-                spriteBoxWidth = data.spriteBox.width || 375;
-                spriteBoxHeight = data.spriteBox.height || 375;
-                charScale = data.spriteBox.scale || 1;
-                document.getElementById('scaleSlider').value = charScale * 100;
-                document.getElementById('scaleVal').textContent = Math.round(charScale * 100) + '%';
-                document.getElementById('spriteFrameSize').value = Math.max(spriteBoxWidth, spriteBoxHeight);
-                document.getElementById('spriteFrameSizeVal').textContent = Math.round(Math.max(spriteBoxWidth, spriteBoxHeight));
-            }
-        } catch(err) { alert('Invalid file.'); }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-});
-
-// ─── VIEW CONTROLS ────────────────────────────────────────────────────
-
-document.getElementById('scaleSlider').addEventListener('input', e => {
-  charScale = parseInt(e.target.value) / 100;
-  document.getElementById('scaleVal').textContent = e.target.value + '%';
+// ─── FLIP ───
+function flipHorizontal() {
+  state.nodes.forEach(n => n.x = -n.x);
+  anim.saveFrame(state);
+  saveHistory();
+  timeline.updateTimeline();
   render();
-});
+}
 
-document.getElementById('resetPoseBtn').addEventListener('click', () => {
-  // Reset to default pose for current body type
-  nodes = getCurrentNodes();
-  frames[currentFrame].nodes = snapshotNodes();
-  renderThumb(currentFrame);
-  render();
-});
-
-document.getElementById('flipHBtn').addEventListener('click', () => {
-  // Flip all nodes horizontally
-  nodes.forEach(n => n.x = -n.x);
-  frames[currentFrame].nodes = snapshotNodes();
-  historyManager.saveState();
-  renderThumb(currentFrame);
-  render();
-});
-
-document.getElementById('symmetryBtn').addEventListener('click', () => {
-  // Mirror left from right based on current body structure
+function mirrorHorizontal() {
   const pairs = [
     ['shoulder_l','shoulder_r'],['elbow_l','elbow_r'],
     ['hand_l','hand_r'],['hip_l','hip_r'],
     ['knee_l','knee_r'],['foot_l','foot_r']
   ];
   pairs.forEach(([l, r]) => {
-    const nl = nodes.find(n => n.id === l);
-    const nr = nodes.find(n => n.id === r);
+    const nl = state.nodes.find(n => n.id === l);
+    const nr = state.nodes.find(n => n.id === r);
     if (!nl || !nr) return;
     const avg_y = (nl.y + nr.y) / 2;
     const dist = Math.abs(nl.x);
     nl.x = -dist; nr.x = dist;
     nl.y = avg_y; nr.y = avg_y;
   });
-  saveCurrentToFrame();
-  renderThumb(currentFrame);
+  anim.saveFrame(state);
+  saveHistory();
+  timeline.updateTimeline();
   render();
-});
-
-document.getElementById('showLabels').addEventListener('change', e => { showLabels = e.target.checked; render(); });
-document.getElementById('showGrid').addEventListener('change', e => { showGrid = e.target.checked; render(); });
-document.getElementById('showShadow').addEventListener('change', e => { showShadow = e.target.checked; render(); });
-document.getElementById('onionToggle').addEventListener('change', e => { onionSkin = e.target.checked; render(); });
-document.getElementById('footAnchor').addEventListener('change', e => { footAnchor = e.target.checked; });
-
-document.getElementById('addFrameBtn').addEventListener('click', addFrame);
-document.getElementById('dupFrameBtn').addEventListener('click', dupFrame);
-document.getElementById('delFrameBtn').addEventListener('click', deleteFrame);
-
-document.getElementById('playBtn').addEventListener('click', () => {
-  if (isPlaying) stopPlay(); else play();
-});
-
-document.getElementById('prevFrameBtn').addEventListener('click', () => {
-  if (!isPlaying) gotoFrame(currentFrame - 1);
-});
-
-document.getElementById('nextFrameBtn').addEventListener('click', () => {
-  if (!isPlaying) gotoFrame(currentFrame + 1);
-});
-
-document.getElementById('modeMove').addEventListener('click', () => {
-  mode = 'move';
-  document.getElementById('modeMove').classList.add('active');
-  document.getElementById('modePan').classList.remove('active');
-  canvas.style.cursor = 'crosshair';
-});
-
-document.getElementById('modePan').addEventListener('click', () => {
-  mode = 'pan';
-  document.getElementById('modePan').classList.add('active');
-  document.getElementById('modeMove').classList.remove('active');
-  canvas.style.cursor = 'grab';
-});
-
-// Save modal
-document.getElementById('saveAnimBtn').addEventListener('click', () => {
-  document.getElementById('animNameInput').value = '';
-  document.getElementById('animAuthorInput').value = currentAnimAuthor;
-  document.getElementById('animDescInput').value = currentAnimDescription;
-  document.getElementById('animHeightInput').value = currentAnimHeight;
-  document.getElementById('animCategorySelect').value = currentAnimCategory;
-  document.getElementById('animBodyTypeSelect').value = currentAnimBodyType;
-  document.getElementById('saveModal').classList.add('open');
-  setTimeout(() => document.getElementById('animNameInput').focus(), 50);
-  updateCharCount('animNameInput', 64);
-  updateCharCount('animAuthorInput', 32);
-  updateCharCount('animDescInput', 200);
-});
-
-function updateCharCount(inputId, max) {
-  const input = document.getElementById(inputId);
-  const countSpan = input.parentElement.querySelector('.char-count');
-  if (countSpan) {
-    countSpan.textContent = `${input.value.length}/${max}`;
-  }
 }
 
-['animNameInput', 'animAuthorInput', 'animDescInput'].forEach((id, i) => {
-  const maxLen = [64, 32, 200][i];
-  document.getElementById(id).addEventListener('input', () => updateCharCount(id, maxLen));
-});
-
-document.getElementById('cancelSaveBtn').addEventListener('click', () => {
-  document.getElementById('saveModal').classList.remove('open');
-});
-
-document.getElementById('confirmSaveBtn').addEventListener('click', () => {
-    let name = document.getElementById('animNameInput').value.trim();
-    if (!name) name = 'Untitled';
-    if (name.length > 64) name = name.substring(0, 64);
-    const author = document.getElementById('animAuthorInput').value.trim();
-    const description = document.getElementById('animDescInput').value.trim();
-    const height = parseInt(document.getElementById('animHeightInput').value) || 180;
-    const category = document.getElementById('animCategorySelect').value;
-    const bodyType = document.getElementById('animBodyTypeSelect').value;
-    saveAnimation(name, author, description, height, category, bodyType, true);
-    currentAnimName = name;
-    currentAnimAuthor = author;
-    currentAnimDescription = description;
-    currentAnimHeight = height;
-    currentAnimCategory = category;
-    currentAnimBodyType = bodyType;
-    document.getElementById('saveModal').classList.remove('open');
-});
-
-document.getElementById('animNameInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('confirmSaveBtn').click();
-  if (e.key === 'Escape') document.getElementById('cancelSaveBtn').click();
-});
-
-// Settings modal
-document.getElementById('settingsBtn').addEventListener('click', () => {
-  document.getElementById('settingsModal').classList.add('open');
-});
-
-document.getElementById('undoBtn').addEventListener('click', () => {
-  if (historyManager.undo()) {
-    restoreNodes(historyManager.history[historyManager.currentIndex]?.nodes || nodes);
-    render();
-  }
-});
-
-document.getElementById('redoBtn').addEventListener('click', () => {
-  if (historyManager.redo()) {
-    restoreNodes(historyManager.history[historyManager.currentIndex]?.nodes || nodes);
-    render();
-  }
-});
-
-document.getElementById('closeSettingsBtn').addEventListener('click', () => {
-  document.getElementById('settingsModal').classList.remove('open');
-});
-
-document.getElementById('settingsModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('settingsModal'))
-    document.getElementById('settingsModal').classList.remove('open');
-});
-
-// Color inputs
-document.getElementById('armLColor').addEventListener('input', e => {
-  charColors.armL = e.target.value;
-  render();
-});
-
-document.getElementById('armRColor').addEventListener('input', e => {
-  charColors.armR = e.target.value;
-  render();
-});
-
-document.getElementById('legLColor').addEventListener('input', e => {
-  charColors.legL = e.target.value;
-  render();
-});
-
-document.getElementById('legRColor').addEventListener('input', e => {
-  charColors.legR = e.target.value;
-  render();
-});
-
-document.getElementById('bodyColor').addEventListener('input', e => {
-  charColors.body = e.target.value;
-  render();
-});
-
-// Tutorial toggle
-document.getElementById('enableTutorial').addEventListener('change', e => {
-  tutorialEnabled = e.target.checked;
-  if (tutorialEnabled && window.tutorialSystem) {
-    window.tutorialSystem.startTutorial('main');
-  } else if (window.tutorialSystem) {
-    window.tutorialSystem.hideTutorial();
-  }
-});
-
-// Display settings
-document.getElementById('displayBoundingBox').addEventListener('change', e => {
-  showBoundingBox = e.target.checked;
-  document.getElementById('spriteBoundingBox').checked = showBoundingBox;
-  render();
-});
-
-// Sprite export settings
-document.getElementById('spriteBoundingBox').addEventListener('change', e => {
-  showBoundingBox = e.target.checked;
-  document.getElementById('displayBoundingBox').checked = showBoundingBox;
-  render();
-});
-
-document.getElementById('spriteFrameSize').addEventListener('input', e => {
-  spriteFrameSize = parseInt(e.target.value);
-  document.getElementById('spriteFrameSizeVal').textContent = spriteFrameSize;
-});
-
-document.getElementById('spriteBgColor').addEventListener('input', e => {
-  document.getElementById('spriteBgTransparent').checked = false;
-});
-
-document.getElementById('spriteBgTransparent').addEventListener('change', e => {
-  if (e.target.checked) {
-    document.getElementById('spriteBgColor').value = '#000000';
-  }
-});
-
-// Body type selection
-document.getElementById('bodyTypeSelect').addEventListener('change', async (e) => {
-  await loadBody(e.target.value);
-});
-
-document.getElementById('loadPresetBtn').addEventListener('click', () => {
-  const presetName = document.getElementById('animationPresetSelect').value;
-  loadAnimationPreset(presetName);
-});
-
-document.getElementById('exportBtn').addEventListener('click', (e) => {
-  e.stopPropagation();
-  document.getElementById('exportMenu').classList.toggle('open');
-});
-
-document.addEventListener('click', () => {
-  document.getElementById('exportMenu').classList.remove('open');
-});
-
-document.querySelectorAll('.export-option').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const format = btn.dataset.format;
-    if (format === 'json') {
-      exportJSON();
-    } else if (format === 'sprite') {
-      exportSpriteSheet();
-    } else if (format === 'apng') {
-      exportAPNG();
-    }
-    document.getElementById('exportMenu').classList.remove('open');
-  });
-});
-
-document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-
-// Modal bg click to close
-document.getElementById('saveModal').addEventListener('click', e => {
-  if (e.target === document.getElementById('saveModal'))
-    document.getElementById('saveModal').classList.remove('open');
-});
-
-// Keyboard shortcuts
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT') return;
-  if (e.key === 'ArrowLeft' && !isPlaying) gotoFrame(currentFrame - 1);
-  if (e.key === 'ArrowRight' && !isPlaying) gotoFrame(currentFrame + 1);
-  if (e.key === ' ') { e.preventDefault(); if (isPlaying) stopPlay(); else play(); }
-  if (e.key === 'n' || e.key === 'N') addFrame();
-  if (e.key === 'z' && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+// ─── KEYBOARD ───
+function handleKeyDown(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
     e.preventDefault();
-    if (historyManager.undo()) { restoreNodes(historyManager.history[historyManager.currentIndex]); render(); }
-  }
-  if ((e.key === 'z' && (e.ctrlKey || e.metaKey) && e.shiftKey) || (e.key === 'y' && (e.ctrlKey || e.metaKey))) {
-    e.preventDefault();
-    if (historyManager.redo()) { restoreNodes(historyManager.history[historyManager.currentIndex]); render(); }
-  }
-});
-
-// Mouse wheel - adjust character scale
-canvas.addEventListener('wheel', e => {
-  e.preventDefault();
-  const delta = e.deltaY > 0 ? -5 : 5;
-  const slider = document.getElementById('scaleSlider');
-  slider.value = Math.max(50, Math.min(200, parseInt(slider.value) + delta));
-  charScale = parseInt(slider.value) / 100;
-  document.getElementById('scaleVal').textContent = slider.value + '%';
-  render();
-}, { passive: false });
-
-// ─── BODY LOADING ────────────────────────────────────────────────────
-async function loadBody(bodyType) {
-  const bodyData = await loadBodyDefinition(bodyType);
-  if (bodyData) {
-    nodes = getCurrentNodes();
-    bones = getCurrentBones();
-    constraints = getCurrentConstraints();
-
-    currentAnimBodyType = bodyType;
-    currentAnimHeight = bodyData.height || 180;
-    if (!currentAnimName && bodyData.name) {
-      currentAnimName = bodyData.name;
-    }
-
-    frames = [{ nodes: snapshotNodes(), label: 'Frame 1' }];
-    currentFrame = 0;
-    updateAnimationList(bodyType);
-
-    updateTimelineUI();
-    updateFrameBadge();
+    undo();
+    anim.saveFrame(state);
     render();
-
-    console.log(`Loaded ${bodyData.name} body`);
+  } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+    e.preventDefault();
+    redo();
+    anim.saveFrame(state);
+    render();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    if (state.playback.isPlaying) { callbacks.onPause(); stopPlayback(); }
+    else { callbacks.onPlay(); startPlayback(); }
+  } else if (e.key === 'ArrowLeft') {
+    const prev = Math.max(0, state.currentFrame - 1);
+    anim.gotoFrame(state, prev);
+    timeline.updateFrameBadge();
+    render();
+  } else if (e.key === 'ArrowRight') {
+    const next = Math.min(state.frames.length - 1, state.currentFrame + 1);
+    anim.gotoFrame(state, next);
+    timeline.updateFrameBadge();
+    render();
+  } else if (e.key === 'Delete' || e.key === 'Backspace') {
+    deleteFrame(state.currentFrame);
+  } else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    modals.openSaveModal(-1);
   }
 }
 
-// ─── ANIMATION PRESETS ────────────────────────────────────────────────
-function updateAnimationPresets(bodyType, viewPerspective) {
-   const select = document.getElementById('animationPresetSelect');
-   const options = select.querySelectorAll('option:not(:first-child)');
-   options.forEach(option => {
-     const isHuman = bodyType.includes('male') || bodyType.includes('female') || bodyType === 'child';
-     const isQuadruped = bodyType === 'quadruped';
-     const isFront = viewPerspective === 'front';
-     const isSide = viewPerspective === 'side';
-
-     // Check if the option matches the current body type and view perspective
-     const isHumanOption = option.value.includes('human') && !option.value.includes('-side');
-     const isHumanSideOption = option.value.includes('human') && option.value.includes('-side');
-     const isQuadrupedOption = option.value.includes('quadruped') && !option.value.includes('-side');
-     const isQuadrupedSideOption = option.value.includes('quadruped') && option.value.includes('-side');
-
-     if ((isHumanOption && !isHuman) || (isHumanSideOption && (!isHuman || !isSide)) ||
-         (isQuadrupedOption && !isQuadruped) || (isQuadrupedSideOption && (!isQuadruped || !isSide))) {
-       option.style.display = 'none';
-     } else {
-       option.style.display = 'block';
-     }
-});
-  }
-
-async function loadAnimationPreset(presetName) {
-   if (!presetName) return;
-
-   try {
-      let filePath = presetName;
-      if (!filePath.endsWith('.json')) {
-        filePath = presetName + '.json';
-      }
-      if (!filePath.includes('/')) {
-        filePath = 'data/animations/' + filePath;
-      }
-      const response = await fetch(filePath);
-      if (!response.ok) throw new Error('File not found');
-      const animData = await response.json();
-
-     if (animData.bones && animData.bones.length > 0) {
-       bones = animData.bones;
-     }
-     if (animData.constraints) {
-       constraints = animData.constraints;
-     }
-
-     currentAnimName = animData.name || presetName;
-     currentAnimAuthor = animData.author || '';
-     currentAnimDescription = animData.description || '';
-     currentAnimHeight = animData.height || 180;
-     currentAnimCategory = animData.category || 'human';
-     currentAnimBodyType = animData.bodyType || 'adult-male';
-
-     frames = [];
-     animData.frames.forEach((frameData, index) => {
-       frames.push({
-         nodes: JSON.parse(JSON.stringify(frameData.nodes)),
-         label: frameData.label || `Frame ${index + 1}`
-       });
-     });
-
-     currentFrame = 0;
-     restoreNodes(frames[0].nodes);
-     updateTimelineUI();
-     updateFrameBadge();
-     render();
-
-     console.log(`Loaded ${animData.name} animation`);
-
-   } catch (error) {
-     console.error('Error loading animation preset:', error);
-     alert('Animation preset not found: ' + presetName);
-   }
- }
-
-// ─── DYNAMIC FILE LOADING ────────────────────────────────────────────────────
-let availableAnimations = [];
-let availableBodies = [];
-
-function getBodyTypeFromFile(file) {
-  const name = file.toLowerCase();
-  if (name.includes('female')) return 'female';
-  if (name.includes('male')) return 'male';
-  if (name.includes('child')) return 'child';
-  if (name.includes('horse')) return 'horse';
-  if (name.includes('dog')) return 'dog';
-  if (name.includes('cat')) return 'cat';
-  return 'human';
-}
-
-async function loadAvailableFiles() {
-  const animSelect = document.getElementById('animationPresetSelect');
-  const bodySelect = document.getElementById('bodyTypeSelect');
+// ─── MOUSE EVENTS ───
+canvas.addEventListener('mousedown', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const screenPos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+  const world = screenToWorld(e.clientX, e.clientY);
   
-  try {
-    const [animResp, bodyResp] = await Promise.all([
-      fetch('data/animations/'),
-      fetch('data/bodies/')
-    ]);
-    
-    const animHtml = await animResp.text();
-    const bodyHtml = await bodyResp.text();
-    
-    const animFiles = animHtml.match(/href="([^"]+\.json)"/g)?.map(m => m.replace(/href="|"/g, '').replace(/^data\/animations\//, '')) || [];
-    const bodyFiles = bodyHtml.match(/href="([^"]+\.json)"/g)?.map(m => m.replace(/href="|"/g, '').replace(/^data\/bodies\//, '')) || [];
-    
-    availableAnimations = animFiles;
-    availableBodies = bodyFiles;
-    
-    animSelect.innerHTML = '<option value="">Select Animation...</option>';
-    
-    updateAnimationList('male');
-    
-  } catch (e) {
-    console.error('Error loading file lists:', e);
-  }
-}
-
-function updateAnimationList(bodyType) {
-  const animSelect = document.getElementById('animationPresetSelect');
-  const bt = getBodyTypeFromFile(bodyType);
-  let matches;
-  if (bt === 'female' || bt === 'male' || bt === 'child') {
-    matches = availableAnimations.filter(f => getBodyTypeFromFile(f) === bt || getBodyTypeFromFile(f) === 'human');
-  } else if (bt === 'horse' || bt === 'dog' || bt === 'cat') {
-    matches = availableAnimations.filter(f => getBodyTypeFromFile(f) === bt);
-  } else {
-    matches = availableAnimations;
+  if (e.button === 1 || e.altKey || state.interactionMode === 'pan') {
+    interaction.startPan(state, screenPos);
+    return;
   }
   
-  animSelect.innerHTML = '<option value="">Select Animation...</option>';
-  matches.forEach(file => {
-    const name = file.replace('.json', '').replace(/-/g, ' ').replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-    const opt = document.createElement('option');
-    opt.value = file;
-    opt.textContent = name;
-    animSelect.appendChild(opt);
-  });
-}
+  if (state.view.showBoundingBox) {
+    const handle = interaction.hitBoxHandle(state, world.x, world.y);
+    if (handle) {
+      state.dragState.boxDragHandle = handle;
+      interaction.startDragBox(state, world);
+      state.isDragging = true;
+      return;
+    }
+    if (interaction.hitBoxBody(state, world.x, world.y)) {
+      state.dragState.boxDragHandle = 'move';
+      interaction.startDragBox(state, world);
+      state.isDragging = true;
+      return;
+    }
+  }
+  
+  const node = interaction.hitNode(state.nodes, world.x, world.y);
+  if (node) {
+    interaction.startDrag(state, node, world);
+  }
+});
 
-// ─── INIT ─────────────────────────────────────────────────────────────
+canvas.addEventListener('mousemove', (e) => {
+  if (state.dragState.isDraggingBox) {
+    const rect = canvas.getBoundingClientRect();
+    const world = screenToWorld(e.clientX, e.clientY);
+    interaction.moveDragBox(state, { x: world.x, y: world.y });
+    render();
+    return;
+  }
+  
+  if (state.isDragging && state.dragNode) {
+    const rect = canvas.getBoundingClientRect();
+    const world = screenToWorld(e.clientX, e.clientY);
+    const dx = world.x - state.dragNode.x;
+    const dy = world.y - state.dragNode.y;
+    interaction.moveDrag(state, dx, dy);
+    render();
+  } else if (state.dragState.panStart) {
+    const rect = canvas.getBoundingClientRect();
+    const dx = (e.clientX - rect.left - state.dragState.panStart.x) / state.view.charScale;
+    const dy = (e.clientY - rect.top - state.dragState.panStart.y) / state.view.charScale;
+    interaction.pan(state, dx, dy);
+    state.dragState.panStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    render();
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  if (state.dragState.isDraggingBox) {
+    interaction.endDragBox(state);
+    state.isDragging = false;
+  } else if (state.isDragging) {
+    interaction.endDrag(state);
+    anim.saveFrame(state);
+  }
+  if (state.dragState.panStart) {
+    interaction.endPan(state);
+  }
+});
+
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+window.addEventListener('keydown', handleKeyDown);
+window.addEventListener('resize', () => {
+  const wrap = document.getElementById('canvasWrap');
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  render();
+});
+
+// ─── INIT ───
 async function init() {
-  // Set CSS variables from config
-  const root = document.documentElement;
-  Object.entries(Config.THEME).forEach(([key, value]) => {
-    const cssKey = '--' + key.replace(/([A-Z])/g, '-$1').toLowerCase();
-    root.style.setProperty(cssKey, value);
-  });
-
   resize();
-  await loadAvailableFiles();
-  await loadBody('adult-male'); // Load default body
-  updateTimelineUI();
-  updateFrameBadge();
-  loadSavedAnimations();
-  render();
-
-  // Initialize history manager
-  historyManager.setNodeHandlers(() => nodes, (n) => { nodes = n; });
-  historyManager.setBoxHandlers(
-    () => ({ 
-      x: spriteBoxX, 
-      y: spriteBoxY, 
-      width: spriteBoxWidth, 
-      height: spriteBoxHeight,
-      scale: charScale
-    }),
-    (box) => {
-      spriteBoxX = box.x;
-      spriteBoxY = box.y;
-      spriteBoxWidth = box.width;
-      spriteBoxHeight = box.height;
-      charScale = box.scale || 1;
-      document.getElementById('scaleSlider').value = charScale * 100;
-      document.getElementById('scaleVal').textContent = Math.round(charScale * 100) + '%';
-      document.getElementById('spriteFrameSize').value = Math.max(spriteBoxWidth, spriteBoxHeight);
-      document.getElementById('spriteFrameSizeVal').textContent = Math.round(Math.max(spriteBoxWidth, spriteBoxHeight));
-    }
-  );
-  historyManager.saveState(); // Save initial state
-
-  // Initialize tutorial system
-  import('./tutorialSystem.js').then(({ TutorialSystem }) => {
-    window.tutorialSystem = new TutorialSystem(tutorialConfig);
-    window.tutorialSystem.init();
-    
-    // Check if tutorial should auto-start
-    if (tutorialEnabled) {
-      window.tutorialSystem.startTutorial('main');
+  
+  // Initialize UI modules
+  sidebar.initSidebar(state, {
+    onBodyChange: async (bodyType) => await loadBody(bodyType),
+    onAnimPreset: () => loadAnimationPreset(document.getElementById('animationPresetSelect').value),
+    onSave: () => modals.openSaveModal(-1),
+    onModeChange: (mode) => { state.interactionMode = mode; },
+    onFootAnchorChange: (enabled) => { state.footAnchor = enabled; },
+    onRender: render,
+    onExport: exportAnimation
+  });
+  
+  timeline.initTimeline(state, {
+    onFrameSelect: (i) => { anim.gotoFrame(state, i); timeline.updateFrameBadge(); render(); },
+    onAddFrame: () => { anim.addFrame(state); saveHistory(); },
+    onDeleteFrame: (i) => deleteFrame(i),
+    onDupFrame: () => { anim.dupFrame(state); saveHistory(); },
+    onPlay: startPlayback,
+    onPause: stopPlayback,
+    onFPSChange: (fps) => { state.playback.fps = fps; },
+    onLoopToggle: (enabled) => { state.playback.loop = enabled; },
+    onOnionToggle: (enabled) => { state.view.onionSkin = enabled; }
+  });
+  
+  modals.initModals(state, {
+    onSave: (data, editIndex) => {
+      if (editIndex >= 0) editSavedAnimation(editIndex, data);
+      else saveNewAnimation(data);
+      renderSavedList();
     }
   });
+  
+  importExport.initImportExport(state, {
+    onImport: () => document.getElementById('importFile').click(),
+    onImportFile: importAnimation,
+    onExport: exportAnimation,
+    onLoadSaved: loadSavedAnimation,
+    onEditSaved: (i) => modals.openSaveModal(i),
+    onDeleteSaved: deleteSavedAnimation
+  });
+  
+  // Header button handlers
+  document.getElementById('flipHBtn').addEventListener('click', flipHorizontal);
+  document.getElementById('symmetryBtn').addEventListener('click', mirrorHorizontal);
+  document.getElementById('undoBtn').addEventListener('click', () => {
+    undo();
+    anim.saveFrame(state);
+    render();
+  });
+  document.getElementById('redoBtn').addEventListener('click', () => {
+    redo();
+    anim.saveFrame(state);
+    render();
+  });
+  document.getElementById('resetPoseBtn').addEventListener('click', async () => {
+    const bodyType = state.meta.bodyType;
+    await loadBody(bodyType);
+  });
+  
+  // Display toggles
+  document.getElementById('displayBoundingBox').addEventListener('change', (e) => {
+    state.view.showBoundingBox = e.target.checked;
+    render();
+  });
+  
+  // Settings color inputs
+  document.getElementById('armLColor').addEventListener('input', (e) => {
+    state.charColors.armL = e.target.value;
+    render();
+  });
+  document.getElementById('armRColor').addEventListener('input', (e) => {
+    state.charColors.armR = e.target.value;
+    render();
+  });
+  document.getElementById('legLColor').addEventListener('input', (e) => {
+    state.charColors.legL = e.target.value;
+    render();
+  });
+  document.getElementById('legRColor').addEventListener('input', (e) => {
+    state.charColors.legR = e.target.value;
+    render();
+  });
+  document.getElementById('bodyColor').addEventListener('input', (e) => {
+    state.charColors.body = e.target.value;
+    render();
+  });
+  
+  // Load default body
+  const defaultBody = Object.keys(Config.BODIES)[0];
+  await loadBody(defaultBody);
+  document.getElementById('bodyTypeSelect').value = defaultBody;
+  renderSavedList();
+  
+  // History setup
+  saveHistory();
+  
+  // Start loop
+  requestAnimationFrame(render);
 }
 
 init();

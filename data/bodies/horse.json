@@ -15,6 +15,12 @@
           "y": -165.984375
         },
         {
+          "id": "upper_neck",
+          "label": "Uppr Neck",
+          "x": -126,
+          "y": -164
+        },
+        {
           "id": "neck",
           "label": "Neck",
           "x": -126.5,
@@ -117,6 +123,10 @@
   "bones": [
     [
       "head",
+      "upper_neck"
+    ],
+    [
+      "upper_neck",
       "neck"
     ],
     [
@@ -182,7 +192,8 @@
   ],
   "constraints": {
     "distances": {
-      "head-neck": 20,
+      "head-upper_neck": 10,
+      "upper_neck-neck": 6,
       "neck-chest": 16,
       "chest-shoulder_l": 18,
       "chest-shoulder_r": 18,
@@ -200,6 +211,10 @@
       "knee_r-foot_r": 22
     },
     "angles": {
+      "upper_neck": {
+        "min": -30,
+        "max": 30
+      },
       "neck": {
         "min": -50,
         "max": 50

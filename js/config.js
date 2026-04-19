@@ -23,6 +23,45 @@ const Config = {
         THEME: 'dark'
     },
 
+    // Body types and their JSON files
+    BODIES: {
+        'adult-male': { file: 'data/bodies/adult-male.json', label: 'Male' },
+        'adult-female': { file: 'data/bodies/adult-female.json', label: 'Female' },
+        'child': { file: 'data/bodies/child.json', label: 'Child' },
+        'horse': { file: 'data/bodies/horse.json', label: 'Horse' },
+        'dog': { file: 'data/bodies/dog.json', label: 'Dog' },
+        'cat': { file: 'data/bodies/cat.json', label: 'Cat' }
+    },
+
+    // Animations mapped to body types
+    ANIMATIONS: {
+        'adult-male': [
+            'data/animations/walk-cycle-male.json',
+            'data/animations/walk-jump-cycle-male.json',
+            'data/animations/run-cycle-male.json',
+            'data/animations/run-jump-cycle-male.json'
+        ],
+        'adult-female': [
+            'data/animations/walk-cycle-female.json',
+            'data/animations/walk-jump-cycle-female.json',
+            'data/animations/run-cycle-female.json',
+            'data/animations/run-jump-cycle-female.json'
+        ],
+        'child': [
+            'data/animations/walk-cycle-child.json',
+            'data/animations/run-cycle-child.json'
+        ],
+        'horse': [
+            'data/animations/walk-cycle-horse.json'
+        ],
+        'dog': [
+            'data/animations/walk-cycle-dog.json'
+        ],
+        'cat': [
+            'data/animations/walk-cycle-cat.json'
+        ]
+    },
+
     // CSS variables for theming
     THEME: {
         bgDarkest: '#0f0f1b',
