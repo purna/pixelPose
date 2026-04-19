@@ -32,10 +32,7 @@ export function moveDrag(state, dx, dy) {
     dragNode.x += dx;
     dragNode.y += dy;
     solveIK(state);
-    return;
-  }
-
-  if (dragNode.id === 'pelvis') {
+  } else if (dragNode.id === 'pelvis') {
     const movingChildren = state.footAnchor 
       ? state.PELVIS_CHILDREN.filter(id => !state.FOOT_NODES.includes(id))
       : state.PELVIS_CHILDREN;
