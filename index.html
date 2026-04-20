@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PIXELPOSE — Character Animator</title>
+  <title>PIXELPOSE</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/modal.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/upng-js/2.1.0/UPNG.min.js"></script>
@@ -16,7 +16,7 @@
 
   <header>
     <h1>PIXEL<span>POSE</span></h1>
-    <div class="header-subtitle">Character Animator</div>
+    <div class="header-subtitle">2D Character Animator</div>
     <div class="header-actions">
       <button class="btn" id="undoBtn" disabled title="Undo (Ctrl+Z)">↶</button>
       <button class="btn" id="redoBtn" disabled title="Redo (Ctrl+Y)">↷</button>
@@ -102,31 +102,31 @@
         </div>
       </div>
 
-<div class="sidebar-section accordion collapsed">
-         <h3 class="accordion-header" onclick="this.parentElement.classList.toggle('collapsed')">
-           Display <span class="accordion-icon">▼</span>
-         </h3>
-         <div class="accordion-content">
-           <label class="checkbox-label">
-             <input type="checkbox" id="showLabels" checked> Node labels
-           </label>
-           <label class="checkbox-label">
-             <input type="checkbox" id="showDistances"> Node distances
-           </label>
-           <label class="checkbox-label">
-             <input type="checkbox" id="showGrid" checked> Grid
-           </label>
-           <label class="checkbox-label">
-             <input type="checkbox" id="displayBoundingBox"> Show bounding box
-           </label>
-           <label class="checkbox-label">
-             <input type="checkbox" id="showShadow"> Ground shadow
-           </label>
-           <label class="checkbox-label">
-             <input type="checkbox" id="spriteMode" disabled> Sprite mode
-           </label>
-         </div>
-       </div>
+      <div class="sidebar-section accordion collapsed">
+        <h3 class="accordion-header" onclick="this.parentElement.classList.toggle('collapsed')">
+          Display <span class="accordion-icon">▼</span>
+        </h3>
+        <div class="accordion-content">
+          <label class="checkbox-label">
+            <input type="checkbox" id="showLabels" checked> Node labels
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="showDistances"> Node distances
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="showGrid" checked> Grid
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="displayBoundingBox"> Show bounding box
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="showShadow"> Ground shadow
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="spriteMode" disabled> Sprite mode
+          </label>
+        </div>
+      </div>
 
       <div class="sidebar-section">
         <h3>Node Info</h3>
@@ -145,63 +145,63 @@
     <div class="main-content" style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
 
       <!-- Canvas -->
-    <div class="canvas-wrap" id="canvasWrap">
-      <div class="floating-toolbar">
-        <button class="float-btn active" id="modeMove" data-tooltip="Move Node">
-          <i class="fas fa-arrows-alt"></i>
-        </button>
-        <button class="float-btn" id="modePan" data-tooltip="Pan Canvas">
-          <i class="fas fa-hand-paper"></i>
-        </button>
-      </div>
-
-      <canvas id="mainCanvas"></canvas>
-      <div class="status-bar">
-        <div class="badge" id="frameBadge">Frame 1 / 1</div>
-        <div class="badge" id="playBadge" style="display:none">▶ PLAYING</div>
-      </div>
-      <div class="canvas-hint" id="canvasHint">Drag nodes to pose • Add frames in the timeline ↓</div>
-    </div>
-
-    <!-- Bottom animation panel -->
-    <div class="anim-panel horizontal">
-      <div class="anim-header-strip">
-        <div class="anim-header">
-          <i class="fas fa-clapperboard" style="color: var(--text-dim); font-size: 1.1em;"></i>
-          <h3>Timeline</h3>
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="floating-toolbar">
+          <button class="float-btn active" id="modeMove" data-tooltip="Move Node">
+            <i class="fas fa-arrows-alt"></i>
+          </button>
+          <button class="float-btn" id="modePan" data-tooltip="Pan Canvas">
+            <i class="fas fa-hand-paper"></i>
+          </button>
         </div>
 
-        <div class="anim-controls">
-          <button class="btn" id="addFrameBtn"><i class="fas fa-plus"></i> Frame</button>
-          <button class="btn" id="dupFrameBtn"><i class="fas fa-copy"></i> Dup</button>
-          <button class="btn danger" id="delFrameBtn"><i class="fas fa-trash"></i></button>
+        <canvas id="mainCanvas"></canvas>
+        <div class="status-bar">
+          <div class="badge" id="frameBadge">Frame 1 / 1</div>
+          <div class="badge" id="playBadge" style="display:none">▶ PLAYING</div>
         </div>
+        <div class="canvas-hint" id="canvasHint">Drag nodes to pose • Add frames in the timeline ↓</div>
+      </div>
 
-        <div class="playback-row">
-          <button class="btn" id="prevFrameBtn"><i class="fas fa-backward-step"></i></button>
-          <button class="btn primary" id="playBtn"><i class="fas fa-play"></i> Play</button>
-          <button class="btn" id="nextFrameBtn"><i class="fas fa-forward-step"></i></button>
-          <div class="fps-control">
-            <span>FPS</span>
-            <input type="number" id="fpsInput" value="12" min="1" max="60">
+      <!-- Bottom animation panel -->
+      <div class="anim-panel horizontal">
+        <div class="anim-header-strip">
+          <div class="anim-header">
+            <i class="fas fa-clapperboard" style="color: var(--text-dim); font-size: 1.1em;"></i>
+            <h3>Timeline</h3>
           </div>
-          <label class="label-small">
-            <input type="checkbox" id="loopToggle" checked> Loop
-          </label>
-          <label class="label-small">
-            <input type="checkbox" id="tweenToggle" checked> Tween
-          </label>
+
+          <div class="anim-controls">
+            <button class="btn" id="addFrameBtn"><i class="fas fa-plus"></i> Frame</button>
+            <button class="btn" id="dupFrameBtn"><i class="fas fa-copy"></i> Dup</button>
+            <button class="btn danger" id="delFrameBtn"><i class="fas fa-trash"></i></button>
+          </div>
+
+          <div class="playback-row">
+            <button class="btn" id="prevFrameBtn"><i class="fas fa-backward-step"></i></button>
+            <button class="btn primary" id="playBtn"><i class="fas fa-play"></i> Play</button>
+            <button class="btn" id="nextFrameBtn"><i class="fas fa-forward-step"></i></button>
+            <div class="fps-control">
+              <span>FPS</span>
+              <input type="number" id="fpsInput" value="12" min="1" max="60">
+            </div>
+            <label class="label-small">
+              <input type="checkbox" id="loopToggle" checked> Loop
+            </label>
+            <label class="label-small">
+              <input type="checkbox" id="tweenToggle" checked> Tween
+            </label>
+          </div>
+
+          <div class="onion-toggle">
+            <input type="checkbox" id="onionToggle">
+            <label for="onionToggle">Onion skin</label>
+          </div>
         </div>
 
-        <div class="onion-toggle">
-          <input type="checkbox" id="onionToggle">
-          <label for="onionToggle">Onion skin</label>
-        </div>
+        <div class="timeline horizontal" id="timeline"></div>
       </div>
 
-      <div class="timeline horizontal" id="timeline"></div>
-    </div>
-    
     </div> <!-- Close main-content -->
 
   </div>
@@ -268,58 +268,132 @@
 
   <!-- Settings modal -->
   <div class="modal-bg" id="settingsModal">
-    <div class="modal save-modal">
+    <div class="modal save-modal settings-tabbed-modal">
       <h3>⚙ Settings</h3>
-      <div class="settings-content">
-        <div class="settings-section">
-          <h4>Colors</h4>
-          <div class="color-row">
-            <label>Left Arm</label>
-            <input type="color" id="armLColor" value="#0055aa">
+
+      <!-- Tab Bar -->
+      <div class="settings-tabs" role="tablist">
+        <button class="settings-tab active" data-tab="appearance" role="tab" id="stab-appearance">🎨 Appearance</button>
+        <button class="settings-tab" data-tab="sprite" role="tab" id="stab-sprite">🖼 Sprite</button>
+        <button class="settings-tab" data-tab="database" role="tab" id="stab-database">🗄 Database</button>
+      </div>
+
+      <!-- Tab Panels -->
+      <div class="settings-panels">
+
+        <!-- APPEARANCE TAB -->
+        <div class="settings-panel active" data-panel="appearance">
+          <div class="settings-section">
+            <h4>Skeleton Colors</h4>
+            <div class="color-row">
+              <label>Left Arm</label>
+              <input type="color" id="armLColor" value="#0055aa">
+            </div>
+            <div class="color-row">
+              <label>Right Arm</label>
+              <input type="color" id="armRColor" value="#005533">
+            </div>
+            <div class="color-row">
+              <label>Left Leg</label>
+              <input type="color" id="legLColor" value="#0044cc">
+            </div>
+            <div class="color-row">
+              <label>Right Leg</label>
+              <input type="color" id="legRColor" value="#006644">
+            </div>
+            <div class="color-row">
+              <label>Body/Torso</label>
+              <input type="color" id="bodyColor" value="#1a3344">
+            </div>
           </div>
-          <div class="color-row">
-            <label>Right Arm</label>
-            <input type="color" id="armRColor" value="#005533">
-          </div>
-          <div class="color-row">
-            <label>Left Leg</label>
-            <input type="color" id="legLColor" value="#0044cc">
-          </div>
-          <div class="color-row">
-            <label>Right Leg</label>
-            <input type="color" id="legRColor" value="#006644">
-          </div>
-          <div class="color-row">
-            <label>Body/Torso</label>
-            <input type="color" id="bodyColor" value="#1a3344">
+          <div class="settings-section">
+            <h4>Tutorial</h4>
+            <div class="color-row">
+              <label>Enable tutorial</label>
+              <input type="checkbox" class="toggle" id="enableTutorial">
+            </div>
           </div>
         </div>
-        <div class="settings-section">
-          <h4>Tutorial</h4>
-          <div class="color-row">
-            <label>Enable tutorial</label>
-            <input type="checkbox" class="toggle" id="enableTutorial">
+
+        <!-- SPRITE EXPORT TAB -->
+        <div class="settings-panel" data-panel="sprite">
+          <div class="settings-section">
+            <h4>Sprite Export</h4>
+            <div class="color-row">
+              <label>Show bounding box</label>
+              <input type="checkbox" class="toggle" id="spriteBoundingBox">
+            </div>
+            <div class="color-row">
+              <label>Background</label>
+              <input type="color" id="spriteBgColor" value="#000000">
+              <label class="val-display">Transparent</label>
+              <input type="checkbox" class="toggle" id="spriteBgTransparent" checked>
+            </div>
+            <div class="color-row slider-row">
+              <label for="spriteFrameSize">Frame Size</label>
+              <input type="range" id="spriteFrameSize" min="100" max="600" value="375" class="range-small">
+              <span id="spriteFrameSizeVal" class="val-display">375</span>
+            </div>
           </div>
         </div>
-        <div class="settings-section">
-          <h4>Sprite Export</h4>
-          <div class="color-row">
-            <label>Show bounding box</label>
-            <input type="checkbox" class="toggle" id="spriteBoundingBox">
+
+        <!-- DATABASE TAB -->
+        <div class="settings-panel" data-panel="database">
+
+          <!-- Status Bar -->
+          <div class="db-status-bar">
+            <span class="db-status-dot" id="dbStatusDot"></span>
+            <span class="db-status-label" id="dbStatusLabel">Loading…</span>
+            <span class="db-stat-badge" id="dbStatBadge">— records</span>
           </div>
-          <div class="color-row">
-            <label>Background</label>
-            <input type="color" id="spriteBgColor" value="#000000">
-            <label class="val-display">Transparent</label>
-            <input type="checkbox" class="toggle" id="spriteBgTransparent" checked>
+
+          <!-- Save Now -->
+          <div class="settings-section">
+            <h4>Manual Save</h4>
+            <p class="settings-hint">Snapshot the current animation to the local database.</p>
+            <button class="btn btn-full db-action-btn" id="dbSaveNowBtn">
+              <i class="fas fa-save"></i> Save Animation Now
+            </button>
           </div>
-          <div class="color-row slider-row">
-            <label for="spriteFrameSize">Frame Size</label>
-            <input type="range" id="spriteFrameSize" min="100" max="600" value="375" class="range-small">
-            <span id="spriteFrameSizeVal" class="val-display">375</span>
+
+          <!-- Auto-save -->
+          <div class="settings-section">
+            <h4>Auto-Save</h4>
+            <div class="color-row">
+              <label>Enable auto-save</label>
+              <input type="checkbox" class="toggle" id="dbAutoSaveToggle">
+            </div>
+            <div class="db-autosave-interval color-row slider-row">
+              <label for="dbAutoSaveInterval">Interval</label>
+              <input type="range" id="dbAutoSaveInterval" min="5" max="300" step="5" value="30" class="range-small">
+              <span class="val-display" id="dbAutoSaveIntervalVal">30s</span>
+            </div>
           </div>
+
+          <!-- Browse Saved -->
+          <div class="settings-section">
+            <h4>Saved Animations <span class="db-count-badge" id="dbCountBadge">0</span></h4>
+            <div id="dbRecordList" class="db-record-list"></div>
+          </div>
+
+          <!-- Backup / Restore -->
+          <div class="settings-section">
+            <h4>Backup &amp; Restore</h4>
+            <button class="btn btn-full db-action-btn" id="dbExportBtn">
+              <i class="fas fa-download"></i> Export Backup (.json)
+            </button>
+            <input type="file" id="dbImportFile" accept=".json" style="display:none">
+            <button class="btn btn-full db-action-btn" id="dbImportBtn" style="margin-top:6px">
+              <i class="fas fa-upload"></i> Import Backup
+            </button>
+            <button class="btn btn-full db-action-btn danger" id="dbClearAllBtn" style="margin-top:6px">
+              <i class="fas fa-trash"></i> Clear All Saved
+            </button>
+          </div>
+
         </div>
       </div>
+
       <div class="modal-btns">
         <button class="btn" id="closeSettingsBtn">Close</button>
       </div>

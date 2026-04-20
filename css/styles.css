@@ -1084,3 +1084,263 @@ input[type="checkbox"].toggle:checked::before {
     color: var(--text);
     border-radius: 3px;
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   SETTINGS — TABBED MODAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+.settings-tabbed-modal {
+    max-width: 460px;
+    width: 100%;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tab bar */
+.settings-tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.settings-tab {
+    flex: 1;
+    padding: 0.5rem 0.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    text-align: center;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+}
+
+.settings-tab:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+}
+
+.settings-tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+    background: rgba(0, 255, 204, 0.04);
+}
+
+/* Panels container */
+.settings-panels {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 0.75rem 0 0 0;
+}
+
+.settings-panel {
+    display: none;
+    animation: fadeTabIn 0.18s ease;
+}
+
+.settings-panel.active {
+    display: block;
+}
+
+@keyframes fadeTabIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DATABASE TAB SPECIFIC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* Status bar at top of db panel */
+.db-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: var(--panel2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+
+.db-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    flex-shrink: 0;
+    transition: background 0.3s;
+}
+
+.db-status-dot.online { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+.db-status-dot.saving { background: #ffd700; box-shadow: 0 0 6px #ffd700; animation: pulse-dot 0.8s infinite; }
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.4; }
+}
+
+.db-status-label {
+    font-size: 0.62rem;
+    color: var(--text);
+    flex: 1;
+}
+
+.db-stat-badge {
+    font-size: 0.55rem;
+    padding: 2px 7px;
+    background: rgba(0,255,204,0.12);
+    border: 1px solid rgba(0,255,204,0.25);
+    color: var(--accent);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+}
+
+/* settings-hint */
+.settings-hint {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+/* Action button */
+.db-action-btn {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* Auto-save interval row — dim when disabled */
+.db-autosave-interval {
+    transition: opacity 0.2s;
+}
+.db-autosave-interval.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+}
+
+/* count badge next to h4 */
+.db-count-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    font-size: 0.55rem;
+    background: rgba(123,97,255,0.2);
+    border: 1px solid rgba(123,97,255,0.35);
+    color: var(--accent3);
+    border-radius: 10px;
+    font-family: 'Space Mono', monospace;
+    vertical-align: middle;
+}
+
+/* Record list (saved animations in db tab) */
+.db-record-list {
+    max-height: 160px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-top: 6px;
+}
+
+.db-record-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 9px;
+    background: var(--panel2);
+    border: 1px solid transparent;
+    border-radius: 5px;
+    transition: border-color 0.15s, background 0.15s;
+    cursor: default;
+}
+
+.db-record-item:hover {
+    background: var(--bg-light);
+    border-color: var(--border);
+}
+
+.db-record-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.db-record-name {
+    font-size: 0.65rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.db-record-meta {
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    margin-top: 2px;
+}
+
+.db-record-auto-badge {
+    font-size: 0.5rem;
+    padding: 1px 5px;
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #ffd700;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.db-record-actions {
+    display: flex;
+    gap: 3px;
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.db-record-item:hover .db-record-actions {
+    opacity: 1;
+}
+
+.db-rec-btn {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-dim);
+    font-size: 0.6rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.db-rec-btn.load:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,255,204,0.08);
+}
+
+.db-rec-btn.del:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(255,61,127,0.08);
+}
+
+.db-empty {
+    text-align: center;
+    padding: 1.5rem 0;
+    font-size: 0.6rem;
+    color: var(--text-dim);
+}

@@ -6,12 +6,16 @@ import * as hierarchy from './core/hierarchy.js';
 import { saveHistory, undo, redo } from './core/history.js';
 import { loadBodyDefinition, getCurrentNodes, getCurrentBones, getCurrentConstraints } from './skeleton.js';
 import Config from './config.js';
+import { DatabaseManager } from './databaseManager.js';
 
 import * as sidebar from './ui/sidebar.js';
 import { syncBoneLengthsFromNodes } from './ui/sidebar.js';
 import * as timeline from './ui/timeline.js';
 import * as modals from './ui/modals.js';
 import * as importExport from './ui/importExport.js';
+
+/** Shared DatabaseManager instance */
+let dbManager = null;
 
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
@@ -515,6 +519,220 @@ window.addEventListener('resize', () => {
   render();
 });
 
+// ─── SETTINGS TABS ────────────────────────────────────────────────────────────
+function initSettingsTabs() {
+  const tabs   = document.querySelectorAll('.settings-tab');
+  const panels = document.querySelectorAll('.settings-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const target = tab.dataset.tab;
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === target));
+      panels.forEach(p => p.classList.toggle('active', p.dataset.panel === target));
+      // Refresh DB list whenever the user switches to database tab
+      if (target === 'database') refreshDatabaseUI();
+    });
+  });
+}
+
+// ─── DATABASE UI ──────────────────────────────────────────────────────────────
+function refreshDatabaseUI() {
+  if (!dbManager) return;
+
+  const stats   = dbManager.getStats();
+  const records = dbManager.loadAll();
+
+  // Status dot & label
+  const dot   = document.getElementById('dbStatusDot');
+  const label = document.getElementById('dbStatusLabel');
+  const badge = document.getElementById('dbStatBadge');
+  const count = document.getElementById('dbCountBadge');
+
+  dot.className   = 'db-status-dot online';
+  label.textContent = 'Local database ready';
+  badge.textContent = `${stats.count} record${stats.count !== 1 ? 's' : ''}`;
+  if (count) count.textContent = stats.count;
+
+  // Record list
+  const list = document.getElementById('dbRecordList');
+  if (!list) return;
+
+  if (records.length === 0) {
+    list.innerHTML = '<div class="db-empty">No saved animations yet.</div>';
+    return;
+  }
+
+  list.innerHTML = records
+    .slice()
+    .sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt))
+    .map(rec => {
+      const date = new Date(rec.savedAt).toLocaleString(undefined, {
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      });
+      const frames = rec.frames ? rec.frames.length : 0;
+      const autoBadge = rec._autoSave
+        ? '<span class="db-record-auto-badge">AUTO</span>'
+        : '';
+      return `
+        <div class="db-record-item" data-id="${rec.id}">
+          <div class="db-record-info">
+            <div class="db-record-name">${escapeHtml(rec.name)}</div>
+            <div class="db-record-meta">${date} · ${frames} frame${frames !== 1 ? 's' : ''}</div>
+          </div>
+          ${autoBadge}
+          <div class="db-record-actions">
+            <button class="db-rec-btn load" title="Load animation" data-load="${rec.id}">↩</button>
+            <button class="db-rec-btn del"  title="Delete record"  data-del="${rec.id}">✕</button>
+          </div>
+        </div>`;
+    })
+    .join('');
+
+  // Wire up the micro-buttons inside the list
+  list.querySelectorAll('.db-rec-btn.load').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const rec = dbManager.loadById(btn.dataset.load);
+      if (rec) applyDbRecord(rec);
+    });
+  });
+  list.querySelectorAll('.db-rec-btn.del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dbManager.delete(btn.dataset.del);
+      refreshDatabaseUI();
+    });
+  });
+}
+
+function applyDbRecord(rec) {
+  if (!rec) return;
+  state.frames      = rec.frames      || [];
+  state.bones       = rec.bones       || [];
+  state.constraints = rec.constraints || { distances: {}, angles: {} };
+  Object.assign(state.meta, rec.meta || {});
+  state.currentFrame = 0;
+  if (state.frames.length > 0) {
+    state.nodes = JSON.parse(JSON.stringify(state.frames[0].nodes));
+  }
+  // Rebuild hierarchy
+  if (state.bones.length > 0) {
+    const rootNode = state.nodes.find(n => n.id === 'pelvis') ? 'pelvis' : state.bones[0][0];
+    const tree = hierarchy.buildTree(state.bones, rootNode);
+    const hierarchyMap = hierarchy.computeAllDescendants(tree.children);
+    state.currentHierarchy = hierarchyMap;
+    state.currentPelvisChildren = hierarchyMap[rootNode] || [];
+    const isHuman = ['adult-male', 'adult-female', 'child'].includes(state.meta.bodyType);
+    const parentNodeIds = new Set(state.bones.map(b => b[0]));
+    state.currentFootNodes = state.nodes
+      .filter(n => {
+        const isFootCandidate = n.id.startsWith('foot') || (n.id.startsWith('hand') && !isHuman) || n.id.includes('paw');
+        return isFootCandidate && !parentNodeIds.has(n.id);
+      })
+      .map(n => n.id);
+    state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
+  }
+  timeline.updateTimeline();
+  timeline.updateFrameBadge();
+  sidebar.updateAnimationList(state.meta.bodyType);
+  saveHistory();
+  render();
+}
+
+function initDatabaseUI() {
+  dbManager = new DatabaseManager(() => state);
+
+  // ── Auto-save toggle ──
+  const autoToggle   = document.getElementById('dbAutoSaveToggle');
+  const intervalSlider = document.getElementById('dbAutoSaveInterval');
+  const intervalVal  = document.getElementById('dbAutoSaveIntervalVal');
+  const intervalRow  = document.querySelector('.db-autosave-interval');
+
+  // Init from stored settings
+  autoToggle.checked     = dbManager.autoSaveEnabled;
+  intervalSlider.value   = dbManager.autoSaveInterval;
+  intervalVal.textContent = dbManager.autoSaveInterval + 's';
+  intervalRow.classList.toggle('disabled', !dbManager.autoSaveEnabled);
+
+  // Start timer if it was enabled before
+  if (dbManager.autoSaveEnabled) {
+    dbManager.setAutoSave(true, dbManager.autoSaveInterval);
+  }
+
+  autoToggle.addEventListener('change', () => {
+    dbManager.setAutoSave(autoToggle.checked, parseInt(intervalSlider.value, 10));
+    intervalRow.classList.toggle('disabled', !autoToggle.checked);
+  });
+
+  intervalSlider.addEventListener('input', () => {
+    const v = parseInt(intervalSlider.value, 10);
+    intervalVal.textContent = v + 's';
+    if (autoToggle.checked) {
+      dbManager.setAutoSave(true, v);
+    } else {
+      // Just persist the value without starting the timer
+      dbManager._autoSaveInterval = v;
+      dbManager._persistSettings();
+    }
+  });
+
+  // ── Save Now ──
+  document.getElementById('dbSaveNowBtn').addEventListener('click', () => {
+    const dot   = document.getElementById('dbStatusDot');
+    const label = document.getElementById('dbStatusLabel');
+    dot.className = 'db-status-dot saving';
+    label.textContent = 'Saving…';
+    const rec = dbManager.save(state);
+    setTimeout(() => {
+      refreshDatabaseUI();
+    }, 300);
+  });
+
+  // ── Export backup ──
+  document.getElementById('dbExportBtn').addEventListener('click', () => {
+    const n = dbManager.exportBackup();
+    console.log(`[DB] Exported ${n} records`);
+  });
+
+  // ── Import backup ──
+  document.getElementById('dbImportBtn').addEventListener('click', () => {
+    document.getElementById('dbImportFile').click();
+  });
+  document.getElementById('dbImportFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const n = await dbManager.importBackup(file);
+      console.log(`[DB] Imported ${n} records`);
+      refreshDatabaseUI();
+    } catch (err) {
+      console.error('[DB] Import failed', err);
+      alert('Import failed: ' + err.message);
+    }
+    e.target.value = '';
+  });
+
+  // ── Clear All ──
+  document.getElementById('dbClearAllBtn').addEventListener('click', () => {
+    if (confirm('Delete all saved animations from the local database? This cannot be undone.')) {
+      dbManager.deleteAll();
+      refreshDatabaseUI();
+    }
+  });
+
+  // Listen for auto-save events to update UI
+  window.addEventListener('db:autosaved', () => refreshDatabaseUI());
+
+  // Initial render
+  refreshDatabaseUI();
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // ─── INIT ───
 async function init() {
   resize();
@@ -604,6 +822,12 @@ async function init() {
     state.charColors.body = e.target.value;
     render();
   });
+
+  // Settings tabs
+  initSettingsTabs();
+
+  // Database UI
+  initDatabaseUI();
   
   // Load default body
   const defaultBody = Object.keys(Config.BODIES)[0];
