@@ -485,6 +485,7 @@ canvas.addEventListener('mousemove', (e) => {
     render();
   } else {
     // Show node info on hover
+    const world = screenToWorld(e.clientX, e.clientY);
     const hoverNode = interaction.hitNode(state.nodes, world.x, world.y);
     if (hoverNode) {
       sidebar.updateNodeInfo(hoverNode);
