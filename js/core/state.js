@@ -41,7 +41,8 @@ export const state = {
     showShadow: false,
     showBoundingBox: false,
     onionSkin: false,
-    spriteMode: false
+    spriteMode: false,
+    showSprites: false
   },
 
   // Sprite box

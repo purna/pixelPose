@@ -7,6 +7,7 @@ import { saveHistory, undo, redo } from './core/history.js';
 import { loadBodyDefinition, getCurrentNodes, getCurrentBones, getCurrentConstraints } from './skeleton.js';
 import Config from './config.js';
 import { DatabaseManager } from './databaseManager.js';
+import { loadSprites } from './spriteLoader.js';
 
 import * as sidebar from './ui/sidebar.js';
 import { syncBoneLengthsFromNodes } from './ui/sidebar.js';
@@ -87,6 +88,7 @@ async function loadBody(bodyType) {
   timeline.updateFrameBadge();
   sidebar.updateAnimationList(bodyType);
   sidebar.updateBoneLengthsUI(state, render);
+  loadSprites(bodyType).then(() => render());
   saveHistory();
   render();
 }
@@ -854,6 +856,10 @@ async function init() {
   // Display toggles
   document.getElementById('displayBoundingBox').addEventListener('change', (e) => {
     state.view.showBoundingBox = e.target.checked;
+    render();
+  });
+  document.getElementById('showSpritesToggle').addEventListener('change', (e) => {
+    state.view.showSprites = e.target.checked;
     render();
   });
   

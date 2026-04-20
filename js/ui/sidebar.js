@@ -91,8 +91,8 @@ export function initSidebar(state, callbacks) {
     render();
   });
 
-  document.getElementById('spriteMode').addEventListener('change', (e) => {
-    state.view.spriteMode = e.target.checked;
+  document.getElementById('showSpritesToggle').addEventListener('change', (e) => {
+    state.view.showSprites = e.target.checked;
     render();
   });
 
@@ -102,6 +102,7 @@ export function initSidebar(state, callbacks) {
   document.getElementById('showDistances').checked = state.view.showDistances;
   document.getElementById('showShadow').checked = state.view.showShadow;
   document.getElementById('displayBoundingBox').checked = state.view.showBoundingBox;
+  document.getElementById('showSpritesToggle').checked = state.view.showSprites;
 
   // Sprite frame size
   document.getElementById('spriteFrameSize').addEventListener('input', (e) => {
