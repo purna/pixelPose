@@ -206,10 +206,8 @@ export async function updateBoneLengthsUI(state, renderFn) {
       if (isNaN(v) || v < 10 || v > 200) return;
       state.constraints.distances[key] = v;
       state.constraints.distances[keyRev] = v;
-      if (state.lockLimbLengths && renderFn) {
-        solveIK(state);
-        renderFn();
-      }
+      solveIK(state);
+      if (renderFn) renderFn();
     };
     
     rangeInput.addEventListener('input', (e) => {

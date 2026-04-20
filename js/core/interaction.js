@@ -6,7 +6,7 @@ const NODE_RADIUS = 7;
 
 export function hitNode(nodes, x, y) {
   let closest = null;
-  let minDist = NODE_RADIUS * 2.5;
+  let minDist = NODE_RADIUS * 5;
   nodes.forEach(n => {
     const d = Math.hypot(n.x - x, n.y - y);
     if (d < minDist) { minDist = d; closest = n; }

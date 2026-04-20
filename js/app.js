@@ -450,6 +450,7 @@ canvas.addEventListener('mousedown', (e) => {
   const node = interaction.hitNode(state.nodes, world.x, world.y);
   if (node) {
     interaction.startDrag(state, node, world);
+    sidebar.updateNodeInfo(node);
   }
 });
 
@@ -468,6 +469,8 @@ canvas.addEventListener('mousemove', (e) => {
     const dx = world.x - state.dragNode.x;
     const dy = world.y - state.dragNode.y;
     interaction.moveDrag(state, dx, dy);
+    syncBoneLengthsFromNodes(state);
+    sidebar.updateNodeInfo(state.dragNode);
     render();
   } else if (state.dragState.panStart) {
     const rect = canvas.getBoundingClientRect();
@@ -476,6 +479,14 @@ canvas.addEventListener('mousemove', (e) => {
     interaction.pan(state, dx, dy);
     state.dragState.panStart = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     render();
+  } else {
+    // Show node info on hover
+    const hoverNode = interaction.hitNode(state.nodes, world.x, world.y);
+    if (hoverNode) {
+      sidebar.updateNodeInfo(hoverNode);
+    } else if (!state.isDragging) {
+      sidebar.updateNodeInfo(null);
+    }
   }
 });
 
@@ -487,6 +498,7 @@ canvas.addEventListener('mouseup', () => {
     interaction.endDrag(state);
     anim.saveFrame(state);
     syncBoneLengthsFromNodes(state);
+    sidebar.updateNodeInfo(null);
   }
   if (state.dragState.panStart) {
     interaction.endPan(state);
