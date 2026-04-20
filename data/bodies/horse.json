@@ -5,6 +5,7 @@
   "category": "animal",
   "bodyType": "horse",
   "height": 80,
+  "direction": "left",
   "frames": [
     {
       "nodes": [

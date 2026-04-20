@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -40 28 80" width="28" height="80">
+  <title>Human Lower Arm Right</title>
+  <path d="M-10,-36 L10,-36 L6,36 L-6,36 Z" fill="#003d26" stroke="#00ff88" stroke-width="1.2"/>
+  <path d="M5,-36 L3,36" stroke="#00ff88" stroke-width="0.8" opacity="0.3"/>
+  <circle cx="0" cy="-36" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="36" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

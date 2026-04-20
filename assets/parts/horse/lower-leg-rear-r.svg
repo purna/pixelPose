@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -44 20 88" width="20" height="88">
+  <title>Horse Lower Rear Leg Right</title>
+  <rect x="-6" y="-40" width="12" height="80" rx="4" fill="#0f1f0f" stroke="#00ff88" stroke-width="1.2"/>
+  <line x1="-3" y1="-40" x2="-3" y2="40" stroke="#00cc66" stroke-width="0.8" opacity="0.5"/>
+  <circle cx="0" cy="-40" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="40" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

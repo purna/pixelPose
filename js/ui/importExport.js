@@ -97,6 +97,7 @@ export function exportJSON() {
     category: state.meta.category || 'human',
     bodyType: state.meta.bodyType || 'adult-male',
     height: state.meta.height || 180,
+    direction: state.meta.direction || 'left',
     frames: state.frames,
     bones: state.bones,
     constraints: state.constraints,

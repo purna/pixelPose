@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -6 40 60" width="40" height="60">
+  <title>Dog Tail</title>
+  <!-- wagging tail, slight curve -->
+  <path d="M-4,-2 Q-6,16 4,30 Q12,46 22,50 Q28,52 28,46 Q28,40 20,38 Q10,34 4,20 Q-2,6 -4,-2 Z" fill="#141428" stroke="#00d9ff" stroke-width="1.2"/>
+  <!-- fluff tip -->
+  <ellipse cx="24" cy="48" rx="6" ry="5" fill="#1a1a3a" stroke="#00d9ff" stroke-width="1"/>
+  <!-- root pivot -->
+  <circle cx="-2" cy="-2" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

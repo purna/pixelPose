@@ -5,6 +5,7 @@
   "category": "human",
   "bodyType": "adult-female",
   "height": 165,
+  "direction": "left",
   "frames": [
     {
       "label": "Run Contact",

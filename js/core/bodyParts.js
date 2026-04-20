@@ -65,6 +65,72 @@ export const BODY_PARTS = {
     width: 56,
     height: 62
   },
+  'head-right': {
+    draw: (ctx, alpha) => {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#0d2233';
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.ellipse(0, -8, 28, 32, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#0d2233';
+      ctx.beginPath();
+      ctx.roundRect(-18, 14, 36, 12, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#001a0d';
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(9, -10, 5, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(-9, -10, 5, 6, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#00ffcc';
+      ctx.beginPath();
+      ctx.arc(9, -10, 2.5, 0, Math.PI * 2);
+      ctx.arc(-9, -10, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#e0f7f0';
+      ctx.beginPath();
+      ctx.arc(8, -11, 1, 0, Math.PI * 2);
+      ctx.arc(-10, -11, 1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 1;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-3, 2);
+      ctx.quadraticCurveTo(0, 8, 3, 2);
+      ctx.stroke();
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-8, 16);
+      ctx.quadraticCurveTo(0, 21, 8, 16);
+      ctx.stroke();
+      ctx.fillStyle = '#0d2233';
+      ctx.strokeStyle = '#00ffcc';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.ellipse(-29, -4, 5, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.ellipse(29, -4, 5, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    },
+    pivotY: 26,
+    width: 56,
+    height: 62
+  },
   neck: {
     draw: (ctx, alpha) => {
       ctx.save();

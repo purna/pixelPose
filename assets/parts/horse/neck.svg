@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -55 50 110" width="50" height="110">
+  <title>Horse Neck</title>
+  <!-- neck tapers upward -->
+  <path d="M-16,50 Q-20,0 0,-50 L20,-50 Q22,0 16,50 Z" fill="#1a2a1a" stroke="#00ff88" stroke-width="1.5"/>
+  <!-- mane stripe -->
+  <path d="M0,-50 Q-4,-20 -4,50" fill="none" stroke="#00cc66" stroke-width="4" stroke-linecap="round" opacity="0.55"/>
+  <!-- head pivot -->
+  <circle cx="0" cy="-50" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- body pivot -->
+  <circle cx="0" cy="50" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

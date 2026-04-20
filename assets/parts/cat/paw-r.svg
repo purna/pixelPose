@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -6 32 22" width="32" height="22">
+  <title>Cat Paw Right</title>
+  <ellipse cx="0" cy="10" rx="12" ry="6" fill="#0f0820" stroke="#00ff88" stroke-width="1.2"/>
+  <ellipse cx="-9" cy="3" rx="4.5" ry="3.5" fill="#0f0820" stroke="#00ff88" stroke-width="1"/>
+  <ellipse cx="0" cy="0" rx="4.5" ry="3.5" fill="#0f0820" stroke="#00ff88" stroke-width="1"/>
+  <ellipse cx="9" cy="3" rx="4.5" ry="3.5" fill="#0f0820" stroke="#00ff88" stroke-width="1"/>
+  <line x1="-9" y1="0" x2="-11" y2="-4" stroke="#00ff88" stroke-width="0.8" opacity="0.6"/>
+  <line x1="0" y1="-3" x2="0" y2="-7" stroke="#00ff88" stroke-width="0.8" opacity="0.6"/>
+  <line x1="9" y1="0" x2="11" y2="-4" stroke="#00ff88" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="0" cy="-4" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

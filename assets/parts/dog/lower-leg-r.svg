@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -32 20 64" width="20" height="64">
+  <title>Dog Lower Leg Right</title>
+  <path d="M-8,-28 L8,-28 Q9,0 6,28 L-6,28 Q-9,0 -8,-28 Z" fill="#0f0f1e" stroke="#00ff88" stroke-width="1.2"/>
+  <circle cx="0" cy="-28" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="28" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-40 -55 80 90" width="80" height="90">
+  <title>Human Head</title>
+  <!-- skull -->
+  <ellipse cx="0" cy="-8" rx="28" ry="32" fill="#0d2233" stroke="#00ffcc" stroke-width="1.5"/>
+  <!-- jaw -->
+  <rect x="-18" y="14" width="36" height="12" rx="4" fill="#0d2233" stroke="#00ffcc" stroke-width="1.5"/>
+  <!-- left eye -->
+  <ellipse cx="-9" cy="-10" rx="5" ry="6" fill="#001a0d" stroke="#00ffcc" stroke-width="1"/>
+  <circle cx="-9" cy="-10" r="2.5" fill="#00ffcc"/>
+  <circle cx="-8" cy="-11" r="1" fill="#e0f7f0"/>
+  <!-- right eye -->
+  <ellipse cx="9" cy="-10" rx="5" ry="6" fill="#001a0d" stroke="#00ffcc" stroke-width="1"/>
+  <circle cx="9" cy="-10" r="2.5" fill="#00ffcc"/>
+  <circle cx="10" cy="-11" r="1" fill="#e0f7f0"/>
+  <!-- nose -->
+  <path d="M-3 2 Q0 8 3 2" fill="none" stroke="#00ffcc" stroke-width="1" stroke-linecap="round"/>
+  <!-- mouth -->
+  <path d="M-8 16 Q0 21 8 16" fill="none" stroke="#00ffcc" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- ear L -->
+  <ellipse cx="-29" cy="-4" rx="5" ry="8" fill="#0d2233" stroke="#00ffcc" stroke-width="1"/>
+  <!-- ear R -->
+  <ellipse cx="29" cy="-4" rx="5" ry="8" fill="#0d2233" stroke="#00ffcc" stroke-width="1"/>
+  <!-- neck pivot -->
+  <circle cx="0" cy="26" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

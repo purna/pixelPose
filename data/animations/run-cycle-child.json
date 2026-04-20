@@ -5,6 +5,7 @@
   "category": "human",
   "bodyType": "child",
   "height": 130,
+  "direction": "left",
   "frames": [
     {
       "label": "Contact (R)",

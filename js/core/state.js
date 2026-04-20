@@ -60,7 +60,8 @@ export const state = {
     description: '',
     height: 180,
     category: 'human',
-    bodyType: 'adult-male'
+    bodyType: 'adult-male',
+    direction: 'left'
   },
 
   // Playback

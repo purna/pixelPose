@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -6 40 80" width="40" height="80">
+  <title>Horse Tail</title>
+  <!-- tail dock -->
+  <path d="M-6,-2 Q0,10 8,30 Q18,55 10,72 Q6,76 2,72 Q-4,55 -2,30 Q-8,10 -6,-2 Z" fill="#162616" stroke="#00ff88" stroke-width="1.2"/>
+  <!-- tail hair strands -->
+  <path d="M4,30 Q12,50 8,72" fill="none" stroke="#00cc66" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+  <path d="M6,35 Q16,55 14,72" fill="none" stroke="#00cc66" stroke-width="1.5" stroke-linecap="round" opacity="0.35"/>
+  <!-- root pivot -->
+  <circle cx="-2" cy="-2" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

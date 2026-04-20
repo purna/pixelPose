@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -52 28 104" width="28" height="104">
+  <title>Horse Upper Front Leg Left</title>
+  <!-- muscular upper leg, slight forward taper -->
+  <path d="M-12,-48 L12,-48 Q14,-20 10,48 L-10,48 Q-14,-20 -12,-48 Z" fill="#162616" stroke="#0088ff" stroke-width="1.5"/>
+  <!-- muscle highlight -->
+  <path d="M-8,-48 Q-10,-20 -8,48" fill="none" stroke="#0055aa" stroke-width="1" opacity="0.5"/>
+  <!-- hip pivot -->
+  <circle cx="0" cy="-48" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- knee pivot -->
+  <circle cx="0" cy="48" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

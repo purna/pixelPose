@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -6 50 90" width="50" height="90">
+  <title>Cat Tail</title>
+  <!-- long curved tail -->
+  <path d="M-6,-2 Q-14,20 0,44 Q16,68 30,76 Q38,80 36,74 Q34,68 26,66 Q14,60 2,38 Q-10,16 -6,-2 Z" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.2"/>
+  <!-- fluffy tip -->
+  <ellipse cx="30" cy="74" rx="8" ry="6" fill="#250d40" stroke="#a855f7" stroke-width="1"/>
+  <!-- fur highlight stripe -->
+  <path d="M-2,10 Q6,32 18,58" fill="none" stroke="#a855f7" stroke-width="1" opacity="0.35"/>
+  <!-- root pivot -->
+  <circle cx="-3" cy="-2" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

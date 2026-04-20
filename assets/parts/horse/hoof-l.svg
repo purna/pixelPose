@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -10 28 26" width="28" height="26">
+  <title>Horse Hoof Left</title>
+  <!-- hoof wall — rounded block -->
+  <path d="M-12,-6 L12,-6 Q14,0 12,14 Q0,18 -12,14 Q-14,0 -12,-6 Z" fill="#0a0a0a" stroke="#0088ff" stroke-width="1.5"/>
+  <!-- coronet band -->
+  <line x1="-12" y1="-6" x2="12" y2="-6" stroke="#0088ff" stroke-width="2" opacity="0.7"/>
+  <!-- fetlock pivot -->
+  <circle cx="0" cy="-6" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

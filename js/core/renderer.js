@@ -155,7 +155,8 @@ function drawSpriteSkeleton(ctx, nodeList, alpha, st, isGhost) {
   }
 
   const head = N('head'), neck = N('neck');
-  if (head && neck) drawPartBetween('head', neck, head);
+  const headPart = (st.meta && st.meta.direction === 'right') ? 'head-right' : 'head';
+  if (head && neck) drawPartBetween(headPart, neck, head);
 
   const chest = N('chest'), pelvis = N('pelvis'), bum = N('bum');
   if (chest && neck) drawPartBetween('neck', neck, chest);
@@ -269,6 +270,7 @@ function drawSkeleton(ctx, nodeList, alpha, overrideColor, st, isGhost) {
   if (ell && handl) drawLimb(ctx, ell.x, ell.y, handl.x, handl.y, 5, 3, colors.armL, baseAlpha);
 
   const head = N('head');
+  const isRight = st.meta && st.meta.direction === 'right';
   if (head && !ghost) {
     ctx.globalAlpha = baseAlpha;
     ctx.beginPath();
@@ -279,13 +281,15 @@ function drawSkeleton(ctx, nodeList, alpha, overrideColor, st, isGhost) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
+    const eyeLOffsetX = isRight ? 5 : -5;
+    const eyeROffsetX = isRight ? 18 : -18;
     ctx.beginPath();
-    ctx.arc(head.x - 5, head.y - 2, 3, 0, Math.PI * 2);
+    ctx.arc(head.x + eyeLOffsetX, head.y - 2, 3, 0, Math.PI * 2);
     ctx.fillStyle = '#00ffcc';
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(head.x - 18, head.y + 4, 2.5, 0, Math.PI * 2);
+    ctx.arc(head.x + eyeROffsetX, head.y + 4, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = '#00ffcc';
     ctx.fill();
   } else if (head && ghost) {

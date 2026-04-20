@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -46 20 92" width="20" height="92">
+  <title>Horse Lower Front Leg Left</title>
+  <!-- cannon bone — narrow and straight -->
+  <rect x="-7" y="-42" width="14" height="84" rx="4" fill="#0f1f0f" stroke="#0088ff" stroke-width="1.2"/>
+  <!-- tendon line -->
+  <line x1="4" y1="-42" x2="4" y2="42" stroke="#0055aa" stroke-width="0.8" opacity="0.5"/>
+  <!-- knee pivot -->
+  <circle cx="0" cy="-42" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- fetlock pivot -->
+  <circle cx="0" cy="42" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

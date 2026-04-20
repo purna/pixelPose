@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -10 28 26" width="28" height="26">
+  <title>Horse Hoof Right</title>
+  <path d="M-12,-6 L12,-6 Q14,0 12,14 Q0,18 -12,14 Q-14,0 -12,-6 Z" fill="#0a0a0a" stroke="#00ff88" stroke-width="1.5"/>
+  <line x1="-12" y1="-6" x2="12" y2="-6" stroke="#00ff88" stroke-width="2" opacity="0.7"/>
+  <circle cx="0" cy="-6" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

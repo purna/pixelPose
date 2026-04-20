@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -32 20 64" width="20" height="64">
+  <title>Cat Upper Leg Left</title>
+  <path d="M-8,-28 L8,-28 Q10,-8 7,28 L-7,28 Q-10,-8 -8,-28 Z" fill="#150a26" stroke="#0088ff" stroke-width="1.2"/>
+  <path d="M-4,-28 Q-5,-8 -4,28" fill="none" stroke="#0066cc" stroke-width="0.8" opacity="0.4"/>
+  <circle cx="0" cy="-28" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="28" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

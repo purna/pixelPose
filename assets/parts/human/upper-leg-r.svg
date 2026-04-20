@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-18 -56 36 112" width="36" height="112">
+  <title>Human Upper Leg Right</title>
+  <path d="M-14,-52 L14,-52 L10,52 L-10,52 Z" fill="#006644" stroke="#00ff88" stroke-width="1.2"/>
+  <path d="M7,-52 L5,52" stroke="#00ff88" stroke-width="1" opacity="0.35"/>
+  <circle cx="0" cy="-52" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="52" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

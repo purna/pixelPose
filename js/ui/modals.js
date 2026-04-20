@@ -59,7 +59,7 @@ export function openSaveModal(editIndex = -1) {
   
   if (editIndex >= 0) {
     // Edit existing saved animation
-    title.textContent = '✏️ Edit Animation';
+    title.textContent = 'Edit Animation';
     const anim = JSON.parse(localStorage.getItem('poseforge_anims') || '[]')[editIndex];
     if (anim) {
       document.getElementById('animNameInput').value = anim.name || '';
@@ -71,7 +71,7 @@ export function openSaveModal(editIndex = -1) {
     }
   } else {
     // New save
-    title.textContent = '💾 Save Animation';
+    title.textContent = 'Save Animation';
     document.getElementById('animNameInput').value = state.meta.name || '';
     document.getElementById('animAuthorInput').value = state.meta.author || '';
     document.getElementById('animDescInput').value = state.meta.description || '';

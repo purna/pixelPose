@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-90 -40 180 80" width="180" height="80">
+  <title>Horse Body</title>
+  <!-- barrel body shape -->
+  <ellipse cx="0" cy="0" rx="82" ry="34" fill="#1a2a1a" stroke="#00ff88" stroke-width="1.5"/>
+  <!-- belly line -->
+  <path d="M-60,20 Q0,30 60,20" fill="none" stroke="#00cc66" stroke-width="1" opacity="0.4"/>
+  <!-- spine line -->
+  <line x1="-80" y1="-18" x2="80" y2="-18" stroke="#00cc66" stroke-width="0.8" opacity="0.3"/>
+  <!-- wither detail -->
+  <path d="M-20,-34 Q0,-38 20,-34" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.5"/>
+  <!-- neck pivot (front top) -->
+  <circle cx="-78" cy="-20" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- tail pivot (rear) -->
+  <circle cx="82" cy="-10" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- front leg L pivot -->
+  <circle cx="-50" cy="32" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- front leg R pivot -->
+  <circle cx="-30" cy="32" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- rear leg L pivot -->
+  <circle cx="36" cy="32" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- rear leg R pivot -->
+  <circle cx="56" cy="32" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

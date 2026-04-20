@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-26 -30 52 44" width="52" height="44">
+  <title>Human Hand Left</title>
+  <rect x="-14" y="-10" width="28" height="20" rx="6" fill="#0044aa" stroke="#0088ff" stroke-width="1.2"/>
+  <rect x="-12" y="-24" width="6" height="16" rx="3" fill="#0044aa" stroke="#0088ff" stroke-width="1"/>
+  <rect x="-4" y="-27" width="6" height="19" rx="3" fill="#0044aa" stroke="#0088ff" stroke-width="1"/>
+  <rect x="4" y="-26" width="6" height="18" rx="3" fill="#0044aa" stroke="#0088ff" stroke-width="1"/>
+  <rect x="12" y="-22" width="6" height="14" rx="3" fill="#0044aa" stroke="#0088ff" stroke-width="1"/>
+  <rect x="-22" y="-6" width="10" height="14" rx="4" fill="#0044aa" stroke="#0088ff" stroke-width="1"/>
+  <circle cx="0" cy="10" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

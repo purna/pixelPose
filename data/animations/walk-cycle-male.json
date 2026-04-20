@@ -5,6 +5,7 @@
   "category": "human",
   "bodyType": "adult-male",
   "height": 180,
+  "direction": "left",
   "frames": [
     {
       "nodes": [

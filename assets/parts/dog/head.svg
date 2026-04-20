@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-35 -42 90 70" width="90" height="70">
+  <title>Dog Head</title>
+  <!-- skull dome -->
+  <ellipse cx="0" cy="-16" rx="28" ry="24" fill="#1a1a2e" stroke="#00d9ff" stroke-width="1.5"/>
+  <!-- muzzle block -->
+  <path d="M-16,0 Q-18,20 -10,24 L30,22 Q38,18 38,8 Q36,-4 20,-6 L-16,0 Z" fill="#1a1a2e" stroke="#00d9ff" stroke-width="1.5"/>
+  <!-- nose -->
+  <ellipse cx="34" cy="8" rx="6" ry="5" fill="#0a0a1a" stroke="#00d9ff" stroke-width="1"/>
+  <ellipse cx="32" cy="7" rx="2" ry="1.5" fill="#00d9ff" opacity="0.4"/>
+  <!-- eye -->
+  <ellipse cx="-2" cy="-18" rx="7" ry="6" fill="#0a0a1a" stroke="#00d9ff" stroke-width="1.2"/>
+  <circle cx="-2" cy="-18" r="3" fill="#00d9ff"/>
+  <circle cx="-1" cy="-19" r="1.2" fill="#e0f7ff"/>
+  <!-- floppy ear -->
+  <path d="M-24,-28 Q-42,-20 -38,10 Q-36,24 -22,20 Q-14,16 -16,0" fill="#141428" stroke="#00d9ff" stroke-width="1.2"/>
+  <!-- mouth line -->
+  <path d="M2,20 Q18,26 30,20" fill="none" stroke="#00d9ff" stroke-width="1" stroke-linecap="round"/>
+  <!-- neck pivot -->
+  <circle cx="-10" cy="26" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

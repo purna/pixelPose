@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-44 -58 88 112" width="88" height="112">
+  <title>Human Torso</title>
+  <path d="M-38,-52 L38,-52 L28,52 L-28,52 Z" fill="#0d2233" stroke="#00ffcc" stroke-width="1.5"/>
+  <path d="M-28,-30 Q-14,-18 0,-30 Q14,-18 28,-30" fill="none" stroke="#00d9ff" stroke-width="1" opacity="0.6"/>
+  <line x1="-16" y1="-10" x2="16" y2="-10" stroke="#00d9ff" stroke-width="0.8" opacity="0.4"/>
+  <line x1="-18" y1="6" x2="18" y2="6" stroke="#00d9ff" stroke-width="0.8" opacity="0.4"/>
+  <line x1="-20" y1="22" x2="20" y2="22" stroke="#00d9ff" stroke-width="0.8" opacity="0.4"/>
+  <line x1="0" y1="-52" x2="0" y2="52" stroke="#00d9ff" stroke-width="0.6" opacity="0.3"/>
+  <!-- neck pivot -->
+  <circle cx="0" cy="-52" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- shoulder L pivot -->
+  <circle cx="-38" cy="-42" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- shoulder R pivot -->
+  <circle cx="38" cy="-42" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- pelvis pivot -->
+  <circle cx="0" cy="52" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

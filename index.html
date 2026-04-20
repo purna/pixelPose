@@ -29,13 +29,13 @@
       <button class="btn" id="resetPoseBtn">↺ Reset Pose</button>
       <button class="btn" id="flipHBtn" title="Flip Horizontally">↔ Flip</button>
       <button class="btn" id="symmetryBtn">⇔ Mirror</button>
-      <button class="btn primary" id="saveAnimBtn">💾 Save Animation</button>
+      <button class="btn primary" id="saveAnimBtn"><i class="fas fa-save"></i> Save Animation</button>
       <div class="export-dropdown">
         <button class="btn" id="exportBtn">⬇ Export ▾</button>
         <div class="export-menu" id="exportMenu">
-          <button class="export-option" data-format="json">📄 JSON (Animation Data)</button>
-          <button class="export-option" data-format="sprite">🖼️ Sprite Sheet (PNG)</button>
-          <button class="export-option" data-format="apng">🎬 Animated PNG (APNG)</button>
+          <button class="export-option" data-format="json"><i class="fa-solid fa-palette"></i> JSON (Animation Data)</button>
+          <button class="export-option" data-format="sprite"><i class="fa-solid fa-image"></i> Sprite Sheet (PNG)</button>
+          <button class="export-option" data-format="apng"><i class="fa-solid fa-database"></i> Animated PNG (APNG)</button>
         </div>
       </div>
       <button class="btn" id="importBtn">⬆ Import</button>
@@ -214,7 +214,7 @@
   <!-- Save modal -->
   <div class="modal-bg" id="saveModal">
     <div class="modal save-modal">
-      <h3>◈ <span id="saveModalTitle">Save Animation</span></h3>
+      <h3><i class="fas fa-save"></i> <span id="saveModalTitle">Save Animation</span></h3>
 
       <div class="form-group">
         <label>Name <span class="char-count" id="nameCount">0/64</span></label>
@@ -231,7 +231,7 @@
         <textarea id="animDescInput" placeholder="Describe the animation…" maxlength="200"></textarea>
       </div>
 
-      <div class="form-row">
+<div class="form-row">
         <div class="form-group">
           <label>Height (cm)</label>
           <input type="number" id="animHeightInput" min="1" max="500" value="180">
@@ -246,6 +246,9 @@
             <option value="creature">Creature</option>
           </select>
         </div>
+      </div>
+
+      <div class="form-row">
         <div class="form-group">
           <label>Body Type</label>
           <select id="animBodyTypeSelect">
@@ -257,7 +260,16 @@
             <option value="cat">Cat</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Direction</label>
+          <select id="animDirectionSelect" disabled>
+            <option value="left">Facing Left</option>
+            <option value="right">Facing Right</option>
+          </select>
+        </div>
       </div>
+
+      <p class="form-hint">Change direction in Settings → Direction</p>
 
       <div class="form-group">
         <label for="updateDistancesCheck">Update pose distances</label>
@@ -266,7 +278,7 @@
 
       <div class="modal-btns">
         <button class="btn" id="cancelSaveBtn">Cancel</button>
-        <button class="btn primary" id="confirmSaveBtn">◈ Save</button>
+        <button class="btn primary" id="confirmSaveBtn"><i class="fas fa-save"></i> Save</button>
       </div>
     </div>
   </div>
@@ -278,9 +290,9 @@
 
       <!-- Tab Bar -->
       <div class="settings-tabs" role="tablist">
-        <button class="settings-tab active" data-tab="appearance" role="tab" id="stab-appearance">🎨 Appearance</button>
-        <button class="settings-tab" data-tab="sprite" role="tab" id="stab-sprite">🖼 Sprite</button>
-        <button class="settings-tab" data-tab="database" role="tab" id="stab-database">🗄 Database</button>
+        <button class="settings-tab active" data-tab="appearance" role="tab" id="stab-appearance"><i class="fas fa-palette"></i> Appearance</button>
+        <button class="settings-tab" data-tab="sprite" role="tab" id="stab-sprite"><i class="fas fa-image"></i> Sprite</button>
+        <button class="settings-tab" data-tab="database" role="tab" id="stab-database"><i class="fas fa-database"></i> Database</button>
       </div>
 
       <!-- Tab Panels -->
@@ -317,6 +329,12 @@
               <label>Enable tutorial</label>
               <input type="checkbox" class="toggle" id="enableTutorial">
             </div>
+          </div>
+          <div class="settings-section">
+            <h4>Direction</h4>
+            <p style="font-size:0.8rem;color:#888;margin:0 0 8px 0;">Flip character to face the other direction. This will modify ALL frames.</p>
+            <button class="btn" id="flipDirectionBtn" title="Flip Direction">→ Flip Face</button>
+            <span id="directionStatus" style="margin-left:8px;font-size:0.8rem;color:#00ffcc;">Facing left</span>
           </div>
         </div>
 

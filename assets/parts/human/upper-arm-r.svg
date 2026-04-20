@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -48 32 96" width="32" height="96">
+  <title>Human Upper Arm Right</title>
+  <path d="M-12,-44 L12,-44 L8,44 L-8,44 Z" fill="#005533" stroke="#00ff88" stroke-width="1.2"/>
+  <path d="M6,-44 L4,44" stroke="#00ff88" stroke-width="1" opacity="0.4"/>
+  <circle cx="0" cy="-44" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="44" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

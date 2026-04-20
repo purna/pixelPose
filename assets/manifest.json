@@ -1,0 +1,60 @@
+{
+  "cat": {
+    "body": "assets/parts/cat/body.svg",
+    "head": "assets/parts/cat/head.svg",
+    "lower-leg-l": "assets/parts/cat/lower-leg-l.svg",
+    "lower-leg-r": "assets/parts/cat/lower-leg-r.svg",
+    "neck": "assets/parts/cat/neck.svg",
+    "paw-l": "assets/parts/cat/paw-l.svg",
+    "paw-r": "assets/parts/cat/paw-r.svg",
+    "tail": "assets/parts/cat/tail.svg",
+    "upper-leg-l": "assets/parts/cat/upper-leg-l.svg",
+    "upper-leg-r": "assets/parts/cat/upper-leg-r.svg"
+  },
+  "dog": {
+    "body": "assets/parts/dog/body.svg",
+    "head": "assets/parts/dog/head.svg",
+    "lower-leg-l": "assets/parts/dog/lower-leg-l.svg",
+    "lower-leg-r": "assets/parts/dog/lower-leg-r.svg",
+    "neck": "assets/parts/dog/neck.svg",
+    "paw-l": "assets/parts/dog/paw-l.svg",
+    "paw-r": "assets/parts/dog/paw-r.svg",
+    "tail": "assets/parts/dog/tail.svg",
+    "upper-leg-l": "assets/parts/dog/upper-leg-l.svg",
+    "upper-leg-r": "assets/parts/dog/upper-leg-r.svg"
+  },
+  "horse": {
+    "body": "assets/parts/horse/body.svg",
+    "head": "assets/parts/horse/head.svg",
+    "hoof-l": "assets/parts/horse/hoof-l.svg",
+    "hoof-r": "assets/parts/horse/hoof-r.svg",
+    "lower-leg-front-l": "assets/parts/horse/lower-leg-front-l.svg",
+    "lower-leg-front-r": "assets/parts/horse/lower-leg-front-r.svg",
+    "lower-leg-rear-l": "assets/parts/horse/lower-leg-rear-l.svg",
+    "lower-leg-rear-r": "assets/parts/horse/lower-leg-rear-r.svg",
+    "neck": "assets/parts/horse/neck.svg",
+    "tail": "assets/parts/horse/tail.svg",
+    "upper-leg-front-l": "assets/parts/horse/upper-leg-front-l.svg",
+    "upper-leg-front-r": "assets/parts/horse/upper-leg-front-r.svg",
+    "upper-leg-rear-l": "assets/parts/horse/upper-leg-rear-l.svg",
+    "upper-leg-rear-r": "assets/parts/horse/upper-leg-rear-r.svg"
+  },
+  "human": {
+    "foot-l": "assets/parts/human/foot-l.svg",
+    "foot-r": "assets/parts/human/foot-r.svg",
+    "hand-l": "assets/parts/human/hand-l.svg",
+    "hand-r": "assets/parts/human/hand-r.svg",
+    "head": "assets/parts/human/head.svg",
+    "lower-arm-l": "assets/parts/human/lower-arm-l.svg",
+    "lower-arm-r": "assets/parts/human/lower-arm-r.svg",
+    "lower-leg-l": "assets/parts/human/lower-leg-l.svg",
+    "lower-leg-r": "assets/parts/human/lower-leg-r.svg",
+    "neck": "assets/parts/human/neck.svg",
+    "pelvis": "assets/parts/human/pelvis.svg",
+    "torso": "assets/parts/human/torso.svg",
+    "upper-arm-l": "assets/parts/human/upper-arm-l.svg",
+    "upper-arm-r": "assets/parts/human/upper-arm-r.svg",
+    "upper-leg-l": "assets/parts/human/upper-leg-l.svg",
+    "upper-leg-r": "assets/parts/human/upper-leg-r.svg"
+  }
+}

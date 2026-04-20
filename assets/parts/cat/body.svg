@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -28 120 56" width="120" height="56">
+  <title>Cat Body</title>
+  <ellipse cx="0" cy="0" rx="56" ry="24" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.5"/>
+  <path d="M-36,18 Q0,26 36,18" fill="none" stroke="#a855f7" stroke-width="0.8" opacity="0.35"/>
+  <line x1="-54" y1="-10" x2="54" y2="-10" stroke="#a855f7" stroke-width="0.6" opacity="0.2"/>
+  <!-- neck pivot front -->
+  <circle cx="-54" cy="-12" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- tail pivot rear -->
+  <circle cx="56" cy="-6" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- front leg L -->
+  <circle cx="-32" cy="22" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- front leg R -->
+  <circle cx="-16" cy="22" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- rear leg L -->
+  <circle cx="20" cy="22" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- rear leg R -->
+  <circle cx="36" cy="22" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

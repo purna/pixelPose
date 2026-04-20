@@ -5,6 +5,7 @@
   "category": "animal",
   "bodyType": "horse",
   "height": 170,
+  "direction": "left",
   "bones": [
     [
       "head",

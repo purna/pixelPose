@@ -13,6 +13,8 @@ import { syncBoneLengthsFromNodes } from './ui/sidebar.js';
 import * as timeline from './ui/timeline.js';
 import * as modals from './ui/modals.js';
 import * as importExport from './ui/importExport.js';
+import { NotificationManager } from './notifications.js';
+const notificationManager = new NotificationManager();
 
 /** Shared DatabaseManager instance */
 let dbManager = null;
@@ -116,6 +118,7 @@ async function loadAnimationPreset(presetName) {
     state.meta.height = animData.height || 180;
     state.meta.category = animData.category || 'human';
     state.meta.bodyType = animData.bodyType || state.meta.bodyType;
+    state.meta.direction = animData.direction || 'left';
 
     // Merge node labels from current skeleton
     state.frames = [];
@@ -139,12 +142,11 @@ async function loadAnimationPreset(presetName) {
       state.currentHierarchy = hierarchyMap;
       state.currentPelvisChildren = hierarchyMap[rootNode] || [];
       const isHuman = ['adult-male', 'adult-female', 'child'].includes(state.meta.bodyType);
-      // Build set of all node IDs that appear as parents (i.e., have children)
       const parentNodeIds = new Set(state.bones.map(bone => bone[0]));
       state.currentFootNodes = state.nodes
         .filter(n => {
           const isFootCandidate = n.id.startsWith('foot') || (n.id.startsWith('hand') && !isHuman) || n.id.includes('paw');
-          const isLeaf = !parentNodeIds.has(n.id); // no children
+          const isLeaf = !parentNodeIds.has(n.id);
           return isFootCandidate && isLeaf;
         })
         .map(n => n.id);
@@ -155,6 +157,7 @@ async function loadAnimationPreset(presetName) {
     timeline.updateFrameBadge();
     sidebar.updateAnimationList(state.meta.bodyType);
     saveHistory();
+    updateDirectionUI();
     render();
   } catch (err) {
     console.error('Error loading animation:', err);
@@ -227,6 +230,7 @@ function saveNewAnimation(data) {
     height: data.height,
     category: data.category,
     bodyType: data.bodyType,
+    direction: state.meta.direction || 'left',
     frames: state.frames,
     bones: state.bones,
     constraints: constraints,
@@ -247,6 +251,7 @@ function editSavedAnimation(index, data) {
     saved[index].height = data.height;
     saved[index].category = data.category;
     saved[index].bodyType = data.bodyType;
+    saved[index].direction = state.meta.direction || 'left';
     if (data.updateDistances && state.nodes.length > 0 && state.bones.length > 0) {
       saved[index].constraints = {
         ...saved[index].constraints,
@@ -272,6 +277,7 @@ function loadSavedAnimation(index) {
   state.meta.height = anim.height || 180;
   state.meta.category = anim.category || 'human';
   state.meta.bodyType = anim.bodyType || state.meta.bodyType;
+  state.meta.direction = anim.direction || 'left';
   
   state.currentFrame = 0;
   if (state.frames.length > 0) {
@@ -318,35 +324,50 @@ function renderSavedList() {
 
 // ─── IMPORT ───
 async function importAnimation(file) {
-  const text = await file.text();
+  let text;
   try {
-    const data = JSON.parse(text);
-    if (data.frames) {
-      state.frames = data.frames;
-      state.currentFrame = 0;
-      state.nodes = JSON.parse(JSON.stringify(state.frames[0].nodes));
-    }
-    if (data.bones) state.bones = data.bones;
-    if (data.constraints) state.constraints = data.constraints;
-    savedAnimations = data.savedAnimations || [];
-    state.meta.name = data.name || 'Imported';
-    state.meta.author = data.author || '';
-    state.meta.description = data.description || '';
-    state.meta.height = data.height || 180;
-    state.meta.category = data.category || 'human';
-    state.meta.bodyType = data.bodyType || state.meta.bodyType;
-    if (data.spriteBox) {
-      Object.assign(state.spriteBox, data.spriteBox);
-      state.view.charScale = state.spriteBox.scale || 1;
-    }
-    timeline.updateTimeline();
-    timeline.updateFrameBadge();
-    renderSavedList();
-    saveHistory();
-    render();
+    text = await file.text();
   } catch (e) {
-    alert('Invalid file');
+    console.error('File read error:', e);
+    notificationManager.error('Import failed: could not read file. Try serving over HTTPS.');
+    return;
   }
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (e) {
+    console.error('JSON parse error:', e);
+    notificationManager.error('Invalid file: could not parse JSON');
+    return;
+  }
+  if (!data || !data.frames) {
+    console.error('Invalid file: no frames found', data);
+    notificationManager.error('Invalid file: no frames data found');
+    return;
+  }
+  state.frames = data.frames;
+  state.currentFrame = 0;
+  state.nodes = JSON.parse(JSON.stringify(state.frames[0].nodes));
+  if (data.bones) state.bones = data.bones;
+  if (data.constraints) state.constraints = data.constraints;
+  state.meta.name = data.name || 'Imported';
+  state.meta.author = data.author || '';
+  state.meta.description = data.description || '';
+  state.meta.height = data.height || 180;
+  state.meta.category = data.category || 'human';
+  state.meta.bodyType = data.bodyType || state.meta.bodyType;
+  state.meta.direction = data.direction || 'left';
+  if (data.spriteBox) {
+    Object.assign(state.spriteBox, data.spriteBox);
+    state.view.charScale = state.spriteBox.scale || 1;
+  }
+  timeline.updateTimeline();
+  timeline.updateFrameBadge();
+  renderSavedList();
+  saveHistory();
+  updateDirectionUI();
+  render();
+  notificationManager.success(`Imported: ${data.name || 'animation'} (${data.frames.length} frames)`);
 }
 
 // ─── EXPORT ───
@@ -363,10 +384,43 @@ function exportAnimation(format) {
 // ─── FLIP ───
 function flipHorizontal() {
   state.nodes.forEach(n => n.x = -n.x);
+  state.frames.forEach(frame => {
+    frame.nodes.forEach(n => n.x = -n.x);
+  });
   anim.saveFrame(state);
   saveHistory();
   timeline.updateTimeline();
   render();
+}
+
+function flipDirection() {
+  const frameCount = state.frames.length;
+  const msg = `This will flip all ${frameCount} frame(s) to face the opposite direction.\n\nAre you sure you want to continue?`;
+  if (!confirm(msg)) return;
+  
+  state.nodes.forEach(n => n.x = -n.x);
+  state.frames.forEach(frame => {
+    frame.nodes.forEach(n => n.x = -n.x);
+  });
+  state.meta.direction = state.meta.direction === 'left' ? 'right' : 'left';
+  anim.saveFrame(state);
+  saveHistory();
+  updateDirectionUI();
+  timeline.updateTimeline();
+  render();
+}
+
+function updateDirectionUI() {
+  const btn = document.getElementById('flipDirectionBtn');
+  const status = document.getElementById('directionStatus');
+  const dir = state.meta.direction || 'left';
+  if (btn) {
+    btn.textContent = dir === 'left' ? '→ Flip to Right' : '← Flip to Left';
+    btn.title = `Facing ${dir}. Click to flip.`;
+  }
+  if (status) {
+    status.textContent = `Facing ${dir}`;
+  }
 }
 
 function mirrorHorizontal() {
@@ -780,6 +834,7 @@ async function init() {
   
   // Header button handlers
   document.getElementById('flipHBtn').addEventListener('click', flipHorizontal);
+  document.getElementById('flipDirectionBtn').addEventListener('click', flipDirection);
   document.getElementById('symmetryBtn').addEventListener('click', mirrorHorizontal);
   document.getElementById('undoBtn').addEventListener('click', () => {
     undo();
@@ -838,6 +893,7 @@ async function init() {
   
   // History setup
   saveHistory();
+  updateDirectionUI();
   
   // Start loop
   requestAnimationFrame(render);

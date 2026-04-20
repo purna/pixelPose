@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-36 -44 72 68" width="72" height="68">
+  <title>Cat Head</title>
+  <!-- round skull -->
+  <circle cx="0" cy="-10" r="30" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.5"/>
+  <!-- pointy ear L -->
+  <path d="M-24,-34 L-32,-54 L-10,-38 Z" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.5"/>
+  <!-- inner ear L -->
+  <path d="M-24,-36 L-30,-50 L-13,-40 Z" fill="#3d1060" stroke="none"/>
+  <!-- pointy ear R -->
+  <path d="M24,-34 L32,-54 L10,-38 Z" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.5"/>
+  <!-- inner ear R -->
+  <path d="M24,-36 L30,-50 L13,-40 Z" fill="#3d1060" stroke="none"/>
+  <!-- left eye (slit) -->
+  <ellipse cx="-11" cy="-12" rx="8" ry="7" fill="#0a0018" stroke="#a855f7" stroke-width="1.2"/>
+  <ellipse cx="-11" cy="-12" rx="2.5" ry="6" fill="#a855f7"/>
+  <circle cx="-10" cy="-13" r="1" fill="#e8d0ff"/>
+  <!-- right eye -->
+  <ellipse cx="11" cy="-12" rx="8" ry="7" fill="#0a0018" stroke="#a855f7" stroke-width="1.2"/>
+  <ellipse cx="11" cy="-12" rx="2.5" ry="6" fill="#a855f7"/>
+  <circle cx="12" cy="-13" r="1" fill="#e8d0ff"/>
+  <!-- small nose -->
+  <path d="M-3 4 L0 2 L3 4 L0 8 Z" fill="#a855f7"/>
+  <!-- whiskers L -->
+  <line x1="-30" y1="2" x2="-6" y2="4" stroke="#a855f7" stroke-width="0.8" opacity="0.6"/>
+  <line x1="-30" y1="6" x2="-6" y2="6" stroke="#a855f7" stroke-width="0.8" opacity="0.6"/>
+  <!-- whiskers R -->
+  <line x1="30" y1="2" x2="6" y2="4" stroke="#a855f7" stroke-width="0.8" opacity="0.6"/>
+  <line x1="30" y1="6" x2="6" y2="6" stroke="#a855f7" stroke-width="0.8" opacity="0.6"/>
+  <!-- mouth -->
+  <path d="M-5 10 Q0 14 5 10" fill="none" stroke="#a855f7" stroke-width="1" stroke-linecap="round"/>
+  <!-- neck pivot -->
+  <circle cx="0" cy="22" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

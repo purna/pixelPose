@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -6 32 22" width="32" height="22">
+  <title>Cat Paw Left</title>
+  <!-- main pad -->
+  <ellipse cx="0" cy="10" rx="12" ry="6" fill="#0f0820" stroke="#0088ff" stroke-width="1.2"/>
+  <!-- three rounded toes -->
+  <ellipse cx="-9" cy="3" rx="4.5" ry="3.5" fill="#0f0820" stroke="#0088ff" stroke-width="1"/>
+  <ellipse cx="0" cy="0" rx="4.5" ry="3.5" fill="#0f0820" stroke="#0088ff" stroke-width="1"/>
+  <ellipse cx="9" cy="3" rx="4.5" ry="3.5" fill="#0f0820" stroke="#0088ff" stroke-width="1"/>
+  <!-- retracted claw hints -->
+  <line x1="-9" y1="0" x2="-11" y2="-4" stroke="#0088ff" stroke-width="0.8" opacity="0.6"/>
+  <line x1="0" y1="-3" x2="0" y2="-7" stroke="#0088ff" stroke-width="0.8" opacity="0.6"/>
+  <line x1="9" y1="0" x2="11" y2="-4" stroke="#0088ff" stroke-width="0.8" opacity="0.6"/>
+  <circle cx="0" cy="-4" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-16 -54 32 108" width="32" height="108">
+  <title>Human Lower Leg Left</title>
+  <path d="M-10,-50 L10,-50 Q14,-20 10,50 L-10,50 Q-12,-20 -10,-50 Z" fill="#003399" stroke="#0066ff" stroke-width="1.2"/>
+  <path d="M-5,-50 Q-6,-20 -5,50" stroke="#3366ff" stroke-width="0.8" opacity="0.3"/>
+  <circle cx="0" cy="-50" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <circle cx="0" cy="50" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

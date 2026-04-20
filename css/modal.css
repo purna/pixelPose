@@ -518,6 +518,12 @@
     justify-content: flex-end;
 }
 
+.save-modal .form-hint {
+    font-size: 0.75rem;
+    color: #888;
+    margin: -4px 0 12px;
+}
+
 .save-modal h3 {
     margin-bottom: 20px;
     padding-bottom: 12px;

@@ -3,7 +3,7 @@
  */
 import Config from './config.js';
 
-class NotificationManager {
+export class NotificationManager {
     constructor() {
         this.container = null;
         this.notifications = new Map();
@@ -18,6 +18,90 @@ class NotificationManager {
             this.container = document.createElement('div');
             this.container.id = 'notification-container';
             document.body.appendChild(this.container);
+            
+            // Add container styles
+            if (!document.querySelector('#notification-container-styles')) {
+                const styles = document.createElement('style');
+                styles.id = 'notification-container-styles';
+                styles.textContent = `
+                    #notification-container {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 10000;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 10px;
+                        pointer-events: none;
+                    }
+                    
+                    #notification-container .notification {
+                        pointer-events: auto;
+                        background: var(--bg-light, #1a2233);
+                        border-radius: 8px;
+                        padding: 14px 18px;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+                        color: var(--text-primary, #e0e6ed);
+                        font-family: 'Syne', -apple-system, sans-serif;
+                        font-size: 14px;
+                        max-width: 320px;
+                        min-width: 250px;
+                        opacity: 0;
+                        transform: translateX(100%);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    
+                    #notification-container .notification.show {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    
+                    #notification-container .notification.success {
+                        border-left: 4px solid #00ff88;
+                    }
+                    
+                    #notification-container .notification.error {
+                        border-left: 4px solid #ff4466;
+                    }
+                    
+                    #notification-container .notification.info {
+                        border-left: 4px solid #00ccff;
+                    }
+                    
+                    #notification-container .notification.warning {
+                        border-left: 4px solid #ffaa00;
+                    }
+                    
+                    #notification-container .notification-title {
+                        font-weight: 600;
+                        margin-bottom: 4px;
+                        font-size: 13px;
+                        color: var(--accent, #00ffcc);
+                    }
+                    
+                    #notification-container .notification-message {
+                        line-height: 1.4;
+                    }
+                    
+                    #notification-container .notification-close {
+                        position: absolute;
+                        top: 8px;
+                        right: 10px;
+                        background: none;
+                        border: none;
+                        color: var(--text-dim, #8899aa);
+                        cursor: pointer;
+                        font-size: 16px;
+                        padding: 4px;
+                        line-height: 1;
+                    }
+                    
+                    #notification-container .notification-close:hover {
+                        color: var(--text-primary, #e0e6ed);
+                    }
+                `;
+                document.head.appendChild(styles);
+            }
         }
     }
 
@@ -329,9 +413,6 @@ class NotificationManager {
         this.hide(notificationId);
     }
 }
-
-// Create global instance
-const notificationManager = new NotificationManager();
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

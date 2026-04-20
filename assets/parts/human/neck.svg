@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -22 28 44" width="28" height="44">
+  <title>Human Neck</title>
+  <rect x="-10" y="-18" width="20" height="36" rx="6" fill="#112233" stroke="#4499cc" stroke-width="1.2"/>
+  <line x1="-8" y1="-4" x2="8" y2="-4" stroke="#4499cc" stroke-width="0.8" opacity="0.5"/>
+  <line x1="-8" y1="4" x2="8" y2="4" stroke="#4499cc" stroke-width="0.8" opacity="0.5"/>
+  <!-- head pivot -->
+  <circle cx="0" cy="-18" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- chest pivot -->
+  <circle cx="0" cy="18" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

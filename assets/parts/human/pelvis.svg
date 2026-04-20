@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-46 -26 92 50" width="92" height="50">
+  <title>Human Pelvis</title>
+  <path d="M-32,-20 Q-40,0 -26,20 L26,20 Q40,0 32,-20 Z" fill="#0d2233" stroke="#00ffcc" stroke-width="1.5"/>
+  <line x1="-28" y1="0" x2="28" y2="0" stroke="#00d9ff" stroke-width="0.8" opacity="0.4"/>
+  <!-- chest pivot -->
+  <circle cx="0" cy="-20" r="4" fill="#00ffcc" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- hip L pivot -->
+  <circle cx="-26" cy="20" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- hip R pivot -->
+  <circle cx="26" cy="20" r="4" fill="#00ff88" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>

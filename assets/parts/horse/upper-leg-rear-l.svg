@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-14 -50 28 100" width="28" height="100">
+  <title>Horse Upper Rear Leg Left</title>
+  <!-- gaskin — wider, more muscular than front -->
+  <path d="M-13,-46 L13,-46 Q16,-16 12,46 L-12,46 Q-16,-16 -13,-46 Z" fill="#162616" stroke="#0088ff" stroke-width="1.5"/>
+  <path d="M-8,-46 Q-10,-16 -8,46" fill="none" stroke="#0055aa" stroke-width="1" opacity="0.5"/>
+  <!-- stifle pivot top -->
+  <circle cx="0" cy="-46" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+  <!-- hock pivot bottom -->
+  <circle cx="0" cy="46" r="4" fill="#0088ff" stroke="#0a0a0f" stroke-width="1.5"/>
+</svg>
