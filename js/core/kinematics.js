@@ -73,11 +73,11 @@ export function solveIK(state, iterations = 30) {
     }
     
     // 2. Enforce foot grounding
-    if (state.footAnchor && state.FOOT_NODES) {
-      state.FOOT_NODES.forEach(fid => {
+    if (state.footAnchor && state.currentFootNodes && state.currentFootNodes.length > 0) {
+      state.currentFootNodes.forEach(fid => {
         const f = nodeMap.get(fid);
-        if (f && f.y > state.GROUND_Y) {
-          f.y = state.GROUND_Y;
+        if (f) {
+          f.y = state.currentGroundY;
         }
       });
     }

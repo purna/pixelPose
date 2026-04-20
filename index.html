@@ -93,6 +93,15 @@
         </label>
       </div>
 
+      <div class="sidebar-section accordion collapsed">
+        <h3 class="accordion-header" onclick="this.parentElement.classList.toggle('collapsed')">
+          Bone Lengths <span class="accordion-icon">▼</span>
+        </h3>
+        <div id="boneLengthsContainer" class="accordion-content bone-lengths-container">
+          <p class="dim">No bones loaded</p>
+        </div>
+      </div>
+
 <div class="sidebar-section">
          <h3>Display</h3>
          <label class="checkbox-label">
@@ -109,6 +118,9 @@
         </label>
         <label class="checkbox-label">
           <input type="checkbox" id="showShadow"> Ground shadow
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="spriteMode" disabled> Sprite mode
         </label>
       </div>
 

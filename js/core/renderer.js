@@ -1,6 +1,27 @@
 import { state } from './state.js';
+import { BODY_PARTS, drawBodyPart } from './bodyParts.js';
 
 const NODE_RADIUS = 7;
+const imageCache = {};
+
+export function loadBodyImages(imagePaths) {
+  Object.entries(imagePaths).forEach(([key, path]) => {
+    if (!imageCache[path]) {
+      const img = new Image();
+      img.src = path;
+      imageCache[path] = img;
+    }
+  });
+  return imageCache;
+}
+
+export function getImageForKey(key, imagePaths) {
+  const path = imagePaths?.[key];
+  if (path && imageCache[path]) {
+    return imageCache[path];
+  }
+  return null;
+}
 
 export function render(ctx, canvas, st) {
   const { view, spriteBox } = st;
@@ -64,10 +85,18 @@ export function render(ctx, canvas, st) {
 
   if (view.onionSkin && st.currentFrame > 0 && st.frames.length > 1) {
     const prevSnap = st.frames[st.currentFrame - 1].nodes;
-    drawSkeleton(ctx, prevSnap, 0.15, '#7b61ff', st, true);
+    if (view.spriteMode) {
+      drawSpriteSkeleton(ctx, prevSnap, 0.15, st, true);
+    } else {
+      drawSkeleton(ctx, prevSnap, 0.15, '#7b61ff', st, true);
+    }
   }
 
-  drawSkeleton(ctx, st.nodes, 1, null, st, false);
+  if (view.spriteMode) {
+    drawSpriteSkeleton(ctx, st.nodes, 1, st, false);
+  } else {
+    drawSkeleton(ctx, st.nodes, 1, null, st, false);
+  }
 
   if (view.showBoundingBox) {
     const boxW = spriteBox.width / view.charScale;
@@ -75,25 +104,25 @@ export function render(ctx, canvas, st) {
     const boxX = spriteBox.x / view.charScale;
     const boxBottom = spriteBox.y / view.charScale;
     const top = boxBottom - boxH;
-    
+
     ctx.strokeStyle = '#00ffcc';
     ctx.lineWidth = 2 / view.charScale;
-    ctx.strokeRect(boxX - boxW/2, top, boxW, boxH);
-    
+    ctx.strokeRect(boxX - boxW / 2, top, boxW, boxH);
+
     const handleSize = 12 / view.charScale;
     ctx.fillStyle = '#00ffcc';
     const handles = [
-      { x: boxX - boxW/2, y: top },
-      { x: boxX + boxW/2, y: top },
-      { x: boxX - boxW/2, y: top + boxH },
-      { x: boxX + boxW/2, y: top + boxH },
+      { x: boxX - boxW / 2, y: top },
+      { x: boxX + boxW / 2, y: top },
+      { x: boxX - boxW / 2, y: top + boxH },
+      { x: boxX + boxW / 2, y: top + boxH },
       { x: boxX, y: top },
       { x: boxX, y: top + boxH },
-      { x: boxX - boxW/2, y: top + boxH },
-      { x: boxX + boxW/2, y: top + boxH },
+      { x: boxX - boxW / 2, y: top + boxH },
+      { x: boxX + boxW / 2, y: top + boxH },
     ];
     handles.forEach(h => {
-      ctx.fillRect(h.x - handleSize/2, h.y - handleSize/2, handleSize, handleSize);
+      ctx.fillRect(h.x - handleSize / 2, h.y - handleSize / 2, handleSize, handleSize);
     });
   }
 
@@ -101,11 +130,85 @@ export function render(ctx, canvas, st) {
   ctx.restore();
 }
 
-function drawLimb(ctx, ax, ay, bx, by, widthA, widthB, color, alphaVal) {
+function drawSpriteSkeleton(ctx, nodeList, alpha, st, isGhost) {
+  const N = id => nodeList.find(n => n.id === id);
+  const baseAlpha = alpha;
+
+  function drawPartBetween(partId, nodeA, nodeB, offsetA = 0, offsetB = 0) {
+    const part = BODY_PARTS[partId];
+    if (!part || !nodeA || !nodeB) return;
+
+    const dx = nodeB.x - nodeA.x;
+    const dy = nodeB.y - nodeA.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 1) return;
+
+    const angle = Math.atan2(dy, dx) - Math.PI / 2;
+    const scale = len / part.height;
+
+    ctx.save();
+    ctx.translate(nodeA.x, nodeA.y);
+    ctx.rotate(angle);
+    ctx.scale(scale, scale);
+    drawBodyPart(ctx, partId, baseAlpha);
+    ctx.restore();
+  }
+
+  const head = N('head'), neck = N('neck');
+  if (head && neck) drawPartBetween('head', neck, head);
+
+  const chest = N('chest'), pelvis = N('pelvis'), bum = N('bum');
+  if (chest && neck) drawPartBetween('neck', neck, chest);
+  if (chest && pelvis) drawPartBetween('torso', chest, pelvis);
+  if (chest && bum) drawPartBetween('pelvis', bum, pelvis);
+
+  const hip_l = N('hip_l'), knee_l = N('knee_l'), foot_l = N('foot_l');
+  const hip_r = N('hip_r'), knee_r = N('knee_r'), foot_r = N('foot_r');
+  if (hip_l && knee_l) drawPartBetween('upper-leg-l', hip_l, knee_l);
+  if (knee_l && foot_l) drawPartBetween('lower-leg-l', knee_l, foot_l);
+  if (foot_l && knee_l) drawPartBetween('foot-l', knee_l, foot_l);
+  if (hip_r && knee_r) drawPartBetween('upper-leg-r', hip_r, knee_r);
+  if (knee_r && foot_r) drawPartBetween('lower-leg-r', knee_r, foot_r);
+  if (foot_r && knee_r) drawPartBetween('foot-r', knee_r, foot_r);
+
+  const shl = N('shoulder_l'), ell = N('elbow_l'), handl = N('hand_l');
+  const shr = N('shoulder_r'), elr = N('elbow_r'), handr = N('hand_r');
+  if (shl && ell) drawPartBetween('upper-arm-l', shl, ell);
+  if (ell && handl) drawPartBetween('lower-arm-l', ell, handl);
+  if (ell && handl) drawPartBetween('hand-l', ell, handl);
+  if (shr && elr) drawPartBetween('upper-arm-r', shr, elr);
+  if (elr && handr) drawPartBetween('lower-arm-r', elr, handr);
+  if (elr && handr) drawPartBetween('hand-r', elr, handr);
+
+  if (!isGhost) {
+    ctx.globalAlpha = baseAlpha;
+    ctx.beginPath();
+    ctx.arc(head.x, head.y, 18, 0, Math.PI * 2);
+    ctx.strokeStyle = '#00ffcc';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function drawLimb(ctx, ax, ay, bx, by, widthA, widthB, color, alphaVal, image = null) {
   ctx.globalAlpha = alphaVal;
   const dx = bx - ax, dy = by - ay;
   const len = Math.hypot(dx, dy);
   if (len < 1) return;
+
+  if (image && image.complete) {
+    const angle = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.translate(ax, ay);
+    ctx.rotate(angle);
+    const imgWidth = len * 1.1;
+    const imgHeight = widthA * 2.5;
+    ctx.drawImage(image, 0, -imgHeight / 2, imgWidth, imgHeight);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    return;
+  }
+
   const nx = -dy / len, ny = dx / len;
 
   ctx.beginPath();
@@ -245,34 +348,34 @@ function drawSkeleton(ctx, nodeList, alpha, overrideColor, st, isGhost) {
 
 function drawBoneDistances(ctx, nodes, bones, st) {
   const scale = st.view.charScale;
-  
+
   bones.forEach(([aId, bId]) => {
     const a = nodes.find(n => n.id === aId);
     const b = nodes.find(n => n.id === bId);
     if (!a || !b) return;
-    
+
     const mx = (a.x + b.x) / 2;
     const my = (a.y + b.y) / 2;
-    
+
     const key = [aId, bId].sort().join('-');
     const targetDist = st.constraints.distances?.[key];
-    
+
     ctx.save();
     ctx.translate(mx, my);
-    ctx.scale(1/scale, 1/scale);
-    
+    ctx.scale(1 / scale, 1 / scale);
+
     ctx.fillStyle = 'rgba(255, 255, 100, 0.9)';
     ctx.font = 'bold 9px Space Mono, monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
+
     if (targetDist !== undefined) {
       ctx.fillText(targetDist.toFixed(1), 0, 0);
     } else {
       const actual = Math.hypot(b.x - a.x, b.y - a.y);
       ctx.fillText(actual.toFixed(1), 0, 0);
     }
-    
+
     ctx.restore();
   });
 }

@@ -1,6 +1,7 @@
 /**
  * notifications.js - Notification system for Pixel Pose
  */
+import Config from './config.js';
 
 class NotificationManager {
     constructor() {

@@ -49,6 +49,20 @@ export function initSidebar(state, callbacks) {
   // Toggles
   document.getElementById('footAnchor').addEventListener('change', (e) => {
     state.footAnchor = e.target.checked;
+    if (state.footAnchor) {
+      let feet = state.currentFootNodes
+        .map(fid => state.nodes.find(n => n.id === fid))
+        .filter(Boolean);
+      if (feet.length === 0) {
+        feet = state.nodes.filter(n => n.id.startsWith('foot'));
+      }
+      if (feet.length > 0) {
+        state.currentGroundY = Math.max(...feet.map(f => f.y));
+        state.currentFootNodes = feet.map(f => f.id);
+        feet.forEach(f => f.y = state.currentGroundY);
+      }
+      callbacks.onRender();
+    }
     callbacks.onFootAnchorChange(e.target.checked);
   });
 
@@ -76,6 +90,18 @@ export function initSidebar(state, callbacks) {
     state.view.showShadow = e.target.checked;
     render();
   });
+
+  document.getElementById('spriteMode').addEventListener('change', (e) => {
+    state.view.spriteMode = e.target.checked;
+    render();
+  });
+
+  // Sync checkboxes with initial state values (skip disabled spriteMode)
+  document.getElementById('showGrid').checked = state.view.showGrid;
+  document.getElementById('showLabels').checked = state.view.showLabels;
+  document.getElementById('showDistances').checked = state.view.showDistances;
+  document.getElementById('showShadow').checked = state.view.showShadow;
+  document.getElementById('displayBoundingBox').checked = state.view.showBoundingBox;
 
   // Sprite frame size
   document.getElementById('spriteFrameSize').addEventListener('input', (e) => {
@@ -139,4 +165,88 @@ export function updateNodeInfo(node) {
     X: ${Math.round(node.x)}<br>
     Y: ${Math.round(node.y)}
   `;
+}
+
+export async function updateBoneLengthsUI(state, renderFn) {
+  const container = document.getElementById('boneLengthsContainer');
+  if (!container) return;
+  
+  const distances = state.constraints?.distances || {};
+  const bones = state.bones || [];
+  
+  if (bones.length === 0) {
+    container.innerHTML = '<p class="dim">No bones loaded</p>';
+    return;
+  }
+  
+  container.innerHTML = '';
+  
+  const { solveIK } = await import('../core/kinematics.js');
+  
+  bones.forEach(([nodeA, nodeB]) => {
+    const key = `${nodeA}-${nodeB}`;
+    const keyRev = `${nodeB}-${nodeA}`;
+    const length = distances[key] || distances[keyRev];
+    if (length === undefined) return;
+    
+    const item = document.createElement('div');
+    item.className = 'bone-length-item';
+    item.dataset.boneKey = key;
+    item.innerHTML = `
+      <label title="${nodeA} → ${nodeB}">${nodeA.slice(0,6)}-${nodeB.slice(0,6)}</label>
+      <input type="range" min="10" max="200" value="${Math.round(length)}" data-bone="${key}">
+      <input type="number" min="10" max="200" value="${Math.round(length)}" data-bone="${key}">
+    `;
+    
+    const rangeInput = item.querySelector('input[type="range"]');
+    const numberInput = item.querySelector('input[type="number"]');
+    
+    const updateConstraint = (value) => {
+      const v = parseFloat(value);
+      if (isNaN(v) || v < 10 || v > 200) return;
+      state.constraints.distances[key] = v;
+      state.constraints.distances[keyRev] = v;
+      if (state.lockLimbLengths && renderFn) {
+        solveIK(state);
+        renderFn();
+      }
+    };
+    
+    rangeInput.addEventListener('input', (e) => {
+      numberInput.value = e.target.value;
+      updateConstraint(e.target.value);
+    });
+    
+    numberInput.addEventListener('change', (e) => {
+      rangeInput.value = e.target.value;
+      updateConstraint(e.target.value);
+    });
+    
+    container.appendChild(item);
+  });
+}
+
+export function syncBoneLengthsFromNodes(state) {
+  const container = document.getElementById('boneLengthsContainer');
+  if (!container) return;
+  
+  const items = container.querySelectorAll('.bone-length-item');
+  items.forEach(item => {
+    const key = item.dataset.boneKey;
+    const nodeA = key.split('-')[0];
+    const nodeB = key.split('-')[1];
+    const nodeObjA = state.nodes.find(n => n.id === nodeA);
+    const nodeObjB = state.nodes.find(n => n.id === nodeB);
+    if (!nodeObjA || !nodeObjB) return;
+    
+    const actualLength = Math.hypot(nodeObjB.x - nodeObjA.x, nodeObjB.y - nodeObjA.y);
+    if (actualLength < 5) return;
+    
+    const rangeInput = item.querySelector('input[type="range"]');
+    const numberInput = item.querySelector('input[type="number"]');
+    if (rangeInput && numberInput) {
+      rangeInput.value = Math.round(actualLength);
+      numberInput.value = Math.round(actualLength);
+    }
+  });
 }

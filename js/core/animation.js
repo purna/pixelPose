@@ -1,4 +1,5 @@
 import { snapshot } from './state.js';
+import { saveHistory } from './history.js';
 
 export function initFrames(state) {
   state.frames = [{ nodes: snapshot(state.nodes), label: 'Frame 1' }];
@@ -21,10 +22,17 @@ export function addFrame(state) {
   state.currentFrame = state.frames.length - 1;
 }
 
-export function gotoFrame(state, index) {
+export function gotoFrame(state, index, skipHistory = false) {
   if (!state.frames.length) return;
-
-  state.currentFrame = Math.max(0, Math.min(index, state.frames.length - 1));
+  
+  const targetIndex = Math.max(0, Math.min(index, state.frames.length - 1));
+  if (targetIndex === state.currentFrame) return;
+  
+  if (!skipHistory) {
+    saveHistory();
+  }
+  
+  state.currentFrame = targetIndex;
   state.nodes = snapshot(state.frames[state.currentFrame].nodes);
 }
 

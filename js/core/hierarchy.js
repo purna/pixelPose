@@ -68,7 +68,7 @@ export function calculateGroundY(nodes) {
     n.id.startsWith('foot') || n.id.includes('paw') || n.id.startsWith('hand')
   );
   if (feet.length > 0) {
-    return Math.max(...feet.map(f => f.y)) + 20;
+    return Math.max(...feet.map(f => f.y));
   }
   return 130;
 }

@@ -7,6 +7,7 @@ export const state = {
   currentPelvisChildren: [],
   currentFootNodes: [],
   currentGroundY: 130,
+  bodyImages: {},
 
   // Animation
   frames: [],
@@ -39,7 +40,8 @@ export const state = {
     showDistances: false,
     showShadow: false,
     showBoundingBox: false,
-    onionSkin: false
+    onionSkin: false,
+    spriteMode: false
   },
 
   // Sprite box
@@ -66,6 +68,7 @@ export const state = {
     isPlaying: false,
     fps: 12,
     loop: true,
+    tweening: true,
     interval: null
   },
 
@@ -81,28 +84,13 @@ export const state = {
   useIK: false,
   lockLimbLengths: false,
 
-  // Hierarchy constants (for human body)
-  PELVIS_CHILDREN: ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head',
-    'elbow_l', 'hand_l', 'elbow_r', 'hand_r',
-    'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'],
-  FOOT_NODES: ['foot_l', 'foot_r'],
+  // Hierarchy constants (defaults)
+  PELVIS_CHILDREN: [],
+  FOOT_NODES: [],
   GROUND_Y: 130,
 
-  // Node hierarchy mapping
-  NODE_HIERARCHY: {
-    'shoulder_l': ['elbow_l', 'hand_l'],
-    'shoulder_r': ['elbow_r', 'hand_r'],
-    'elbow_l': ['hand_l'],
-    'elbow_r': ['hand_r'],
-    'hip_l': ['knee_l', 'foot_l'],
-    'hip_r': ['knee_r', 'foot_r'],
-    'knee_l': ['foot_l'],
-    'knee_r': ['foot_r'],
-    'neck': ['head'],
-    'chest': ['shoulder_l', 'shoulder_r', 'neck', 'head', 'elbow_l', 'hand_l', 'elbow_r', 'hand_r'],
-    'bum': ['hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r'],
-    'pelvis': ['chest', 'bum', 'shoulder_l', 'shoulder_r', 'neck', 'head', 'elbow_l', 'hand_l', 'elbow_r', 'hand_r', 'hip_l', 'hip_r', 'knee_l', 'knee_r', 'foot_l', 'foot_r']
-  }
+  // Dynamic node hierarchy mapping (derived from bones)
+  NODE_HIERARCHY: {}
 };
 
 export function snapshot(nodes) {

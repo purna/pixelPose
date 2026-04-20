@@ -8,6 +8,7 @@ import { loadBodyDefinition, getCurrentNodes, getCurrentBones, getCurrentConstra
 import Config from './config.js';
 
 import * as sidebar from './ui/sidebar.js';
+import { syncBoneLengthsFromNodes } from './ui/sidebar.js';
 import * as timeline from './ui/timeline.js';
 import * as modals from './ui/modals.js';
 import * as importExport from './ui/importExport.js';
@@ -56,16 +57,22 @@ async function loadBody(bodyType) {
     state.currentHierarchy = hierarchyMap;
     state.currentPelvisChildren = hierarchyMap[rootNode] ? [...hierarchyMap[rootNode]] : [];
     
-    const isHuman = ['adult-male', 'adult-female', 'child'].includes(bodyType);
-    state.currentFootNodes = [];
-    Object.keys(tree.children).forEach(node => {
-      const children = tree.children[node];
-      if (!children || children.length === 0) {
-        if (node.startsWith('foot')) state.currentFootNodes.push(node);
-        else if (node.startsWith('hand') && !isHuman) state.currentFootNodes.push(node);
-        else if (node.includes('paw')) state.currentFootNodes.push(node);
-      }
+    // Build dynamic NODE_HIERARCHY from tree.children (parent -> children map)
+    state.NODE_HIERARCHY = {};
+    Object.keys(tree.children).forEach(parent => {
+      state.NODE_HIERARCHY[parent] = tree.children[parent] || [];
     });
+    
+    const isHuman = ['adult-male', 'adult-female', 'child'].includes(bodyType);
+    // Build set of all node IDs that appear as parents (i.e., have children)
+    const parentNodeIds = new Set(state.bones.map(bone => bone[0]));
+    state.currentFootNodes = state.nodes
+      .filter(n => {
+        const isFootCandidate = n.id.startsWith('foot') || (n.id.startsWith('hand') && !isHuman) || n.id.includes('paw');
+        const isLeaf = !parentNodeIds.has(n.id); // no children
+        return isFootCandidate && isLeaf;
+      })
+      .map(n => n.id);
     state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
   }
 
@@ -73,6 +80,7 @@ async function loadBody(bodyType) {
   timeline.updateTimeline();
   timeline.updateFrameBadge();
   sidebar.updateAnimationList(bodyType);
+  sidebar.updateBoneLengthsUI(state, render);
   saveHistory();
   render();
 }
@@ -127,15 +135,15 @@ async function loadAnimationPreset(presetName) {
       state.currentHierarchy = hierarchyMap;
       state.currentPelvisChildren = hierarchyMap[rootNode] || [];
       const isHuman = ['adult-male', 'adult-female', 'child'].includes(state.meta.bodyType);
-      state.currentFootNodes = [];
-      Object.keys(tree.children).forEach(node => {
-        const children = tree.children[node];
-        if (!children || children.length === 0) {
-          if (node.startsWith('foot')) state.currentFootNodes.push(node);
-          else if (node.startsWith('hand') && !isHuman) state.currentFootNodes.push(node);
-          else if (node.includes('paw')) state.currentFootNodes.push(node);
-        }
-      });
+      // Build set of all node IDs that appear as parents (i.e., have children)
+      const parentNodeIds = new Set(state.bones.map(bone => bone[0]));
+      state.currentFootNodes = state.nodes
+        .filter(n => {
+          const isFootCandidate = n.id.startsWith('foot') || (n.id.startsWith('hand') && !isHuman) || n.id.includes('paw');
+          const isLeaf = !parentNodeIds.has(n.id); // no children
+          return isFootCandidate && isLeaf;
+        })
+        .map(n => n.id);
       state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
     }
 
@@ -274,15 +282,15 @@ function loadSavedAnimation(index) {
     state.currentHierarchy = hierarchyMap;
     state.currentPelvisChildren = hierarchyMap[rootNode] || [];
     const isHuman = ['adult-male', 'adult-female', 'child'].includes(state.meta.bodyType);
-    state.currentFootNodes = [];
-    Object.keys(tree.children).forEach(node => {
-      const children = tree.children[node];
-      if (!children || children.length === 0) {
-        if (node.startsWith('foot')) state.currentFootNodes.push(node);
-        else if (node.startsWith('hand') && !isHuman) state.currentFootNodes.push(node);
-        else if (node.includes('paw')) state.currentFootNodes.push(node);
-      }
-    });
+    // Build set of all node IDs that appear as parents (i.e., have children)
+    const parentNodeIds = new Set(state.bones.map(bone => bone[0]));
+    state.currentFootNodes = state.nodes
+      .filter(n => {
+        const isFootCandidate = n.id.startsWith('foot') || (n.id.startsWith('hand') && !isHuman) || n.id.includes('paw');
+        const isLeaf = !parentNodeIds.has(n.id); // no children
+        return isFootCandidate && isLeaf;
+      })
+      .map(n => n.id);
     state.currentGroundY = hierarchy.calculateGroundY(state.nodes);
   }
   
@@ -478,6 +486,7 @@ canvas.addEventListener('mouseup', () => {
   } else if (state.isDragging) {
     interaction.endDrag(state);
     anim.saveFrame(state);
+    syncBoneLengthsFromNodes(state);
   }
   if (state.dragState.panStart) {
     interaction.endPan(state);

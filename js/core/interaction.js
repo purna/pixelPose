@@ -17,7 +17,7 @@ export function hitNode(nodes, x, y) {
 export function startDrag(state, node, worldPos) {
   state.dragNode = node;
   state.isDragging = true;
-  
+
   if (!state.selectedNodes.some(n => n.id === node.id)) {
     state.selectedNodes = [node];
   }
@@ -36,11 +36,11 @@ export function moveDrag(state, dx, dy) {
     dragNode.x += dx;
     dragNode.y += dy;
     solveIK(state);
-} else if (dragNode.id === 'pelvis') {
-    const movingChildren = state.footAnchor 
-      ? state.PELVIS_CHILDREN.filter(id => !state.FOOT_NODES.includes(id))
-      : state.PELVIS_CHILDREN;
-        
+  } else if (dragNode.id === 'pelvis') {
+    const movingChildren = state.footAnchor
+      ? state.currentPelvisChildren.filter(id => !state.currentFootNodes.includes(id))
+      : state.currentPelvisChildren;
+
     state.nodes.forEach(n => {
       if (movingChildren.includes(n.id)) {
         n.x += dx;
@@ -49,14 +49,21 @@ export function moveDrag(state, dx, dy) {
     });
     dragNode.x += dx;
     dragNode.y += dy;
-    
+
     if (state.footAnchor) {
-      state.FOOT_NODES.forEach(fid => {
+      // Re-read groundY from current foot positions so it moves with the character
+      const footNodes = state.currentFootNodes
+        .map(fid => state.nodes.find(n => n.id === fid))
+        .filter(Boolean);
+      if (footNodes.length > 0) {
+        state.currentGroundY = Math.max(...footNodes.map(f => f.y));
+      }
+      state.currentFootNodes.forEach(fid => {
         const f = state.nodes.find(n => n.id === fid);
-        if (f) f.y = state.GROUND_Y;
+        if (f) f.y = state.currentGroundY;
       });
     }
-    
+
     if (state.lockLimbLengths) {
       solveIK(state);
     }
@@ -64,7 +71,7 @@ export function moveDrag(state, dx, dy) {
     // Move the dragged node freely (constraints disabled)
     dragNode.x += dx;
     dragNode.y += dy;
-    
+
     if (state.NODE_HIERARCHY[dragNode.id]) {
       state.NODE_HIERARCHY[dragNode.id].forEach(childId => {
         const child = state.nodes.find(n => n.id === childId);
@@ -74,13 +81,21 @@ export function moveDrag(state, dx, dy) {
         }
       });
     }
-    
+
     state.selectedNodes.forEach(n => {
       if (n.id !== dragNode.id) {
         n.x += dx;
         n.y += dy;
       }
     });
+
+    // Enforce foot anchoring even in free-drag mode
+    if (state.footAnchor && state.currentFootNodes && state.currentFootNodes.length > 0) {
+      state.currentFootNodes.forEach(fid => {
+        const f = state.nodes.find(n => n.id === fid);
+        if (f) f.y = state.currentGroundY;
+      });
+    }
   }
 }
 
@@ -114,9 +129,9 @@ export function hitBoxHandle(state, wx, wy) {
   const boxX = spriteBox.x / view.charScale;
   const boxBottom = spriteBox.y / view.charScale;
   const top = boxBottom - boxH;
-  const left = boxX - boxW/2;
+  const left = boxX - boxW / 2;
   const handleHitSize = 30 / view.charScale;
-  
+
   const handles = [
     { id: 'top', x: boxX, y: top },
     { id: 'bottom', x: boxX, y: top + boxH },
@@ -127,7 +142,7 @@ export function hitBoxHandle(state, wx, wy) {
     { id: 'bottom-left', x: left, y: top + boxH },
     { id: 'bottom-right', x: left + boxW, y: top + boxH },
   ];
-  
+
   for (const h of handles) {
     if (Math.abs(wx - h.x) < handleHitSize && Math.abs(wy - h.y) < handleHitSize) {
       return h.id;
@@ -143,8 +158,8 @@ export function hitBoxBody(state, wx, wy) {
   const boxX = spriteBox.x / view.charScale;
   const boxBottom = spriteBox.y / view.charScale;
   const top = boxBottom - boxH;
-  const left = boxX - boxW/2;
-  
+  const left = boxX - boxW / 2;
+
   return wx >= left && wx <= left + boxW && wy >= top && wy <= top + boxH;
 }
 
@@ -161,7 +176,7 @@ export function startDragBox(state, worldPos) {
 
 export function moveDragBox(state, worldPos) {
   if (!state.dragState.isDraggingBox) return;
-  
+
   const dx = worldPos.x - state.dragState.boxDragStart.x;
   const dy = worldPos.y - state.dragState.boxDragStart.y;
   const start = state.dragState.boxStartState;
@@ -195,7 +210,7 @@ export function moveDragBox(state, worldPos) {
       state.spriteBox.width = newW;
       state.spriteBox.height = newH;
     }
-    
+
     const sizeEl = document.getElementById('spriteFrameSize');
     const sizeValEl = document.getElementById('spriteFrameSizeVal');
     if (sizeEl) sizeEl.value = Math.max(state.spriteBox.width, state.spriteBox.height);
