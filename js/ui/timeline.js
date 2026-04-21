@@ -198,6 +198,12 @@ export function updateTimeline() {
       }
     };
     
+    const grip = document.createElement('span');
+    grip.className = 'frame-grip';
+    grip.innerHTML = '⋮⋮';
+    grip.title = 'Drag to reorder';
+    
+    item.appendChild(grip);
     item.appendChild(thumb);
     item.appendChild(num);
     item.appendChild(label);
@@ -283,54 +289,90 @@ export function updateFrameBadge() {
 }
 
 function setupDragAndDrop(timeline) {
-  let draggedItem = null;
-  let draggedIndex = -1;
   const items = timeline.querySelectorAll('.frame-item');
   
-  items.forEach(item => {
-    item.draggable = true;
-    item.style.cursor = 'grab';
+  items.forEach((item, index) => {
+    const grip = item.querySelector('.frame-grip');
+    if (!grip) return;
     
-    item.addEventListener('dragstart', (e) => {
-      draggedItem = item;
-      draggedIndex = [...timeline.querySelectorAll('.frame-item')].indexOf(item);
+    grip.draggable = true;
+    grip.style.cursor = 'grab';
+    grip.setAttribute('data-index', index);
+    
+    grip.addEventListener('dragstart', (e) => {
+      e.stopPropagation();
+      grip.classList.add('dragging');
       item.classList.add('dragging');
       e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', index);
     });
     
-    item.addEventListener('dragend', () => {
+    grip.addEventListener('dragend', (e) => {
+      e.stopPropagation();
+      grip.classList.remove('dragging');
       item.classList.remove('dragging');
-      draggedItem = null;
-      draggedIndex = -1;
     });
+  });
+  
+  timeline.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
     
-    item.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
-    
-    item.addEventListener('drop', (e) => {
-      e.preventDefault();
-      if (!draggedItem || draggedItem === item) return;
-      
-      const dropIndex = [...timeline.querySelectorAll('.frame-item')].indexOf(item);
-      if (dropIndex === draggedIndex) return;
-      
-      const movedFrame = state.frames.splice(draggedIndex, 1)[0];
-      state.frames.splice(dropIndex, 0, movedFrame);
-      
-      if (state.currentFrame === draggedIndex) {
-        state.currentFrame = dropIndex;
-      } else if (draggedIndex < state.currentFrame && dropIndex >= state.currentFrame) {
-        state.currentFrame--;
-      } else if (draggedIndex > state.currentFrame && dropIndex <= state.currentFrame) {
-        state.currentFrame++;
+    const targetItem = e.target.closest('.frame-item');
+    if (targetItem) {
+      const rect = targetItem.getBoundingClientRect();
+      const isHorizontal = timeline.classList.contains('horizontal');
+      const midpoint = isHorizontal 
+        ? rect.left + rect.width / 2 
+        : rect.top + rect.height / 2;
+      timeline.querySelectorAll('.frame-item').forEach(item => {
+        item.classList.remove('drag-over', 'drag-over-last');
+      });
+      if (isHorizontal ? e.clientX < midpoint : e.clientY < midpoint) {
+        targetItem.classList.add('drag-over');
+      } else {
+        targetItem.classList.add('drag-over-last');
       }
-      
-      state.nodes = JSON.parse(JSON.stringify(state.frames[state.currentFrame].nodes));
-      updateTimeline();
-      updateFrameBadge();
-      if (callbacks.onReorderFrame) callbacks.onReorderFrame();
+    }
+  });
+  
+  timeline.addEventListener('dragleave', (e) => {
+    if (!e.target.closest('.frame-item')) {
+      timeline.querySelectorAll('.frame-item').forEach(item => {
+        item.classList.remove('drag-over', 'drag-over-last');
+      });
+    }
+  });
+  
+  timeline.addEventListener('drop', (e) => {
+    e.preventDefault();
+    timeline.querySelectorAll('.frame-item').forEach(item => {
+      item.classList.remove('drag-over', 'drag-over-last');
     });
+    
+    const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+    if (isNaN(draggedIndex)) return;
+    
+    const targetItem = e.target.closest('.frame-item');
+    if (!targetItem) return;
+    
+    const dropIndex = [...timeline.querySelectorAll('.frame-item')].indexOf(targetItem);
+    if (dropIndex === draggedIndex || dropIndex < 0) return;
+    
+    const movedFrame = state.frames.splice(draggedIndex, 1)[0];
+    state.frames.splice(dropIndex, 0, movedFrame);
+    
+    if (state.currentFrame === draggedIndex) {
+      state.currentFrame = dropIndex;
+    } else if (draggedIndex < state.currentFrame && dropIndex >= state.currentFrame) {
+      state.currentFrame--;
+    } else if (draggedIndex > state.currentFrame && dropIndex <= state.currentFrame) {
+      state.currentFrame++;
+    }
+    
+    state.nodes = JSON.parse(JSON.stringify(state.frames[state.currentFrame].nodes));
+    updateTimeline();
+    updateFrameBadge();
+    if (callbacks.onReorderFrame) callbacks.onReorderFrame();
   });
 }

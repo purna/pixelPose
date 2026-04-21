@@ -396,7 +396,6 @@ header h1 span {
     border-radius: 4px;
     margin-bottom: 0.4rem;
     background: var(--panel2);
-    cursor: pointer;
     transition: all 0.15s;
     font-size: 0.65rem;
     position: relative;
@@ -414,6 +413,28 @@ header h1 span {
 .frame-item.dragging {
     opacity: 0.5;
     border-color: var(--accent3);
+}
+
+.frame-grip {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    padding: 0 0.2rem;
+    user-select: none;
+    cursor: grab;
+}
+
+.frame-grip:hover {
+    color: var(--text);
+}
+
+.frame-grip:active {
+    cursor: grabbing;
+}
+
+.frame-item.dragging {
+    opacity: 0.4;
+    background: var(--accent) !important;
+    border-color: var(--accent);
 }
 
 .frame-num {
@@ -450,6 +471,47 @@ header h1 span {
 
 .timeline.horizontal .frame-label {
     display: none;
+}
+
+.frame-item.drag-over::before,
+.frame-item.drag-over-last::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--accent);
+    pointer-events: none;
+    z-index: 100;
+}
+
+.timeline:not(.horizontal) .frame-item.drag-over::before {
+    top: -3px;
+    left: 0;
+}
+
+.timeline:not(.horizontal) .frame-item.drag-over-last::before {
+    bottom: -3px;
+    left: 0;
+}
+
+.timeline.horizontal .frame-item.drag-over::before,
+.timeline.horizontal .frame-item.drag-over-last::before {
+    position: absolute;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    z-index: 100;
+}
+
+.timeline.horizontal .frame-item.drag-over::before {
+    left: -3px;
+    right: auto;
+}
+
+.timeline.horizontal .frame-item.drag-over-last::before {
+    left: auto;
+    right: -3px;
 }
 
 .timeline.horizontal .frame-del {
