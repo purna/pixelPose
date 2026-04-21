@@ -810,6 +810,7 @@ async function init() {
     onAddFrame: () => { anim.addFrame(state); saveHistory(); },
     onDeleteFrame: (i) => deleteFrame(i),
     onDupFrame: () => { anim.dupFrame(state); saveHistory(); },
+    onReorderFrame: () => { saveHistory(); render(); },
     onPlay: startPlayback,
     onPause: stopPlayback,
     onFPSChange: (fps) => { state.playback.fps = fps; },

@@ -211,6 +211,8 @@ export function updateTimeline() {
     
     timeline.appendChild(item);
   });
+  
+  setupDragAndDrop(timeline);
 }
 
 function renderFrameThumb(canvas, nodes) {
@@ -278,4 +280,57 @@ export function updateFrameBadge() {
   if (badge) {
     badge.textContent = `Frame ${state.currentFrame + 1} / ${state.frames.length}`;
   }
+}
+
+function setupDragAndDrop(timeline) {
+  let draggedItem = null;
+  let draggedIndex = -1;
+  const items = timeline.querySelectorAll('.frame-item');
+  
+  items.forEach(item => {
+    item.draggable = true;
+    item.style.cursor = 'grab';
+    
+    item.addEventListener('dragstart', (e) => {
+      draggedItem = item;
+      draggedIndex = [...timeline.querySelectorAll('.frame-item')].indexOf(item);
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      draggedItem = null;
+      draggedIndex = -1;
+    });
+    
+    item.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    
+    item.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (!draggedItem || draggedItem === item) return;
+      
+      const dropIndex = [...timeline.querySelectorAll('.frame-item')].indexOf(item);
+      if (dropIndex === draggedIndex) return;
+      
+      const movedFrame = state.frames.splice(draggedIndex, 1)[0];
+      state.frames.splice(dropIndex, 0, movedFrame);
+      
+      if (state.currentFrame === draggedIndex) {
+        state.currentFrame = dropIndex;
+      } else if (draggedIndex < state.currentFrame && dropIndex >= state.currentFrame) {
+        state.currentFrame--;
+      } else if (draggedIndex > state.currentFrame && dropIndex <= state.currentFrame) {
+        state.currentFrame++;
+      }
+      
+      state.nodes = JSON.parse(JSON.stringify(state.frames[state.currentFrame].nodes));
+      updateTimeline();
+      updateFrameBadge();
+      if (callbacks.onReorderFrame) callbacks.onReorderFrame();
+    });
+  });
 }

@@ -411,6 +411,11 @@ header h1 span {
     background: rgba(123, 97, 255, 0.12);
 }
 
+.frame-item.dragging {
+    opacity: 0.5;
+    border-color: var(--accent3);
+}
+
 .frame-num {
     font-size: 0.6rem;
     color: var(--text-dim);
