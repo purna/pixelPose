@@ -23,6 +23,19 @@ let dbManager = null;
 const canvas = document.getElementById('mainCanvas');
 const ctx = canvas.getContext('2d');
 
+// AI Create integration: provide the live skeleton and apply a reviewed pose.
+window.PixelPoseAIContext = () => state.nodes.map(({ id, x, y }) => ({ id, x, y }));
+window.PixelAIApply_pixelPose = (result) => {
+  const proposed = result?.nodes;
+  if (!Array.isArray(proposed) || !state.nodes.length) throw new Error('The AI pose did not include usable skeleton nodes.');
+  const updates = new Map(proposed.filter(n => n && typeof n.id === 'string' && Number.isFinite(n.x) && Number.isFinite(n.y)).map(n => [n.id, n]));
+  if (!updates.size) throw new Error('The AI pose did not match any skeleton joints.');
+  saveHistory();
+  state.nodes = state.nodes.map(node => { const next = updates.get(node.id); return next ? { ...node, x: Math.max(-300, Math.min(300, next.x)), y: Math.max(-300, Math.min(300, next.y)) } : node; });
+  anim.saveFrame(state);
+  render();
+};
+
 // ─── HELPERS ───
 function screenToWorld(sx, sy) {
   const rect = canvas.getBoundingClientRect();
