@@ -9,7 +9,10 @@ export function initTimeline(state, cb) {
     const fps = parseInt(e.target.value) || 12;
     state.playback.fps = fps;
     callbacks.onFPSChange(fps);
-    if (state.playback.isPlaying) restartPlayback();
+    if (state.playback.isPlaying) {
+      callbacks.onPause();
+      callbacks.onPlay();
+    }
   });
 
   document.getElementById('loopToggle').addEventListener('change', (e) => {
@@ -53,10 +56,8 @@ export function initTimeline(state, cb) {
   document.getElementById('playBtn').addEventListener('click', () => {
     if (state.playback.isPlaying) {
       callbacks.onPause();
-      stopPlayback();
     } else {
       callbacks.onPlay();
-      startPlayback();
     }
   });
 
@@ -71,94 +72,6 @@ export function initTimeline(state, cb) {
     callbacks.onFrameSelect(next);
     updateFrameBadge();
   });
-}
-
-let tweenAnimId = null;
-
-function startPlayback() {
-  state.playback.isPlaying = true;
-  document.getElementById('playBadge').style.display = 'block';
-  document.getElementById('playBtn').textContent = '⏸';
-  
-  const interval = 1000 / state.playback.fps;
-  let lastTime = performance.now();
-  let timeAccumulator = 0;
-  
-  function loop(currentTime) {
-    if (!state.playback.isPlaying) return;
-    
-    const deltaTime = currentTime - lastTime;
-    lastTime = currentTime;
-    timeAccumulator += deltaTime;
-    
-    // Check if we advanced a whole frame boundary
-    if (timeAccumulator >= interval) {
-      const framesToAdvance = Math.floor(timeAccumulator / interval);
-      timeAccumulator = timeAccumulator % interval;
-      
-      let next = state.currentFrame + framesToAdvance;
-      if (next >= state.frames.length) {
-        if (state.playback.loop) {
-          next = next % state.frames.length;
-        } else {
-          state.currentFrame = state.frames.length - 1;
-          stopPlayback();
-          return;
-        }
-      }
-      state.currentFrame = next;
-      updateTimeline();
-      updateFrameBadge();
-    }
-    
-    // Tweening logic
-    if (state.playback.tweening && state.frames.length > 1) {
-      const fromFrame = state.currentFrame;
-      let toFrame = fromFrame + 1;
-      if (toFrame >= state.frames.length) {
-        toFrame = state.playback.loop ? 0 : fromFrame;
-      }
-      
-      const t = timeAccumulator / interval; // 0 to 1
-      const fNodes = state.frames[fromFrame].nodes;
-      const tNodes = state.frames[toFrame].nodes;
-      
-      for (let i = 0; i < state.nodes.length; i++) {
-         const fromNode = fNodes.find(n => n.id === state.nodes[i].id);
-         const toNode = tNodes.find(n => n.id === state.nodes[i].id);
-         if (fromNode && toNode) {
-            state.nodes[i].x = fromNode.x + (toNode.x - fromNode.x) * t;
-            state.nodes[i].y = fromNode.y + (toNode.y - fromNode.y) * t;
-         }
-      }
-    } else {
-      // Direct assignment when tweening is off
-      state.nodes = JSON.parse(JSON.stringify(state.frames[state.currentFrame].nodes));
-    }
-    
-    if (callbacks.onRender) callbacks.onRender();
-    tweenAnimId = requestAnimationFrame(loop);
-  }
-  
-  tweenAnimId = requestAnimationFrame(loop);
-}
-
-function stopPlayback() {
-  state.playback.isPlaying = false;
-  document.getElementById('playBadge').style.display = 'none';
-  document.getElementById('playBtn').textContent = '▶ Play';
-  
-  if (tweenAnimId) {
-    cancelAnimationFrame(tweenAnimId);
-    tweenAnimId = null;
-  }
-  // Immediately snap safely back to current frame
-  callbacks.onFrameSelect(state.currentFrame);
-}
-
-function restartPlayback() {
-  stopPlayback();
-  startPlayback();
 }
 
 export function updateTimeline() {
@@ -286,6 +199,12 @@ export function updateFrameBadge() {
   if (badge) {
     badge.textContent = `Frame ${state.currentFrame + 1} / ${state.frames.length}`;
   }
+}
+
+export function updateFrameHighlight() {
+  document.querySelectorAll('#timeline .frame-item').forEach((item, index) => {
+    item.classList.toggle('current', index === state.currentFrame);
+  });
 }
 
 function setupDragAndDrop(timeline) {

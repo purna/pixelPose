@@ -203,30 +203,93 @@ function deleteFrame(index) {
   render();
 }
 
+function applyPlaybackPose(frameIndex, progress) {
+  if (!state.frames.length || !state.nodes.length) return;
+  const frame = state.frames[frameIndex];
+  if (!frame) return;
+
+  const nextIndex = state.playback.tweening && state.frames.length > 1
+    ? (frameIndex + 1) % state.frames.length
+    : frameIndex;
+  const fromNodes = new Map(frame.nodes.map(node => [node.id, node]));
+  const toNodes = new Map(state.frames[nextIndex].nodes.map(node => [node.id, node]));
+  const t = state.playback.tweening ? Math.max(0, Math.min(1, progress)) : 0;
+
+  for (const node of state.nodes) {
+    const from = fromNodes.get(node.id);
+    const to = toNodes.get(node.id) || from;
+    if (!from) continue;
+    node.x = t === 0 ? from.x : from.x + (to.x - from.x) * t;
+    node.y = t === 0 ? from.y : from.y + (to.y - from.y) * t;
+  }
+}
+
 function startPlayback() {
+  if (state.playback.isPlaying || state.frames.length === 0) return;
+
   state.playback.isPlaying = true;
   document.getElementById('playBadge').style.display = 'block';
   document.getElementById('playBtn').textContent = '⏸';
-  
-  const interval = 1000 / state.playback.fps;
-  state.playback.interval = setInterval(() => {
+
+  let lastTime = performance.now();
+  let accumulator = 0;
+
+  function tick(now) {
     if (!state.playback.isPlaying) return;
-    let next = state.currentFrame + 1;
-    if (next >= state.frames.length) {
-      if (state.playback.loop) next = 0;
-      else { stopPlayback(); return; }
+
+    const frameInterval = 1000 / Math.max(1, state.playback.fps);
+    let delta = now - lastTime;
+    lastTime = now;
+    // Avoid a burst of catch-up frames after the tab has been backgrounded.
+    if (delta > frameInterval * 4) delta = frameInterval;
+    accumulator += delta;
+
+    const advance = Math.floor(accumulator / frameInterval);
+    if (advance > 0) {
+      accumulator -= advance * frameInterval;
+      let next = state.currentFrame + advance;
+
+      if (next >= state.frames.length) {
+        if (state.playback.loop) {
+          next %= state.frames.length;
+        } else {
+          state.currentFrame = state.frames.length - 1;
+          applyPlaybackPose(state.currentFrame, 0);
+          timeline.updateFrameBadge();
+          timeline.updateFrameHighlight();
+          render();
+          stopPlayback();
+          return;
+        }
+      }
+
+      state.currentFrame = next;
+      timeline.updateFrameBadge();
+      timeline.updateFrameHighlight();
     }
-    anim.gotoFrame(state, next);
-    timeline.updateFrameBadge();
+
+    applyPlaybackPose(state.currentFrame, accumulator / frameInterval);
     render();
-  }, interval);
+    state.playback.rafId = requestAnimationFrame(tick);
+  }
+
+  state.playback.rafId = requestAnimationFrame(tick);
 }
 
 function stopPlayback() {
   state.playback.isPlaying = false;
   document.getElementById('playBadge').style.display = 'none';
   document.getElementById('playBtn').textContent = '▶';
-  if (state.playback.interval) clearInterval(state.playback.interval);
+
+  if (state.playback.rafId) {
+    cancelAnimationFrame(state.playback.rafId);
+    state.playback.rafId = null;
+  }
+
+  applyPlaybackPose(state.currentFrame, 0);
+  timeline.updateFrameBadge();
+  timeline.updateFrameHighlight();
+  render();
 }
 
 // ─── SAVE / LOAD ANIMATION ───
@@ -473,8 +536,8 @@ function handleKeyDown(e) {
     render();
   } else if (e.key === ' ') {
     e.preventDefault();
-    if (state.playback.isPlaying) { callbacks.onPause(); stopPlayback(); }
-    else { callbacks.onPlay(); startPlayback(); }
+    if (state.playback.isPlaying) stopPlayback();
+    else startPlayback();
   } else if (e.key === 'ArrowLeft') {
     const prev = Math.max(0, state.currentFrame - 1);
     anim.gotoFrame(state, prev);

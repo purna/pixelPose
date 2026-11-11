@@ -71,7 +71,7 @@ export const state = {
     fps: 12,
     loop: true,
     tweening: true,
-    interval: null
+    rafId: null
   },
 
   // Temporary drag state
