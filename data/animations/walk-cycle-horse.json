@@ -1,153 +1,19 @@
 {
   "name": "Horse Walk",
-  "author": "Nigel Morris",
-  "description": "8-frame horse walk cycle with upper neck node for more natural movement",
+  "author": "PixelPose",
+  "description": "Example walk cycle for horse.",
   "category": "animal",
   "bodyType": "horse",
-  "height": 170,
+  "height": 80,
   "direction": "left",
-  "bones": [
-    [
-      "head",
-      "upper_neck"
-    ],
-    [
-      "upper_neck",
-      "neck"
-    ],
-    [
-      "neck",
-      "chest"
-    ],
-    [
-      "chest",
-      "shoulder_l"
-    ],
-    [
-      "chest",
-      "shoulder_r"
-    ],
-    [
-      "shoulder_l",
-      "elbow_l"
-    ],
-    [
-      "shoulder_r",
-      "elbow_r"
-    ],
-    [
-      "elbow_l",
-      "hand_l"
-    ],
-    [
-      "elbow_r",
-      "hand_r"
-    ],
-    [
-      "chest",
-      "pelvis"
-    ],
-    [
-      "pelvis",
-      "bum"
-    ],
-    [
-      "bum",
-      "hip_l"
-    ],
-    [
-      "bum",
-      "hip_r"
-    ],
-    [
-      "hip_l",
-      "knee_l"
-    ],
-    [
-      "hip_r",
-      "knee_r"
-    ],
-    [
-      "knee_l",
-      "foot_l"
-    ],
-    [
-      "knee_r",
-      "foot_r"
-    ]
-  ],
-  "constraints": {
-    "distances": {
-      "head-upper_neck": 1.9,
-      "neck-upper_neck": 1.1,
-      "chest-neck": 65.7,
-      "chest-shoulder_l": 124.2,
-      "chest-shoulder_r": 133.7,
-      "elbow_l-shoulder_l": 78.7,
-      "elbow_r-shoulder_r": 64.8,
-      "elbow_l-hand_l": 94.5,
-      "elbow_r-hand_r": 91.9,
-      "chest-pelvis": 122.5,
-      "bum-pelvis": 151.9,
-      "bum-hip_l": 13.5,
-      "bum-hip_r": 10.5,
-      "hip_l-knee_l": 106,
-      "hip_r-knee_r": 112.7,
-      "foot_l-knee_l": 82.8,
-      "foot_r-knee_r": 71.3
-    },
-    "angles": {
-      "upper_neck": {
-        "min": -30,
-        "max": 30
-      },
-      "neck": {
-        "min": -50,
-        "max": 50
-      },
-      "shoulder_l": {
-        "min": -100,
-        "max": 180
-      },
-      "shoulder_r": {
-        "min": -100,
-        "max": 180
-      },
-      "elbow_l": {
-        "min": 0,
-        "max": 150
-      },
-      "elbow_r": {
-        "min": 0,
-        "max": 150
-      },
-      "hip_l": {
-        "min": 0,
-        "max": 180
-      },
-      "hip_r": {
-        "min": 0,
-        "max": 180
-      },
-      "knee_l": {
-        "min": 0,
-        "max": 150
-      },
-      "knee_r": {
-        "min": 0,
-        "max": 150
-      }
-    }
-  },
   "frames": [
     {
-      "label": "Contact (R Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
           "x": -125.5,
-          "y": -165.984375
+          "y": -165.984
         },
         {
           "id": "upper_neck",
@@ -159,447 +25,447 @@
           "id": "neck",
           "label": "Neck",
           "x": -126.5,
-          "y": -162.984375
+          "y": -162.984
         },
         {
           "id": "chest",
           "label": "Chest",
           "x": -57.5,
-          "y": -150.984375
+          "y": -150.984
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
           "x": 0.5,
-          "y": -31.984375
+          "y": -31.984
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
           "x": -1.5,
-          "y": -19.984375
+          "y": -19.984
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -42.5,
-          "y": 40.015625
+          "x": -34.009,
+          "y": 44.45
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 24.5,
-          "y": 44.015625
+          "x": 36.063,
+          "y": 37.99
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -55.5,
-          "y": 140.015625
+          "x": -45.664,
+          "y": 144.616
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 22.5,
-          "y": 142.015625
+          "x": 5.014,
+          "y": 130.963
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
           "x": 2.5,
-          "y": -34.984375
+          "y": -34.984
         },
         {
           "id": "bum",
           "label": "Bum",
           "x": 163.5,
-          "y": -52.984375
+          "y": -52.984
         },
         {
           "id": "hip_l",
           "label": "Hip L",
           "x": 149.5,
-          "y": -49.984375
+          "y": -49.984
         },
         {
           "id": "hip_r",
           "label": "Hip R",
           "x": 168.5,
-          "y": -42.984375
+          "y": -42.984
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 133.5,
-          "y": 62.015625
+          "x": 140.394,
+          "y": 62.786
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 191.5,
-          "y": 75.015625
+          "x": 154.974,
+          "y": 76.473
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 126.5,
-          "y": 150.015625
+          "x": 171.464,
+          "y": 145.416
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 212.5,
-          "y": 148.015625
+          "x": 187.208,
+          "y": 145.256
         }
-      ]
+      ],
+      "label": "Frame 1"
     },
     {
-      "label": "Down (R Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
-          "x": -123,
-          "y": -163
+          "x": -124.439,
+          "y": -159.989
         },
         {
           "id": "upper_neck",
           "label": "Uppr Neck",
+          "x": -124.939,
+          "y": -158.005
+        },
+        {
+          "id": "neck",
+          "label": "Neck",
+          "x": -125.439,
+          "y": -156.989
+        },
+        {
+          "id": "chest",
+          "label": "Chest",
+          "x": -56.439,
+          "y": -144.989
+        },
+        {
+          "id": "shoulder_l",
+          "label": "Shldr L",
+          "x": 1.561,
+          "y": -25.989
+        },
+        {
+          "id": "shoulder_r",
+          "label": "Shldr R",
+          "x": -0.439,
+          "y": -13.989
+        },
+        {
+          "id": "elbow_l",
+          "label": "Elbow L",
+          "x": -41.046,
+          "y": 46.244
+        },
+        {
+          "id": "elbow_r",
+          "label": "Elbow R",
+          "x": 50.362,
+          "y": 32.822
+        },
+        {
+          "id": "hand_l",
+          "label": "Front Paw L",
+          "x": -63.228,
+          "y": 144.616
+        },
+        {
+          "id": "hand_r",
+          "label": "Front Paw R",
+          "x": 36.239,
+          "y": 129.819
+        },
+        {
+          "id": "pelvis",
+          "label": "Pelvis",
+          "x": 3.561,
+          "y": -28.989
+        },
+        {
+          "id": "bum",
+          "label": "Bum",
+          "x": 164.561,
+          "y": -46.989
+        },
+        {
+          "id": "hip_l",
+          "label": "Hip L",
+          "x": 150.561,
+          "y": -43.989
+        },
+        {
+          "id": "hip_r",
+          "label": "Hip R",
+          "x": 169.561,
+          "y": -36.989
+        },
+        {
+          "id": "knee_l",
+          "label": "Knee L",
+          "x": 118.549,
+          "y": 64.525
+        },
+        {
+          "id": "knee_r",
+          "label": "Knee R",
+          "x": 134.389,
+          "y": 77.972
+        },
+        {
+          "id": "foot_l",
+          "label": "Rear Paw L",
+          "x": 153.9,
+          "y": 145.416
+        },
+        {
+          "id": "foot_r",
+          "label": "Rear Paw R",
+          "x": 169.644,
+          "y": 145.256
+        }
+      ],
+      "label": "Frame 2"
+    },
+    {
+      "nodes": [
+        {
+          "id": "head",
+          "label": "Head",
           "x": -124,
-          "y": -161
+          "y": -165.984
+        },
+        {
+          "id": "upper_neck",
+          "label": "Uppr Neck",
+          "x": -124.5,
+          "y": -164
         },
         {
           "id": "neck",
           "label": "Neck",
           "x": -125,
-          "y": -159
+          "y": -162.984
         },
         {
           "id": "chest",
           "label": "Chest",
-          "x": -58,
-          "y": -148
+          "x": -56,
+          "y": -150.984
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
-          "x": 1,
-          "y": -30
+          "x": 2,
+          "y": -31.984
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
           "x": 0,
-          "y": -18
+          "y": -19.984
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -40,
-          "y": 42
+          "x": -34.462,
+          "y": 43.537
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 26,
-          "y": 46
+          "x": 27.007,
+          "y": 43.597
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -53,
-          "y": 142
+          "x": -76.399,
+          "y": 135.245
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 24,
-          "y": 144
-        },
-        {
-          "id": "pelvis",
-          "label": "Pelvis",
-          "x": 3,
-          "y": -33
-        },
-        {
-          "id": "bum",
-          "label": "Bum",
-          "x": 164,
-          "y": -51
-        },
-        {
-          "id": "hip_l",
-          "label": "Hip L",
-          "x": 150,
-          "y": -48
-        },
-        {
-          "id": "hip_r",
-          "label": "Hip R",
-          "x": 169,
-          "y": -41
-        },
-        {
-          "id": "knee_l",
-          "label": "Knee L",
-          "x": 134,
-          "y": 64
-        },
-        {
-          "id": "knee_r",
-          "label": "Knee R",
-          "x": 192,
-          "y": 77
-        },
-        {
-          "id": "foot_l",
-          "label": "Rear Paw L",
-          "x": 127,
-          "y": 152
-        },
-        {
-          "id": "foot_r",
-          "label": "Rear Paw R",
-          "x": 213,
-          "y": 150
-        }
-      ]
-    },
-    {
-      "label": "Passing (R Front)",
-      "nodes": [
-        {
-          "id": "head",
-          "label": "Head",
-          "x": -120,
-          "y": -160
-        },
-        {
-          "id": "upper_neck",
-          "label": "Uppr Neck",
-          "x": -121,
-          "y": -158
-        },
-        {
-          "id": "neck",
-          "label": "Neck",
-          "x": -123,
-          "y": -155
-        },
-        {
-          "id": "chest",
-          "label": "Chest",
-          "x": -59,
-          "y": -145
-        },
-        {
-          "id": "shoulder_l",
-          "label": "Shldr L",
-          "x": 2,
-          "y": -28
-        },
-        {
-          "id": "shoulder_r",
-          "label": "Shldr R",
-          "x": 2,
-          "y": -16
-        },
-        {
-          "id": "elbow_l",
-          "label": "Elbow L",
-          "x": -38,
-          "y": 44
-        },
-        {
-          "id": "elbow_r",
-          "label": "Elbow R",
-          "x": 28,
-          "y": 48
-        },
-        {
-          "id": "hand_l",
-          "label": "Front Paw L",
-          "x": -50,
-          "y": 144
-        },
-        {
-          "id": "hand_r",
-          "label": "Front Paw R",
-          "x": 26,
-          "y": 146
+          "x": 63.316,
+          "y": 134.645
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
           "x": 4,
-          "y": -31
+          "y": -34.984
         },
         {
           "id": "bum",
           "label": "Bum",
           "x": 165,
-          "y": -49
+          "y": -52.984
         },
         {
           "id": "hip_l",
           "label": "Hip L",
           "x": 151,
-          "y": -46
+          "y": -49.984
         },
         {
           "id": "hip_r",
           "label": "Hip R",
           "x": 170,
-          "y": -39
+          "y": -42.984
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 135,
-          "y": 66
+          "x": 119.663,
+          "y": 58.726
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 193,
-          "y": 79
+          "x": 144.692,
+          "y": 74.543
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 128,
-          "y": 154
+          "x": 136.336,
+          "y": 145.416
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 214,
-          "y": 152
+          "x": 195.014,
+          "y": 131.443
         }
-      ]
+      ],
+      "label": "Frame 3"
     },
     {
-      "label": "Up (R Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
-          "x": -117,
-          "y": -157
+          "x": -124.439,
+          "y": -171.98
         },
         {
           "id": "upper_neck",
           "label": "Uppr Neck",
-          "x": -118,
-          "y": -155
+          "x": -124.939,
+          "y": -169.995
         },
         {
           "id": "neck",
           "label": "Neck",
-          "x": -120,
-          "y": -151
+          "x": -125.439,
+          "y": -168.98
         },
         {
           "id": "chest",
           "label": "Chest",
-          "x": -60,
-          "y": -142
+          "x": -56.439,
+          "y": -156.98
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
-          "x": 3,
-          "y": -26
+          "x": 1.561,
+          "y": -37.98
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
-          "x": 4,
-          "y": -14
+          "x": -0.439,
+          "y": -25.98
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -36,
-          "y": 46
+          "x": -39.533,
+          "y": 35.125
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 30,
-          "y": 50
+          "x": 19.956,
+          "y": 40.02
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -47,
-          "y": 146
+          "x": -87.099,
+          "y": 124.043
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 28,
-          "y": 148
+          "x": 46.809,
+          "y": 134.291
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
-          "x": 5,
-          "y": -29
+          "x": 3.561,
+          "y": -40.98
         },
         {
           "id": "bum",
           "label": "Bum",
-          "x": 166,
-          "y": -47
+          "x": 164.561,
+          "y": -58.98
         },
         {
           "id": "hip_l",
           "label": "Hip L",
-          "x": 152,
-          "y": -44
+          "x": 150.561,
+          "y": -55.98
         },
         {
           "id": "hip_r",
           "label": "Hip R",
-          "x": 171,
-          "y": -37
+          "x": 169.561,
+          "y": -48.98
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 136,
-          "y": 68
+          "x": 131.938,
+          "y": 55.614
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 194,
-          "y": 81
+          "x": 178.923,
+          "y": 70.876
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 129,
-          "y": 156
+          "x": 119.159,
+          "y": 142.962
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 215,
-          "y": 154
+          "x": 226.239,
+          "y": 130.299
         }
-      ]
+      ],
+      "label": "Frame 4"
     },
     {
-      "label": "Contact (L Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
           "x": -125.5,
-          "y": -165.984375
+          "y": -165.984
         },
         {
           "id": "upper_neck",
@@ -611,438 +477,439 @@
           "id": "neck",
           "label": "Neck",
           "x": -126.5,
-          "y": -162.984375
+          "y": -162.984
         },
         {
           "id": "chest",
           "label": "Chest",
           "x": -57.5,
-          "y": -150.984375
+          "y": -150.984
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
           "x": 0.5,
-          "y": -31.984375
+          "y": -31.984
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
           "x": -1.5,
-          "y": -19.984375
+          "y": -19.984
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -42.5,
-          "y": 40.015625
+          "x": -53.985,
+          "y": 31.768
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 24.5,
-          "y": 44.015625
+          "x": 13.277,
+          "y": 47.497
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -55.5,
-          "y": 140.015625
+          "x": -72.986,
+          "y": 130.803
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 22.5,
-          "y": 142.015625
+          "x": 32.113,
+          "y": 143.69
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
           "x": 2.5,
-          "y": -34.984375
+          "y": -34.984
         },
         {
           "id": "bum",
           "label": "Bum",
           "x": 163.5,
-          "y": -52.984375
+          "y": -52.984
         },
         {
           "id": "hip_l",
           "label": "Hip L",
           "x": 149.5,
-          "y": -49.984375
+          "y": -49.984
         },
         {
           "id": "hip_r",
           "label": "Hip R",
           "x": 168.5,
-          "y": -42.984375
+          "y": -42.984
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 133.5,
-          "y": 62.015625
+          "x": 118.802,
+          "y": 58.909
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 191.5,
-          "y": 75.015625
+          "x": 218.995,
+          "y": 66.118
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 126.5,
-          "y": 150.015625
+          "x": 101.208,
+          "y": 145.416
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 212.5,
-          "y": 148.015625
+          "x": 252.323,
+          "y": 134.377
         }
-      ]
+      ],
+      "label": "Frame 5"
     },
     {
-      "label": "Down (L Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
-          "x": -123,
-          "y": -163
+          "x": -126.561,
+          "y": -159.989
         },
         {
           "id": "upper_neck",
           "label": "Uppr Neck",
-          "x": -124,
-          "y": -161
+          "x": -127.061,
+          "y": -158.005
         },
         {
           "id": "neck",
           "label": "Neck",
-          "x": -125,
-          "y": -159
+          "x": -127.561,
+          "y": -156.989
         },
         {
           "id": "chest",
           "label": "Chest",
-          "x": -58,
-          "y": -148
+          "x": -58.561,
+          "y": -144.989
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
-          "x": 1,
-          "y": -30
+          "x": -0.561,
+          "y": -25.989
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
-          "x": 0,
-          "y": -18
+          "x": -2.561,
+          "y": -13.989
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -40,
-          "y": 42
+          "x": -62.173,
+          "y": 30.905
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 26,
-          "y": 46
+          "x": 28.488,
+          "y": 47.72
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -53,
-          "y": 142
+          "x": -41.761,
+          "y": 129.659
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 24,
-          "y": 144
+          "x": 14.772,
+          "y": 144.776
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
-          "x": 3,
-          "y": -33
+          "x": 1.439,
+          "y": -28.989
         },
         {
           "id": "bum",
           "label": "Bum",
-          "x": 164,
-          "y": -51
+          "x": 162.439,
+          "y": -46.989
         },
         {
           "id": "hip_l",
           "label": "Hip L",
-          "x": 150,
-          "y": -48
+          "x": 148.439,
+          "y": -43.989
         },
         {
           "id": "hip_r",
           "label": "Hip R",
-          "x": 169,
-          "y": -41
+          "x": 167.439,
+          "y": -36.989
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 134,
-          "y": 64
+          "x": 101.544,
+          "y": 58.972
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 192,
-          "y": 77
+          "x": 209.661,
+          "y": 75.573
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 127,
-          "y": 152
+          "x": 83.644,
+          "y": 145.416
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 213,
-          "y": 150
+          "x": 239.9,
+          "y": 145.256
         }
-      ]
+      ],
+      "label": "Frame 6"
     },
     {
-      "label": "Passing (L Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
-          "x": -120,
-          "y": -160
+          "x": -127,
+          "y": -165.984
         },
         {
           "id": "upper_neck",
           "label": "Uppr Neck",
-          "x": -121,
-          "y": -158
+          "x": -127.5,
+          "y": -164
         },
         {
           "id": "neck",
           "label": "Neck",
-          "x": -123,
-          "y": -155
+          "x": -128,
+          "y": -162.984
         },
         {
           "id": "chest",
           "label": "Chest",
           "x": -59,
-          "y": -145
+          "y": -150.984
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
-          "x": 2,
-          "y": -28
+          "x": -1,
+          "y": -31.984
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
-          "x": 2,
-          "y": -16
+          "x": -3,
+          "y": -19.984
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -38,
-          "y": 44
+          "x": -31.762,
+          "y": 46.033
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 28,
-          "y": 48
+          "x": 10.803,
+          "y": 47.703
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -50,
-          "y": 144
+          "x": -10.536,
+          "y": 144.616
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 26,
-          "y": 146
+          "x": -2.792,
+          "y": 144.776
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
-          "x": 4,
-          "y": -31
+          "x": 1,
+          "y": -34.984
         },
         {
           "id": "bum",
           "label": "Bum",
-          "x": 165,
-          "y": -49
+          "x": 162,
+          "y": -52.984
         },
         {
           "id": "hip_l",
           "label": "Hip L",
-          "x": 151,
-          "y": -46
+          "x": 148,
+          "y": -49.984
         },
         {
           "id": "hip_r",
           "label": "Hip R",
-          "x": 170,
-          "y": -39
+          "x": 167,
+          "y": -42.984
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 135,
-          "y": 66
+          "x": 87.92,
+          "y": 45.883
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 193,
-          "y": 79
+          "x": 199.979,
+          "y": 72.625
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 128,
-          "y": 154
+          "x": 109.014,
+          "y": 131.603
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 214,
-          "y": 152
+          "x": 222.326,
+          "y": 145.224
         }
-      ]
+      ],
+      "label": "Frame 7"
     },
     {
-      "label": "Up (L Front)",
       "nodes": [
         {
           "id": "head",
           "label": "Head",
-          "x": -117,
-          "y": -157
+          "x": -126.561,
+          "y": -171.98
         },
         {
           "id": "upper_neck",
           "label": "Uppr Neck",
-          "x": -118,
-          "y": -155
+          "x": -127.061,
+          "y": -169.995
         },
         {
           "id": "neck",
           "label": "Neck",
-          "x": -120,
-          "y": -151
+          "x": -127.561,
+          "y": -168.98
         },
         {
           "id": "chest",
           "label": "Chest",
-          "x": -60,
-          "y": -142
+          "x": -58.561,
+          "y": -156.98
         },
         {
           "id": "shoulder_l",
           "label": "Shldr L",
-          "x": 3,
-          "y": -26
+          "x": -0.561,
+          "y": -37.98
         },
         {
           "id": "shoulder_r",
           "label": "Shldr R",
-          "x": 4,
-          "y": -14
+          "x": -2.561,
+          "y": -25.98
         },
         {
           "id": "elbow_l",
           "label": "Elbow L",
-          "x": -36,
-          "y": 46
+          "x": -15.044,
+          "y": 44.623
         },
         {
           "id": "elbow_r",
           "label": "Elbow R",
-          "x": 30,
-          "y": 50
+          "x": -8.825,
+          "y": 42.815
         },
         {
           "id": "hand_l",
           "label": "Front Paw L",
-          "x": -47,
-          "y": 146
+          "x": -28.1,
+          "y": 144.616
         },
         {
           "id": "hand_r",
           "label": "Front Paw R",
-          "x": 28,
-          "y": 148
+          "x": -19.881,
+          "y": 140.21
         },
         {
           "id": "pelvis",
           "label": "Pelvis",
-          "x": 5,
-          "y": -29
+          "x": 1.439,
+          "y": -40.98
         },
         {
           "id": "bum",
           "label": "Bum",
-          "x": 166,
-          "y": -47
+          "x": 162.439,
+          "y": -58.98
         },
         {
           "id": "hip_l",
           "label": "Hip L",
-          "x": 152,
-          "y": -44
+          "x": 148.439,
+          "y": -55.98
         },
         {
           "id": "hip_r",
           "label": "Hip R",
-          "x": 171,
-          "y": -37
+          "x": 167.439,
+          "y": -48.98
         },
         {
           "id": "knee_l",
           "label": "Knee L",
-          "x": 136,
-          "y": 68
+          "x": 106.238,
+          "y": 48.992
         },
         {
           "id": "knee_r",
           "label": "Knee R",
-          "x": 194,
-          "y": 81
+          "x": 189.182,
+          "y": 69.258
         },
         {
           "id": "foot_l",
           "label": "Rear Paw L",
-          "x": 129,
-          "y": 156
+          "x": 140.239,
+          "y": 130.459
         },
         {
           "id": "foot_r",
           "label": "Rear Paw R",
-          "x": 215,
-          "y": 154
+          "x": 204.466,
+          "y": 143.665
         }
-      ]
+      ],
+      "label": "Frame 8"
     }
   ]
 }

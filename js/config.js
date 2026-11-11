@@ -37,28 +37,37 @@ const Config = {
     ANIMATIONS: {
         'adult-male': [
             'data/animations/walk-cycle-male.json',
-            'data/animations/walk-jump-cycle-male.json',
             'data/animations/run-cycle-male.json',
+            'data/animations/jump-cycle-male.json',
+            'data/animations/walk-jump-cycle-male.json',
             'data/animations/run-jump-cycle-male.json'
         ],
         'adult-female': [
             'data/animations/walk-cycle-female.json',
-            'data/animations/walk-jump-cycle-female.json',
             'data/animations/run-cycle-female.json',
+            'data/animations/jump-cycle-female.json',
+            'data/animations/walk-jump-cycle-female.json',
             'data/animations/run-jump-cycle-female.json'
         ],
         'child': [
             'data/animations/walk-cycle-child.json',
-            'data/animations/run-cycle-child.json'
+            'data/animations/run-cycle-child.json',
+            'data/animations/jump-cycle-child.json'
         ],
         'horse': [
-            'data/animations/walk-cycle-horse.json'
+            'data/animations/walk-cycle-horse.json',
+            'data/animations/run-cycle-horse.json',
+            'data/animations/jump-cycle-horse.json'
         ],
         'dog': [
-            'data/animations/walk-cycle-dog.json'
+            'data/animations/walk-cycle-dog.json',
+            'data/animations/run-cycle-dog.json',
+            'data/animations/jump-cycle-dog.json'
         ],
         'cat': [
-            'data/animations/walk-cycle-cat.json'
+            'data/animations/walk-cycle-cat.json',
+            'data/animations/run-cycle-cat.json',
+            'data/animations/jump-cycle-cat.json'
         ]
     },
 
